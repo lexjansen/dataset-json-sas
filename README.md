@@ -2,14 +2,6 @@
 
 This repository shows a SAS implementation for converting Dataset-JSON files to and from SAS datrasets.
 
-## Description
-
-The main purpose of *Project Name* is to ....
-
-If possible use images as well.
-
-![Image Description](./images/lexjansen.png)
-
 ## Contribution
 
 Contribution is very welcome. When you contribute to this repository you are doing so under the below licenses. Please checkout [Contribution](CONTRIBUTING.md) for additional information. All contributions must adhere to the following [Code of Conduct](CODE_OF_CONDUCT.md).
