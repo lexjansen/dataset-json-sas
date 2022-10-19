@@ -2,6 +2,10 @@
 
 This repository shows a SAS implementation for converting Dataset-JSON files to and from SAS datrasets.
 
+## TODO
+
+- Parameterize read_json and write_json macros. Currently there are hard-coded paths.
+
 ## Contribution
 
 Contribution is very welcome. When you contribute to this repository you are doing so under the below licenses. Please checkout [Contribution](CONTRIBUTING.md) for additional information. All contributions must adhere to the following [Code of Conduct](CODE_OF_CONDUCT.md).
@@ -25,7 +29,3 @@ When you re-use the source, keep or copy the license information also in the sou
 When you want to re-use and refer to the content, please do so like the following:
 
 > Content based on [Dataset-JSON SAS Implementation (GitHub)](https://github.com/lexjansen/dataset-json-sas) used under the [CC-BY-4.0](https://creativecommons.org/licenses/by/4.0/) license.
-
-
-
-
