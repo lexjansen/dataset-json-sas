@@ -5,6 +5,7 @@ This repository shows a SAS implementation for converting Dataset-JSON files to 
 ## TODO
 
 - Parameterize read_json and write_json macros. Currently there are hard-coded paths.
+- Allow reading/writing JSON without the use of Define-XML metadata.
 
 ## Contribution
 
