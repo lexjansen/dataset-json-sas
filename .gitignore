@@ -1,2 +1,6 @@
 *.log
 *.lst
+*.sas7bdat
+develop/
+/data_out
+/json_out

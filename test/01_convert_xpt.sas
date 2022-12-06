@@ -1,7 +1,5 @@
 %* update this location to your own location;
 %let root=/_github/lexjansen/dataset-json-sas;
-
-
 %include "&root/test/config.sas";
 
 

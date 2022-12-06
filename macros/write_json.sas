@@ -1,4 +1,4 @@
-%macro write_json(dataset, model);
+%macro write_json(jsonfile=, dataset=, usemetadata=, metadatalib=, _studyOID=, _MetaDataVersionOID=);
   %local dataset_name dataset_label records 
     studyOID metaDataVersionOID
     ClinicalReferenceData ItemGroupOID;
@@ -15,27 +15,60 @@
 
   %let records=%utl_nobs(&dataset);
 
-  libname metadata "&root/metadata/&model";
+  %if &UseMetadata=1 %then %do;
 
-  /* Get StudyOID and metaDataVersionOID */
-  proc sql noprint;
-    select studyOID, metaDataVersionOID into :studyOID trimmed, :metaDataVersionOID trimmed
-      from metadata.metadata_study;
-  /* Get dataset label and ItemGroupOID */
-    select label, oid into :dataset_label, :ItemGroupOID trimmed
-      from metadata.metadata_tables
-        where upcase(name)="%upcase(&dataset_name)";
-  quit;
+    /* Get StudyOID and metaDataVersionOID */
+    proc sql noprint;
+      select studyOID, metaDataVersionOID into :studyOID trimmed, :metaDataVersionOID trimmed
+        from &metadatalib..metadata_study;
+    /* Get dataset label and ItemGroupOID */
+      select label, oid into :dataset_label, :ItemGroupOID trimmed
+        from &metadatalib..metadata_tables
+          where upcase(name)="%upcase(&dataset_name)";
+    quit;
+  %end;
+
+  
+  %if %sysevalf(%superq(studyOID)=, boolean) %then %let studyOID=&_StudyOId;
+  %if %sysevalf(%superq(studyOID)=, boolean) %then %let studyOID=STUDY1;
+  %if %sysevalf(%superq(metaDataVersionOID)=, boolean) %then %let metaDataVersionOID=&_MetaDataVersionOID;
+  %if %sysevalf(%superq(metaDataVersionOID)=, boolean) %then %let metaDataVersionOID=METADATAVERSION1;
+  %if %sysevalf(%superq(ItemGroupOID)=, boolean) %then %let ItemGroupOID=IG.%upcase(&dataset_name);
+  %if %sysevalf(%superq(dataset_label)=, boolean) %then 
+    %let dataset_label=%cstutilgetattribute(_cstDataSetName=&dataset,_cstAttribute=LABEL);
+  %if %sysevalf(%superq(dataset_label)=, boolean) %then 
+    %let dataset_label=&dataset_name;
   
   %put ### &=dataset &=records &=ClinicalReferenceData &=ItemGroupOID dslabel=%bquote(&dataset_label);
 
-  data work.column_metadata(keep=OID name label type length);
-    retain OID name label type length;
-    set metadata.metadata_columns(
-      rename=(json_datatype=type)
-      where=(upcase(dataset_name) = %upcase("&dataset_name")));
-  run;
+  %if &UseMetadata=1 %then %do;
 
+    data work.column_metadata(keep=OID name label type length);
+      retain OID name label type length;
+      set &metadatalib..metadata_columns(
+        rename=(json_datatype=type)
+        where=(upcase(dataset_name) = %upcase("&dataset_name")));
+    run;
+  %end;
+  %else %do;
+    proc contents noprint varnum data=&dataset out=work.column_metadata(keep=varnum name type length label rename=(type=sas_type));
+    run;
+    
+    proc sort data=work.column_metadata;
+      by varnum;
+    run;
+      
+    data work.column_metadata(drop=sas_type varnum);
+      retain OID name label type length;
+      length OID $128 type $32;
+      set work.column_metadata;
+      OID = cats("IT", ".", upcase("&dataset_name"), ".", upcase(name));
+      if sas_type=1 then type="float";
+                    else type="string"; 
+    run;
+      
+  %end;
+  
   /* Create a 1-obs dataset with the same structure as the column_metadata dataset */
   proc sql noprint;
     create table itemgroupdataseq
@@ -56,7 +89,7 @@
     ITEMGROUPDATASEQ = _n_;
   run;
 
-  filename jsonfout "&root/json_out/&model/&dataset_name..json";
+  filename jsonfout "&jsonfile";
 
   PROC JSON OUT=jsonfout NOPRETTY NOSASTAGS SCAN TRIMBLANKS
                          NOFMTCHARACTER NOFMTDATETIME NOFMTNUMERIC;
@@ -90,7 +123,6 @@
   RUN;
 
   filename jsonfout clear;
-  libname metadata clear;
 
   proc delete data=work.column_metadata;
   run;
