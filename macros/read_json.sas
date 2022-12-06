@@ -1,15 +1,11 @@
-%macro read_json(jsonfile, model);
+%macro read_json(jsonfile=, dataoutlib=, metadatalib=, usemetadata=);
 
 %local _clinicalreferencedata_ _items_ _itemdata_ _itemgroupdata_ dslabel dsname
        variables rename label length format;
 
-libname data "&root/data/&model";
-libname dataout "&root/data_out/&model";
-libname metadata "&root/metadata/&model";
-
-filename jsonfile "&root/json/&model/&jsonfile";
-filename mapfile "%sysfunc(pathname(work))/%scan(&jsonfile, 1, %str(.)).map";
-libname out "%sysfunc(pathname(work))/%scan(&jsonfile, 1, %str(.))";
+filename jsonfile "&jsonfile";
+filename mapfile "%sysfunc(pathname(work))/%scan(&jsonfile, -2, %str(.\/)).map";
+libname out "%sysfunc(pathname(work))/%scan(&jsonfile, -2, %str(.\/))";
 
 libname jsonfile json map=mapfile automap=create fileref=jsonfile noalldata ordinalcount=none;
 proc copy in=jsonfile out=out;
@@ -62,20 +58,23 @@ proc sql noprint;
   ;
 quit;
 
-proc copy in=out out=dataout;
+proc copy in=out out=&dataoutlib;
   select &_itemdata_;
 run;
 
-/* get formats from metadata */
-%let format=;
-proc sql noprint;
-  select catx(' ', name, strip(displayformat)) into :format separated by ' '
-      from metadata.metadata_columns
-      where upcase(dataset_name)="%upcase(&dsname)"
-      and not(missing(displayformat)) and (xml_datatype in ('integer' 'float' 'double' 'decimal'));
-quit;
+%if &UseMetadata=1 %then %do;
+  
+  /* get formats from metadata */
+  %let format=;
+  proc sql noprint;
+    select catx(' ', name, strip(displayformat)) into :format separated by ' '
+        from &metadatalib..metadata_columns
+        where upcase(dataset_name)="%upcase(&dsname)"
+        and not(missing(displayformat)) and (xml_datatype in ('integer' 'float' 'double' 'decimal'));
+  quit;
+%end;
 
-proc datasets library=dataout noprint nolist nodetails;
+proc datasets library=&dataoutlib noprint nolist nodetails;
   delete &dsname;
   change &_itemdata_ = &dsname;
   modify &dsname %if %sysevalf(%superq(dslabel)=, boolean)=0 %then %str((label = %sysfunc(quote(%nrbquote(&dslabel)))));;
@@ -90,52 +89,21 @@ proc sql noprint;
   select catt(d.name, ' $', i.length) into :length separated by ' '
     from dictionary.columns d,
          out.&_items_ i
-  where upcase(libname)="DATAOUT" and
+  where upcase(libname)="%upcase(&dataoutlib)" and
        upcase(memname)="%upcase(&dsname)" and
        d.name = i.name and
        d.type="char" and (not(missing(i.length))) and (i.length gt d.length)
  ;
 quit ;
 
-data dataout.&dsname(
+data &dataoutlib..&dsname(
     %if %sysevalf(%superq(dslabel)=, boolean)=0 %then %str(label = %sysfunc(quote(%nrbquote(&dslabel))));
   );
   retain &variables;
   length &length;
-  set dataout.&dsname;
+  set &dataoutlib..&dsname;
 run;
 
-
-
-/* Compare created data with original data*/
-
-proc compare base=data.&dsname compare=dataout.&dsname(drop=ITEMGROUPDATASEQ) listall
-  criterion=1e-8 method=absolute;
-run;
-
-%let compinfo=&sysinfo;
-data _null_;
-  length result 8 resultc restmp $200;
-  array r(*) 8 r1 r2 r3 r4 r5 r6 r7 r8 r9 r10 r11 r12 r13 r14 r15 r16;
-  result=&compinfo;
-  resultc="";
-  restmp='/DSLABEL/DSTYPE/INFORMAT/FORMAT/LENGTH/LABEL/BASEOBS/COMPOBS'||
-        '/BASEBY/COMPBY/BASEVAR/COMPVAR/VALUE/TYPE/BYVAR/ER'||'ROR';
-  do i=1 to 16;
-    if result >= 0 then do;
-      if band(result, 2**(i-1)) then do;
-        resultc=trim(resultc)||'/'||scan(restmp,i,'/'); 
-        r(i) = 1;
-      end;
-    end;  
-  end;
-  if result=0 then resultc="NO DIFFERENCES";
-  resultc=left(resultc);
-  if index(resultc,'/')=1 then resultc=substr(resultc,2);
-  call symputx ('resultc', resultc);
-run;
-
-%put ### &dsname - &compinfo - &resultc;
 
 
 
@@ -155,7 +123,7 @@ proc sql ;
   d.format
  from dictionary.columns d,
       out.&_items_ i
- where upcase(libname)="DATAOUT" and
+ where upcase(libname)="%upcase(&dataoutlib)" and
        upcase(memname)="%upcase(&dsname)" and
        d.name = i.name
  ;
@@ -171,9 +139,5 @@ run;
 filename jsonfile clear;
 filename mapfile clear;
 libname out clear;
-
-libname data clear;
-libname dataout clear;
-libname metadata clear;
 
 %mend read_json;
