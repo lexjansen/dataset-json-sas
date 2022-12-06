@@ -16,8 +16,8 @@ data _null_;
     if scan(lowcase(jsonfile), -1, ".") = 'json' then do;
       code=cats('%nrstr(%read_json(',
                   'dataoutlib=dataout, ',
-                  'metadatalib=metadata, ',
                   'usemetadata=1, ',
+                  'metadatalib=metadata, ',
                   'jsonfile=', jsonfile, 
                 ');)');
       call execute(code);
@@ -41,8 +41,8 @@ data _null_;
     if scan(lowcase(jsonfile), -1, ".") = 'json' then do;
       code=cats('%nrstr(%read_json(',
                   'dataoutlib=dataout, ',
-                  'metadatalib=metadata, ',
                   'usemetadata=1, ',
+                  'metadatalib=metadata, ',
                   'jsonfile=', jsonfile,
                 ');)');
       call execute(code);

@@ -1,4 +1,4 @@
-%macro read_json(jsonfile=, dataoutlib=, metadatalib=, usemetadata=);
+%macro read_json(jsonfile=, dataoutlib=, usemetadata=, metadatalib=);
 
 %local _clinicalreferencedata_ _items_ _itemdata_ _itemgroupdata_ dslabel dsname
        variables rename label length format;
@@ -75,7 +75,7 @@ run;
 %end;
 
 proc datasets library=&dataoutlib noprint nolist nodetails;
-  delete &dsname;
+  %if %sysfunc(exist(&dataoutlib..&dsname)) %then %do; delete &dsname; %end;
   change &_itemdata_ = &dsname;
   modify &dsname %if %sysevalf(%superq(dslabel)=, boolean)=0 %then %str((label = %sysfunc(quote(%nrbquote(&dslabel)))));;
     rename &rename;
