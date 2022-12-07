@@ -26,7 +26,11 @@ data _null_;
   call symputx ('resultc', resultc);
 run;
 
-%put ### &dsname - &compinfo - &resultc;
-
-
+%if &compinfo ne 0 %then %do;
+  %put %str(WARN)ING: &dsname - &compinfo - &resultc;
+%end;
+%else %do;
+  %put %str(NOT)E: &dsname - &compinfo - &resultc;
+%end;
+  
 %mend utl_comparedata;

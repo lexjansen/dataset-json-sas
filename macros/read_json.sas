@@ -12,10 +12,13 @@ proc copy in=jsonfile out=out;
 run;
 
 /* Find the names of the dataset that were created */
-ods output Members=members(keep=name);
-  proc datasets library=out memtype=data;
-  quit;
-run;
+proc sql noprint;
+  create table members 
+  as select upcase(memname) as name
+  from dictionary.tables
+  where libname="OUT" and memtype="DATA"
+  ;
+quit;
 
 %let _clinicalreferencedata_=;
 %let _items=;
@@ -31,6 +34,9 @@ data _null_;
     call symputx('_itemdata_', strip(name));
   if index(upcase(name), 'ITEMGROUPDATA_') then 
     call symputx('_itemgroupdata_', strip(name));
+run;
+
+proc delete data=work.members;
 run;
 
 proc sql noprint;
@@ -134,6 +140,10 @@ data _null_;
   if DataType="char" and not (type in ('string')) then put "WAR" "NING: &dsname " OID= name= DataType= type=;
   if DataType="num" and not (type in ('integer' 'double' 'float' 'decimal')) then put "WAR" "NING: &dsname " OID= name= DataType= type=;
   if DataType="char" and not(missing(length)) and (length lt sas_length) then put "WAR" "NING: &dsname " OID= name= length= sas_length=;
+run;
+
+
+proc delete data=work.column_metadata;
 run;
 
 filename jsonfile clear;

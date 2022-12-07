@@ -3,22 +3,18 @@
 %include "&root/test/config.sas";
 
 
-%let model=adam;
-libname dataout "&root/data_out/&model";
-libname metadata "&root/metadata/&model";
-
 data _null_;
   length fref $8 jsonfile $200 code $200;
-  did = filename(fref,"&root/json/&model");
+  did = filename(fref,"&root/json/adam");
   did = dopen(fref);
   do i = 1 to dnum(did);
-    jsonfile = cats("&root/json/&model", "/", dread(did,i));
+    jsonfile = cats("&root/json/adam", "/", dread(did,i));
     if scan(lowcase(jsonfile), -1, ".") = 'json' then do;
       code=cats('%nrstr(%read_json(',
-                  'dataoutlib=dataout, ',
+                  'jsonfile=', jsonfile, ', ',
+                  'dataoutlib=outadam, ',
                   'usemetadata=1, ',
-                  'metadatalib=metadata, ',
-                  'jsonfile=', jsonfile, 
+                  'metadatalib=metaadam',
                 ');)');
       call execute(code);
     end;
@@ -26,24 +22,20 @@ data _null_;
   did = dclose(did);
   did = filename(fref);
 run;
-libname dataout clear;
-libname metadata clear;
 
-%let model=sdtm;
-libname dataout "&root/data_out/&model";
-libname metadata "&root/metadata/&model";
+
 data _null_;
   length fref $8 jsonfile $200 code $200;
-  did = filename(fref,"&root/json/&model");
+  did = filename(fref,"&root/json/sdtm");
   did = dopen(fref);
   do i = 1 to dnum(did);
-    jsonfile = cats("&root/json/&model", "/", dread(did,i));
+    jsonfile = cats("&root/json/sdtm", "/", dread(did,i));
     if scan(lowcase(jsonfile), -1, ".") = 'json' then do;
       code=cats('%nrstr(%read_json(',
-                  'dataoutlib=dataout, ',
+                  'jsonfile=', jsonfile, ', ',
+                  'dataoutlib=outsdtm, ',
                   'usemetadata=1, ',
-                  'metadatalib=metadata, ',
-                  'jsonfile=', jsonfile,
+                  'metadatalib=metasdtm',
                 ');)');
       call execute(code);
     end;
@@ -51,5 +43,11 @@ data _null_;
   did = dclose(did);
   did = filename(fref);
 run;
-libname dataout clear;
-libname metadata clear;
+
+
+/*
+libname metaadam clear;
+libname metasdtm clear;
+libname outadam clear;
+libname outsdtm clear;
+*/
