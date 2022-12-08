@@ -3,14 +3,14 @@
 %include "&root/test/config.sas";
 
 data _null_;
-  length fref $8 jsonfile $200 code $400;
+  length fref $8 jsonpath $200 code $400;
   did = filename(fref,"&root/json/adam");
   did = dopen(fref);
   do i = 1 to dnum(did);
-    jsonfile = cats("&root/json/adam", "/", dread(did,i));
-    if scan(lowcase(jsonfile), -1, ".") = 'json' then do;
+    jsonpath = cats("&root/json/adam", "/", dread(did,i));
+    if scan(lowcase(jsonpath), -1, ".") = 'json' then do;
       code=cats('%nrstr(%read_datasetjson(',
-                  'jsonfile=', jsonfile, ', ',
+                  'jsonpath=', jsonpath, ', ',
                   'dataoutlib=outadam, ',
                   'usemetadata=1, ',
                   'metadatalib=metaadam',
@@ -24,14 +24,14 @@ run;
 
 
 data _null_;
-  length fref $8 jsonfile $200 code $400;
+  length fref $8 jsonpath $200 code $400;
   did = filename(fref,"&root/json/sdtm");
   did = dopen(fref);
   do i = 1 to dnum(did);
-    jsonfile = cats("&root/json/sdtm", "/", dread(did,i));
-    if scan(lowcase(jsonfile), -1, ".") = 'json' then do;
+    jsonpath = cats("&root/json/sdtm", "/", dread(did,i));
+    if scan(lowcase(jsonpath), -1, ".") = 'json' then do;
       code=cats('%nrstr(%read_datasetjson(',
-                  'jsonfile=', jsonfile, ', ',
+                  'jsonpath=', jsonpath, ', ',
                   'dataoutlib=outsdtm, ',
                   'usemetadata=1, ',
                   'metadatalib=metasdtm',

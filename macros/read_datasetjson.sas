@@ -1,11 +1,11 @@
-%macro read_datasetjson(jsonfile=, dataoutlib=, usemetadata=, metadatalib=);
+%macro read_datasetjson(jsonpath=, dataoutlib=, usemetadata=, metadatalib=);
 
 %local _clinicalreferencedata_ _items_ _itemdata_ _itemgroupdata_ dslabel dsname
        variables rename label length format;
 
-filename jsonfile "&jsonfile";
-filename mapfile "%sysfunc(pathname(work))/%scan(&jsonfile, -2, %str(.\/)).map";
-libname out "%sysfunc(pathname(work))/%scan(&jsonfile, -2, %str(.\/))";
+filename jsonfile "&jsonpath";
+filename mapfile "%sysfunc(pathname(work))/%scan(&jsonpath, -2, %str(.\/)).map";
+libname out "%sysfunc(pathname(work))/%scan(&jsonpath, -2, %str(.\/))";
 
 libname jsonfile json map=mapfile automap=create fileref=jsonfile noalldata ordinalcount=none;
 proc copy in=jsonfile out=out;

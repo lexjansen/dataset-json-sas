@@ -1,4 +1,4 @@
-%macro write_datasetjson(dataset=, jsonfile=, usemetadata=, metadatalib=, _studyOID=, _MetaDataVersionOID=);
+%macro write_datasetjson(dataset=, jsonpath=, usemetadata=, metadatalib=, _studyOID=, _MetaDataVersionOID=);
   %local dataset_name dataset_label records 
     studyOID metaDataVersionOID
     ClinicalReferenceData ItemGroupOID;
@@ -19,12 +19,16 @@
 
     /* Get StudyOID and metaDataVersionOID */
     proc sql noprint;
-      select studyOID, metaDataVersionOID into :studyOID trimmed, :metaDataVersionOID trimmed
-        from &metadatalib..metadata_study;
+      %if %sysfunc(exist(&metadatalib..metadata_study)) %then %do;  
+        select studyOID, metaDataVersionOID into :studyOID trimmed, :metaDataVersionOID trimmed
+          from &metadatalib..metadata_study;
+      %end;  
     /* Get dataset label and ItemGroupOID */
-      select label, oid into :dataset_label, :ItemGroupOID trimmed
-        from &metadatalib..metadata_tables
-          where upcase(name)="%upcase(&dataset_name)";
+      %if %sysfunc(exist(&metadatalib..metadata_tables)) %then %do;  
+        select label, oid into :dataset_label, :ItemGroupOID trimmed
+          from &metadatalib..metadata_tables
+            where upcase(name)="%upcase(&dataset_name)";
+      %end;
     quit;
   %end;
 
@@ -93,7 +97,7 @@
     ITEMGROUPDATASEQ = _n_;
   run;
 
-  filename jsonfout "&jsonfile";
+  filename jsonfout "&jsonpath";
 
   PROC JSON OUT=jsonfout NOPRETTY NOSASTAGS SCAN TRIMBLANKS
                          NOFMTCHARACTER NOFMTDATETIME NOFMTNUMERIC;
