@@ -14,13 +14,13 @@ quit;
 
 
 data _null_;
-  length code $400 jsonfile $200;
+  length code $400 jsonpath $200;
   set members;
   name=lowcase(name);
-  jsonfile=cats("&root/json_out/adam/", name, ".json");
-  code=cats('%nrstr(%write_json(',
+  jsonpath=cats("&root/json_out/adam/", name, ".json");
+  code=cats('%nrstr(%write_datasetjson(',
               'dataset=dataadam.', name, ', ', 
-              'jsonfile=', jsonfile, ', ',
+              'jsonpath=', jsonpath, ', ',
               'usemetadata=1, ',
               'metadatalib=metaadam',
             ');)');
@@ -41,13 +41,13 @@ quit;
 
 
 data _null_;
-  length code $400 jsonfile $200;
+  length code $400 jsonpath $200;
   set members;
   name=lowcase(name);
-  jsonfile=cats("&root/json_out/sdtm/", name, ".json");
-  code=cats('%nrstr(%write_json(',
+  jsonpath=cats("&root/json_out/sdtm/", name, ".json");
+  code=cats('%nrstr(%write_datasetjson(',
               'dataset=datasdtm.', name, ', ', 
-              'jsonfile=', jsonfile, ', ',
+              'jsonpath=', jsonpath, ', ',
               'usemetadata=0, ',
               'metadatalib=metasdtm, ',
               "_studyOID=&StudyOID, ",
