@@ -1,4 +1,4 @@
-%macro write_json(dataset=, jsonfile=, usemetadata=, metadatalib=, _studyOID=, _MetaDataVersionOID=);
+%macro write_datasetjson(dataset=, jsonfile=, usemetadata=, metadatalib=, _studyOID=, _MetaDataVersionOID=);
   %local dataset_name dataset_label records 
     studyOID metaDataVersionOID
     ClinicalReferenceData ItemGroupOID;
@@ -134,4 +134,4 @@
   proc delete data=work.column_data;
   run;
 
-%mend write_json;
+%mend write_datasetjson;

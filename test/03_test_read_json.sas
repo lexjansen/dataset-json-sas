@@ -2,7 +2,6 @@
 %let root=/_github/lexjansen/dataset-json-sas;
 %include "&root/test/config.sas";
 
-
 data _null_;
   length fref $8 jsonfile $200 code $400;
   did = filename(fref,"&root/json/adam");
@@ -10,7 +9,7 @@ data _null_;
   do i = 1 to dnum(did);
     jsonfile = cats("&root/json/adam", "/", dread(did,i));
     if scan(lowcase(jsonfile), -1, ".") = 'json' then do;
-      code=cats('%nrstr(%read_json(',
+      code=cats('%nrstr(%read_datasetjson(',
                   'jsonfile=', jsonfile, ', ',
                   'dataoutlib=outadam, ',
                   'usemetadata=1, ',
@@ -31,7 +30,7 @@ data _null_;
   do i = 1 to dnum(did);
     jsonfile = cats("&root/json/sdtm", "/", dread(did,i));
     if scan(lowcase(jsonfile), -1, ".") = 'json' then do;
-      code=cats('%nrstr(%read_json(',
+      code=cats('%nrstr(%read_datasetjson(',
                   'jsonfile=', jsonfile, ', ',
                   'dataoutlib=outsdtm, ',
                   'usemetadata=1, ',

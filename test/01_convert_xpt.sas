@@ -2,7 +2,6 @@
 %let root=/_github/lexjansen/dataset-json-sas;
 %include "&root/test/config.sas";
 
-
 %let _cst_rc=;
 %let _cst_rcmsg=;
 

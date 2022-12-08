@@ -1,4 +1,4 @@
-%macro read_json(jsonfile=, dataoutlib=, usemetadata=, metadatalib=);
+%macro read_datasetjson(jsonfile=, dataoutlib=, usemetadata=, metadatalib=);
 
 %local _clinicalreferencedata_ _items_ _itemdata_ _itemgroupdata_ dslabel dsname
        variables rename label length format;
@@ -150,4 +150,4 @@ filename jsonfile clear;
 filename mapfile clear;
 libname out clear;
 
-%mend read_json;
+%mend read_datasetjson;

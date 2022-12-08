@@ -10,7 +10,7 @@ data _null_;
     if index(dread(did,i), "sas7bdat") then do;
       name=scan(dread(did,i), 1, ".");
       jsonfile=cats("&root/json_out/adam/", name, ".json");
-      code=cats('%nrstr(%write_json(',
+      code=cats('%nrstr(%write_datasetjson(',
                           'dataset=dataadam.', name, ', ', 
                           'jsonfile=', jsonfile, ', ',
                           'usemetadata=1, ',
@@ -34,7 +34,7 @@ data _null_;
     if index(dread(did,i), "sas7bdat") then do;
       name=scan(dread(did,i), 1, ".");
       jsonfile=cats("&root/json_out/sdtm/", name, ".json");
-      code=cats('%nrstr(%write_json(',
+      code=cats('%nrstr(%write_datasetjson(',
                           'dataset=datasdtm.', name, ', ', 
                           'jsonfile=', jsonfile, ', ',
                           'usemetadata=0, ',
