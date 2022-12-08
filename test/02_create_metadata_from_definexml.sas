@@ -7,9 +7,7 @@
   run;
 %mend CreateMetadataFromDefineXML;
 
-
-
-/* Create metadata from Define-XML for SDTM */
+/* Create metadata from Define-XML for ADaM */
 %CreateMetadataFromDefineXML(
    definexml=&root/json/adam/define_2_0.xml, 
    metadatalib=metaadam
@@ -22,8 +20,6 @@ data metaadam.metadata_columns;
     if index(name, 'VISIT') then json_datatype='decimal';
   end;
 run;
-
-
 
 /* Create metadata from Define-XML for SDTM */
 %CreateMetadataFromDefineXML(

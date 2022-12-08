@@ -4,7 +4,7 @@
 
 
 data _null_;
-  length fref $8 jsonfile $200 code $200;
+  length fref $8 jsonfile $200 code $400;
   did = filename(fref,"&root/json/adam");
   did = dopen(fref);
   do i = 1 to dnum(did);
@@ -25,7 +25,7 @@ run;
 
 
 data _null_;
-  length fref $8 jsonfile $200 code $200;
+  length fref $8 jsonfile $200 code $400;
   did = filename(fref,"&root/json/sdtm");
   did = dopen(fref);
   do i = 1 to dnum(did);
