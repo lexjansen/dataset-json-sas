@@ -31,6 +31,12 @@
     sas.symput('metaDataVersionOID', define.Study.MetaDataVersion["@OID"])
 
     sas.new_table(metadatalib..'.metadata_study', {
+      { name="fileoid", label="fileOID", type="C", length=128},
+      { name="creationdatetime", label="CreationDatetime", type="C", length=32},
+      { name="asofdatetime", label="AsOfDatetime", type="C", length=32},
+      { name="originator", label="Originator", type="C", length=128},
+      { name="sourcesystem", label="SourceSystem", type="C", length=128},
+      { name="sourcesystemversion", label="SourceSystemVersion", type="C", length=128},
       { name="studyoid", label="studyOID", type="C", length=128},
       { name="metadataversionoid", label="metaDataVersionOID", type="C", length=128}
     })
@@ -54,11 +60,18 @@
       { name="xml_datatype", label="Define-XML DataType", type="C", length=32},
       { name="json_datatype", label="Dataset-JSON DataType", type="C", length=32},
       { name="length", label="Length", type="N"},
-      { name="displayformat", label="Display format", type="C", length=32} 
+      { name="displayformat", label="Display format", type="C", length=32},
+      { name="keysequence", label="Key sequence", type="N"}
     })
 
     dsid_s = sas.open(metadatalib..'.metadata_study', "u")
     sas.append(dsid_s)
+    sas.put_value(dsid_s, "fileoid", define["@FileOID"])
+    sas.put_value(dsid_s, "creationdatetime", define["@CreationDateTime"])
+    if define["@AsOfDateTime"] then sas.put_value(dsid_s, "asofdatetime", define["@AsOfDateTime"]) end
+    if define["@Originator"] then sas.put_value(dsid_s, "originator", define["@Originator"]) end
+    if define["@SourceSystem"] then sas.put_value(dsid_s, "sourcesystem", define["@SourceSystem"]) end
+    if define["@SourceSystemVersion"] then sas.put_value(dsid_s, "sourcesystemversion", define["@SourceSystemVersion"]) end
     sas.put_value(dsid_s, "studyoid", define.Study["@OID"])
     sas.put_value(dsid_s, "metadataversionoid", define.Study.MetaDataVersion["@OID"])
     sas.update(dsid_s)
@@ -103,6 +116,7 @@
         sas.put_value(dsid_c, "order", tonumber(it['@OrderNumber']))
         if tonumber(itemtbl[it['@ItemOID']].Length) ~= nil then sas.put_value(dsid_c, "length", itemtbl[it['@ItemOID']].Length) end
         if itemtbl[it['@ItemOID']].DisplayFormat ~= nil then sas.put_value(dsid_c, "DisplayFormat", itemtbl[it['@ItemOID']].DisplayFormat) end
+        if it['@KeySequence'] ~= nil then sas.put_value(dsid_c, "keysequence", tonumber(it['@KeySequence'])) end
         sas.put_value(dsid_c, "json_datatype", datatype_mapping[itemtbl[it['@ItemOID']].DataType])
         sas.update(dsid_c)
       end

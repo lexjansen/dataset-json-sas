@@ -11,13 +11,18 @@
   _cstExtension=XPT,
   _cstOptions=
   );
-
+proc contents data=dataadam._ALL_;
+run;
+  
 %cstutilxptread(
   _cstSourceFolder=%sysfunc(pathname(datasdtm)), 
   _cstOutputLibrary=datasdtm,
   _cstExtension=XPT,
   _cstOptions=
   );
+
+proc contents data=datasdtm._ALL_;
+run;
 
   /*
 libname dataadam clear;
