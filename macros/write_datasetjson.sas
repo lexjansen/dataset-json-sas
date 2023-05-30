@@ -103,10 +103,19 @@
                          NOFMTCHARACTER NOFMTDATETIME NOFMTNUMERIC;
     WRITE OPEN OBJECT;
     
+    WRITE VALUES "fileOID" "www.sponsor.org.project123.final";
+    WRITE VALUES "creationDateTime" "%sysfunc(datetime(), is8601dt.)";
+    WRITE VALUES "asOfDateTime" "%sysfunc(datetime(), is8601dt.)";
+    WRITE VALUES "datasetJSONVersion" "&datasetJSONVersion";
+    WRITE VALUES "originator" "CDISC Data Exchange Team";
+    WRITE VALUES "sourceSystem" "SAS";
+    WRITE VALUES "sourceSystemVersion" "&SYSVLONG";
+    
     WRITE VALUES "&ClinicalReferenceData";
     WRITE OPEN OBJECT;
     WRITE VALUES "studyOID" "&studyOID";
     WRITE VALUES "metaDataVersionOID" "&metaDataVersionOID";
+    WRITE VALUES "metaDataRef" "https://metadata.location.org/api.link";
     WRITE VALUE "itemGroupData";
     WRITE OPEN OBJECT;
     WRITE VALUE "&ItemGroupOID";
