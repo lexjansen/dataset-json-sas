@@ -47,8 +47,8 @@
 
   %if &UseMetadata=1 %then %do;
 
-    data work.column_metadata(keep=OID name label type length);
-      retain OID name label type length;
+    data work.column_metadata(keep=OID name label type length keySequence);
+      retain OID name label type length keySequence;
       set &metadatalib..metadata_columns(
         rename=(json_datatype=type)
         where=(upcase(dataset_name) = %upcase("&dataset_name")));
@@ -102,6 +102,7 @@
   PROC JSON OUT=jsonfout NOPRETTY NOSASTAGS SCAN TRIMBLANKS
                          NOFMTCHARACTER NOFMTDATETIME NOFMTNUMERIC;
     WRITE OPEN OBJECT;
+    
     WRITE VALUES "&ClinicalReferenceData";
     WRITE OPEN OBJECT;
     WRITE VALUES "studyOID" "&studyOID";

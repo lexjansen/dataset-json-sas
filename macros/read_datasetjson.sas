@@ -1,4 +1,4 @@
-%macro read_datasetjson(jsonpath=, dataoutlib=, usemetadata=, metadatalib=);
+%macro read_datasetjson(jsonpath=, dataoutlib=, usemetadata=, metadatalib=, metadataoutlib=);
 
 %local _clinicalreferencedata_ _items_ _itemdata_ _itemgroupdata_ dslabel dsname
        variables rename label length format;
@@ -67,6 +67,11 @@ quit;
 proc copy in=out out=&dataoutlib;
   select &_itemdata_;
 run;
+
+proc copy in=out out=&metadataoutlib;
+  select &_items_;
+run;
+
 
 %if &UseMetadata=1 %then %do;
   

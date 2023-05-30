@@ -2,6 +2,8 @@
 %let root=/_github/lexjansen/dataset-json-sas;
 %include "&root/test/config.sas";
 
+%let datasetJSONVersion=1.0.0;
+
 data _null_;
   length fref $8 name $64 jsonpath $200 code $400;
   did = filename(fref,"%sysfunc(pathname(dataadam))");
@@ -37,7 +39,7 @@ data _null_;
       code=cats('%nrstr(%write_datasetjson(',
                           'dataset=datasdtm.', name, ', ', 
                           'jsonpath=', jsonpath, ', ',
-                          'usemetadata=0, ',
+                          'usemetadata=1, ',
                           'metadatalib=metasdtm, ',
                           "_studyOID=&StudyOID, ",
                           "_MetaDataVersionOID=&MetaDataVersionOID",

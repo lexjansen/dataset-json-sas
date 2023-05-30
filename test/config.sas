@@ -27,3 +27,6 @@ filename luapath ("&root/lua");
 
 %SetLib(metaadam, &root/metadata/adam);
 %SetLib(metasdtm, &root/metadata/sdtm);
+
+%SetLib(metainad, &root/metadata_in/adam);
+%SetLib(metainsd, &root/metadata_in/sdtm);

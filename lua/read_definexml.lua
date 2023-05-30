@@ -116,7 +116,7 @@
         sas.put_value(dsid_c, "order", tonumber(it['@OrderNumber']))
         if tonumber(itemtbl[it['@ItemOID']].Length) ~= nil then sas.put_value(dsid_c, "length", itemtbl[it['@ItemOID']].Length) end
         if itemtbl[it['@ItemOID']].DisplayFormat ~= nil then sas.put_value(dsid_c, "DisplayFormat", itemtbl[it['@ItemOID']].DisplayFormat) end
-        if it['@KeySequence'] ~= nil then sas.put_value(dsid_c, "keysequence", tonumber(it['@KeySequence'])) end
+        if it['@KeySequence'] ~= nil then sas.put_value(dsid_c, "keySequence", tonumber(it['@KeySequence'])) end
         sas.put_value(dsid_c, "json_datatype", datatype_mapping[itemtbl[it['@ItemOID']].DataType])
         sas.update(dsid_c)
       end

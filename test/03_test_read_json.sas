@@ -13,7 +13,8 @@ data _null_;
                   'jsonpath=', jsonpath, ', ',
                   'dataoutlib=outadam, ',
                   'usemetadata=1, ',
-                  'metadatalib=metaadam',
+                  'metadatalib=metaadam, ',
+                  'metadataoutlib=metainad',
                 ');)');
       call execute(code);
     end;
@@ -34,7 +35,8 @@ data _null_;
                   'jsonpath=', jsonpath, ', ',
                   'dataoutlib=outsdtm, ',
                   'usemetadata=1, ',
-                  'metadatalib=metasdtm',
+                  'metadatalib=metasdtm, ',
+                  'metadataoutlib=metainsd',
                 ');)');
       call execute(code);
     end;
