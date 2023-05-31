@@ -1,4 +1,10 @@
-%macro read_datasetjson(jsonpath=, dataoutlib=, usemetadata=, metadatalib=, metadataoutlib=);
+%macro read_datasetjson(
+  jsonpath=, 
+  dataoutlib=, 
+  usemetadata=, 
+  metadatalib=, 
+  metadataoutlib=
+  ) / des = 'Read a Dataset-JSON file to a SAS dataset';
 
 %local _clinicalreferencedata_ _items_ _itemdata_ _itemgroupdata_ dslabel dsname
        variables rename label length format;

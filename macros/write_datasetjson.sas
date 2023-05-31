@@ -1,13 +1,29 @@
-%macro write_datasetjson(dataset=, jsonpath=, usemetadata=, metadatalib=, _studyOID=, _MetaDataVersionOID=);
+%macro write_datasetjson(
+  dataset=, 
+  jsonpath=, 
+  usemetadata=, 
+  metadatalib=, 
+  _FileOID=,
+  _AsOfDateTime=,
+  _Originator=,
+  _SourceSystem=,
+  _SourceSystemVersion=,
+  _studyOID=, 
+  _MetaDataVersionOID=,
+  _MetaDataRef=
+  ) / des = 'Write a SAS dataset to a Dataset-JSON file';
+  
   %local dataset_name dataset_label records 
     studyOID metaDataVersionOID
-    ClinicalReferenceData ItemGroupOID;
+    ClinicalReferenceData ItemGroupOID
+    CurrentDataTime;
 
   %let dataset_name=%scan(&dataset, -1, %str(.));
   %let dataset_label=;
   %let ItemGroupOID=;
   %let studyOID=;
   %let metaDataVersionOID=;
+  %let CurrentDateTime=%sysfunc(datetime(), is8601dt.);
 
   %if %utl_varexist(&dataset, usubjid) %then
       %let ClinicalReferenceData=clinicalData;
@@ -103,19 +119,33 @@
                          NOFMTCHARACTER NOFMTDATETIME NOFMTNUMERIC;
     WRITE OPEN OBJECT;
     
-    WRITE VALUES "fileOID" "www.sponsor.org.project123.final";
-    WRITE VALUES "creationDateTime" "%sysfunc(datetime(), is8601dt.)";
-    WRITE VALUES "asOfDateTime" "%sysfunc(datetime(), is8601dt.)";
+    %if %sysevalf(%superq(_FileOID)=, boolean)=0 %then
+      WRITE VALUES "fileOID" "&_FileOID";
+    %else
+      WRITE VALUES "fileOID" "%sysfunc(uuidgen())";
+    ;  
+    WRITE VALUES "creationDateTime" "&CurrentDateTime";
+    %if %sysevalf(%superq(_AsOfDateTime)=, boolean)=0 %then
+      WRITE VALUES "asOfDateTime" "&_AsOfDateTime";
+    ;    
     WRITE VALUES "datasetJSONVersion" "&datasetJSONVersion";
-    WRITE VALUES "originator" "CDISC Data Exchange Team";
-    WRITE VALUES "sourceSystem" "SAS";
-    WRITE VALUES "sourceSystemVersion" "&SYSVLONG";
+    %if %sysevalf(%superq(_Originator)=, boolean)=0 %then
+      WRITE VALUES "originator" "&_Originator";
+    ;
+    %if %sysevalf(%superq(_SourceSystem)=, boolean)=0 %then
+      WRITE VALUES "sourceSystem" "&_SourceSystem";
+    ;
+    %if %sysevalf(%superq(_SourceSystemVersion)=, boolean)=0 %then
+      WRITE VALUES "sourceSystemVersion" "&_SourceSystemVersion";
+    ;
     
     WRITE VALUES "&ClinicalReferenceData";
     WRITE OPEN OBJECT;
     WRITE VALUES "studyOID" "&studyOID";
     WRITE VALUES "metaDataVersionOID" "&metaDataVersionOID";
-    WRITE VALUES "metaDataRef" "https://metadata.location.org/api.link";
+    %if %sysevalf(%superq(_MetaDataRef)=, boolean)=0 %then
+      WRITE VALUES "metaDataRef" "&_MetaDataRef";
+    ;  
     WRITE VALUE "itemGroupData";
     WRITE OPEN OBJECT;
     WRITE VALUE "&ItemGroupOID";
