@@ -1,3 +1,8 @@
+.vscode/
+.hypothesis/
+__pycache__/
+venv/
+work/
 *.log
 *.lst
 *.sas7bdat

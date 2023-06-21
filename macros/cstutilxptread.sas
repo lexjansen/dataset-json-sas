@@ -1,3 +1,6 @@
+%* Copyright (c) 2022, SAS Institute Inc., Cary, NC, USA.  All Rights Reserved.   *;
+%* SPDX-License-Identifier: Apache-2.0                                            *;
+%*                                                                                *;
 %* cstutilxptread                                                                 *;
 %*                                                                                *;
 %* Creates SAS data sets from a folder with SAS Version 5 XPORT files.            *;
@@ -32,7 +35,7 @@
 %* @exposure external                                                             *;
 
 %macro cstutilxptread(
-  _cstSourceFolder=,
+  _cstSourceFolder=, 
   _cstOutputLibrary=work,
   _cstExtension=XPT,
   _cstOptions=,
@@ -40,13 +43,13 @@
   _cstReturnMsg=_cst_rcmsg
   ) / des='CST: Create SAS Data Sets from XPT files';
 
-  %local
+  %local 
     _cstSrcMacro
     _cstRandom
-    _cstCounter
+    _cstCounter 
     _cstXPTFile
-    fref
-    did
+    fref 
+    did 
     ;
 
   %let _cstSrcMacro=&SYSMACRONAME;
@@ -131,7 +134,7 @@
 
   %do _cstCounter = 1 %to %sysfunc(dnum(&did));
     %let _cstXPTFile = %sysfunc(dread(&did,&_cstCounter));
-    %if %kindex(%upcase(&_cstXPTFile), %upcase(.&_cstExtension)) %then
+    %if %kindex(%upcase(&_cstXPTFile), %upcase(.&_cstExtension)) %then 
     %do;
 
       %if %sysfunc(libname(xpt&_cstRandom, &_cstSourceFolder/&_cstXPTFile, xport)) ne 0

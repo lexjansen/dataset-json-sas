@@ -1,14 +1,16 @@
 %* update this location to your own location;
 %let root=/_github/lexjansen/dataset-json-sas;
 
-%include "&root/test/config.sas";
+%include "&root/programs/config.sas";
+
+%let datasetJSONVersion=1.0.0;
 
 
 %let model=adam;
-libname data "&root/data/&model";
+libname adamdata "&root/data/&model";
 
 
-%let _File=%sysfunc(pathname(data))/adae.xpt;
+%let _File=%sysfunc(pathname(adamdata))/adae.xpt;
 libname xptFile xport "&_File";
 proc copy in=xptFile out=work;
 run;
@@ -17,8 +19,19 @@ data work.adaedt(label="Adverse Events with DateTime");
   retain USUBJID TRTSDT TRTSDTC TRTSDTM TRTSDTMC 
                  TRTEDT TRTEDTC TRTEDTM TRTEDTMC 
                  ASTDT  ASTDTC  ASTDTM  ASTDTMC;
-  length TRTSDTC TRTEDTC ASTDTC TRTSDTMC TRTEDTMC ASTDTMC $32;
+  length TRTSDT TRTSDTM TRTEDT TRTEDTM ASTDT ASTDTM 8 
+         TRTSDTC TRTEDTC ASTDTC TRTSDTMC TRTEDTMC ASTDTMC $32;
   format TRTSDT  TRTEDT  ASTDT  date10.  TRTSDTM  TRTEDTM  ASTDTM datetime22.2;
+  label TRTSDTC = "Date of First Exposure to Treatment (c)"
+        TRTSDTM = "Datetime of First Exp to Treatment"
+        TRTSDTMC = "Datetime of First Exp to Treatment (c)"
+        TRTEDTC = "Date of Last Exposure to Treatment (c)"
+        TRTEDTM = "Datetime of Last Exp to Treatment"
+        TRTEDTMC = "Datetime of Last Exp to Treatment (c)"
+        ASTDTC = "Analysis Start Date (c)"
+        ASTDTM = "Analysis Start Datetime"
+        ASTDTMC = "Analysis Start Datetime (c)"
+        ;        
   set work.adae(keep=USUBJID TRTSDT TRTEDT ASTDT);
   TRTSDTC = strip(put(TRTSDT, E8601DA10.));
   TRTEDTC = strip(put(TRTEDT, E8601DA10.));
@@ -51,9 +64,10 @@ proc sort data=work.metadata_columns;
 run;
   
 data work.metadata_columns(drop=sas_type varnum);
-  retain OID name label json_datatype xml_datatype length;
-  length OID $128 json_datatype $32;
+  retain OID name label json_datatype xml_datatype length keysequence;
+  length OID $128 json_datatype $32 keysequence 8;
   set work.metadata_columns;
+  keysequence=.;
   OID = cats("IT", ".", "ADAEDT", ".", upcase(name));
   if sas_type=1 then json_datatype="float";
                 else json_datatype="string"; 
@@ -66,19 +80,20 @@ run;
 %write_datasetjson(
   dataset=work.adaedt, 
   jsonpath=adaedt.json, 
-  usemetadata=1, 
+  usemetadata=N, 
   metadatalib=work, 
   _studyOID=%str(CDISCPILOT01), 
   _MetaDataVersionOID=%str(CDISC.ADaM.2.1)
   );
 
-libname data ".";
+libname data "&root/test_datetime";
 options mlogic symbolgen;
   
 %read_datasetjson(
   jsonpath=adaedt.json, 
   dataoutlib=data, 
-  usemetadata=1,
+  usemetadata=N,
+  dropseqvar=Y,
   metadatalib=work
   );
 
