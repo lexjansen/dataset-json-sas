@@ -6,7 +6,7 @@
 
 data _null_;
   length fref $8 jsonpath $200 code $400;
-  did = filename(fref,"&root/json/adam");
+  did = filename(fref,"&root/json_out/adam");
   did = dopen(fref);
   do i = 1 to dnum(did);
     jsonpath = cats("&root/json_out/adam", "/", dread(did,i));
@@ -14,7 +14,7 @@ data _null_;
       code=cats('%nrstr(%read_datasetjson(',
                   'jsonpath=', jsonpath, ', ',
                   'dataoutlib=outadam, ',
-                  'usemetadata=Y, ',
+                  'usemetadata=N, ',
                   'dropseqvar=Y, ',
                   'metadatalib=metaadam, ',
                   'metadataoutlib=metainad',
@@ -32,12 +32,12 @@ data _null_;
   did = filename(fref,"&root/json_out/sdtm");
   did = dopen(fref);
   do i = 1 to dnum(did);
-    jsonpath = cats("&root/json/sdtm", "/", dread(did,i));
+    jsonpath = cats("&root/json_out/sdtm", "/", dread(did,i));
     if scan(lowcase(jsonpath), -1, ".") = 'json' then do;
       code=cats('%nrstr(%read_datasetjson(',
                   'jsonpath=', jsonpath, ', ',
                   'dataoutlib=outsdtm, ',
-                  'usemetadata=Y, ',
+                  'usemetadata=N, ',
                   'dropseqvar=Y, ',
                   'metadatalib=metasdtm, ',
                   'metadataoutlib=metainsd',

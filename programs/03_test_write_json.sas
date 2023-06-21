@@ -13,12 +13,15 @@ data _null_;
   did = filename(fref,"%sysfunc(pathname(dataadam))");
   did = dopen(fref);
   do i = 1 to dnum(did);
-    if index(dread(did,i), "sas7bdat") then do;
+/*    if index(dread(did,i), "sas7bdat") then do; */
+    if index(dread(did,i), "xpt") then do;
       name=scan(dread(did,i), 1, ".");
       jsonpath=cats("&root/json_out/adam/", name, ".json");
       fileoid=cats("&FileOID", "/", "%sysfunc(date(), is8601da.)", "/", name);
       code=cats('%nrstr(%write_datasetjson('
-                          , 'dataset=dataadam.', name, ','
+                          /* , 'dataset=dataadam.', name, ',' */
+                          , 'dataset=', ','
+                          , 'xptfile=', "%sysfunc(pathname(dataadam))/", name, ".xpt",','
                           , 'jsonpath=', jsonpath, ','
                           , 'usemetadata=N,'
                           , 'metadatalib=metaadam,'
@@ -28,7 +31,7 @@ data _null_;
                           , "_SourceSystemVersion=1.0,"
                           , "_studyOID=&StudyOID,"
                           , "_MetaDataVersionOID=&MetaDataVersionOID,"
-                          , "_MetaDataRef=file://define.xml"
+                          , "_MetaDataRef=https://metadata.location.org/TDF_ADaM_ADaMIG11/define.xml"
                         ,');)');
       call execute(code);
     end;
@@ -52,8 +55,9 @@ data _null_;
       fileoid=cats("&FileOID", "/", "%sysfunc(date(), is8601da.)", "/", name);
       code=cats('%nrstr(%write_datasetjson('
                           , 'dataset=datasdtm.', name, ','
+                          , 'xptfile=', ','
                           , 'jsonpath=', jsonpath, ','
-                          , 'usemetadata=Y,'
+                          , 'usemetadata=N,'
                           , 'metadatalib=metasdtm,'
                           , "_FileOID=", fileoid, ","
                           , "_AsOfDateTime=2023-05-31T00:00:00, "
@@ -62,7 +66,7 @@ data _null_;
                           , "_SourceSystemVersion=1.0,"
                           , "_studyOID=&StudyOID,"
                           , "_MetaDataVersionOID=&MetaDataVersionOID,"
-                          , "_MetaDataRef=file://define.xml"
+                          , "_MetaDataRef=https://metadata.location.org/CDISCPILOT01/define.xml"
                         ,');)');
           call execute(code);
     end;

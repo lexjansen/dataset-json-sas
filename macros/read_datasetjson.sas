@@ -159,7 +159,7 @@
     proc sql noprint;
       select catx(' ', name, strip(displayformat)) into :format separated by ' '
           from work.&_items_
-          where not(missing(displayformat)) and (type in ('integer' 'float' 'double' 'decimal'));
+          where not(missing(displayformat)) /* and (type in ('integer' 'float' 'double' 'decimal')) */;
     quit;
   %end;
 
@@ -171,7 +171,7 @@
       select catx(' ', name, strip(displayformat)) into :format separated by ' '
           from &metadatalib..metadata_columns
           where upcase(dataset_name)="%upcase(&dsname)"
-          and not(missing(displayformat)) and (xml_datatype in ('integer' 'float' 'double' 'decimal'));
+          and not(missing(displayformat)) /* and (xml_datatype in ('integer' 'float' 'double' 'decimal')) */;
     quit;
   %end;
 
@@ -181,7 +181,6 @@
     modify &dsname %if %sysevalf(%superq(dslabel)=, boolean)=0 %then %str((label = %sysfunc(quote(%nrbquote(&dslabel)))));;
       rename &rename;
       label &label;
-      %if %sysevalf(%superq(format)=, boolean)=0 %then format &format;;
   quit;
 
 
@@ -203,6 +202,7 @@
     );
     retain &variables;
     length &length;
+    %if %sysevalf(%superq(format)=, boolean)=0 %then format &format;;
     set &dataoutlib..&dsname;
   run;
 

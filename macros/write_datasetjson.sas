@@ -1,5 +1,6 @@
 %macro write_datasetjson(
   dataset=, 
+  xptfile=,
   jsonpath=, 
   usemetadata=, 
   metadatalib=, 
@@ -14,13 +15,33 @@
   ) / des = 'Write a SAS dataset to a Dataset-JSON file';
   
   %local 
+    _Random
     _Missing
-    dataset_name dataset_label records 
+    dataset_new dataset_name dataset_label records 
     fileOID studyOID metaDataVersionOID
     ClinicalReferenceData ItemGroupOID
     CurrentDataTime;
-
-  %let dataset_name=%scan(&dataset, -1, %str(.));
+    
+  %if %sysevalf(%superq(dataset)=, boolean)=0 
+    %then %do;
+      %let dataset_name=%scan(&dataset, -1, %str(.));
+      %let dataset_new=&dataset;
+    %end;
+    %else %do;
+      %let _Random=%sysfunc(putn(%sysevalf(%sysfunc(ranuni(0))*10000,floor),z4.));  
+      %let dataset_name=%scan(&xptfile, -2, %str(/\.));
+      %put %sysfunc(dcreate(xpttmp, %sysfunc(pathname(work))));
+      %if %sysfunc(libname(xpt&_Random, &xptfile, xport)) ne 0
+        %then %put %sysfunc(sysmsg());
+      libname xpttmp "%sysfunc(pathname(work))/xpttmp";
+      proc copy in=xpt&_Random out=xpttmp memtype=data;
+      run;
+      %if %sysfunc(libname(xpt&_Random)) ne 0
+        %then %put %sysfunc(sysmsg());
+      %let dataset_new=xpttmp.&dataset_name;
+      
+    %end;
+  
   %let dataset_label=;
   %let fileOID=;
   %let ItemGroupOID=;
@@ -34,7 +55,7 @@
   
   %* Check for missing parameters ;
   %let _Missing=;
-  %if %sysevalf(%superq(dataset)=, boolean) %then %let _Missing = &_Missing dataset;
+  /* %if %sysevalf(%superq(dataset)=, boolean) %then %let _Missing = &_Missing dataset; */
   %if %sysevalf(%superq(jsonpath)=, boolean) %then %let _Missing = &_Missing jsonpath;
   %if %sysevalf(%superq(usemetadata)=, boolean) %then %let _Missing = &_Missing usemetadata;
 
@@ -55,11 +76,11 @@
   %* End of parameter checks                                                    *;
   %******************************************************************************;
  
-  %if %cstutilcheckvarsexist(_cstDataSetName=&dataset, _cstVarList=usubjid) %then
+  %if %cstutilcheckvarsexist(_cstDataSetName=&dataset_new, _cstVarList=usubjid) %then
       %let ClinicalReferenceData=clinicalData;
     %else %let ClinicalReferenceData=referenceData;
 
-  %let records=%cstutilnobs(_cstDataSetName=&dataset);
+  %let records=%cstutilnobs(_cstDataSetName=&dataset_new);
 
   %if %substr(%upcase(&UseMetadata),1,1) eq Y %then %do;
 
@@ -87,14 +108,16 @@
   %if %sysevalf(%superq(metaDataVersionOID)=, boolean) %then %let metaDataVersionOID=METADATAVERSION1;
   %if %sysevalf(%superq(ItemGroupOID)=, boolean) %then %let ItemGroupOID=IG.%upcase(&dataset_name);
   %if %sysevalf(%superq(dataset_label)=, boolean) %then 
-    %let dataset_label=%cstutilgetattribute(_cstDataSetName=&dataset,_cstAttribute=LABEL);
-  %if %sysevalf(%superq(dataset_label)=, boolean) %then 
-    %let dataset_label=&dataset_name;
+    %let dataset_label=%cstutilgetattribute(_cstDataSetName=&dataset_new,_cstAttribute=LABEL);
+  %if %sysevalf(%superq(dataset_label)=, boolean) %then %do;
+    /* %let dataset_label=&dataset_name; */
+    %put %str(WAR)NING: &dataset_name: no dataset label.;
+  %end;  
   
   %put ### &=dataset &=records &=ClinicalReferenceData &=ItemGroupOID dslabel=%bquote(&dataset_label);
 
   %if %substr(%upcase(&UseMetadata),1,1) eq Y %then %do;
-
+    /* Get column metadata - oid, label, type, length, displayformat, keysequence  */
     data work.column_metadata(keep=OID name label type length displayFormat keySequence);
       retain OID name label type length displayFormat keySequence;
       set &metadatalib..metadata_columns(
@@ -107,7 +130,8 @@
     run;
   %end;
   %else %do;
-    proc contents noprint varnum data=&dataset 
+    /* Get column metadata from the datasets - label, type, length, format and derive as much as we can */
+    proc contents noprint varnum data=&dataset_new 
       out=work.column_metadata(
         keep=varnum name type format formatl formatd length label 
         rename=(format=displayFormat type=sas_type)
@@ -153,7 +177,7 @@
   %******************************************************************************;
   data work.column_data;
     length ITEMGROUPDATASEQ 8.;
-    set &dataset;
+    set &dataset_new;
     ITEMGROUPDATASEQ = _n_;
   run;
 
