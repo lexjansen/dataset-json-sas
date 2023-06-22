@@ -17,10 +17,13 @@
   %local 
     _Random
     _Missing
+    _delete_temp_dataset
     dataset_new dataset_name dataset_label records 
     fileOID studyOID metaDataVersionOID
     ClinicalReferenceData ItemGroupOID
     CurrentDataTime;
+  
+  %let _delete_temp_dataset=0;
     
   %if %sysevalf(%superq(dataset)=, boolean)=0 
     %then %do;
@@ -34,12 +37,14 @@
       %if %sysfunc(libname(xpt&_Random, &xptfile, xport)) ne 0
         %then %put %sysfunc(sysmsg());
       libname xpttmp "%sysfunc(pathname(work))/xpttmp";
+      
       proc copy in=xpt&_Random out=xpttmp memtype=data;
       run;
+      
       %if %sysfunc(libname(xpt&_Random)) ne 0
         %then %put %sysfunc(sysmsg());
       %let dataset_new=xpttmp.&dataset_name;
-      
+      %let _delete_temp_dataset=1;
     %end;
   
   %let dataset_label=;
@@ -180,6 +185,12 @@
     set &dataset_new;
     ITEMGROUPDATASEQ = _n_;
   run;
+
+  %if &_delete_temp_dataset=1 %then %do;
+    proc delete data=xpttmp.&dataset_name;
+    run;
+    libname xpttmp clear;
+  %end;  
 
   filename jsonfout "&jsonpath";
 

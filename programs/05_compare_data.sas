@@ -12,6 +12,9 @@ proc sql noprint;
   ;
 quit;
 
+%if %cstutilnobs(_cstDataSetName=members)=0 %then %do;
+  %put WAR%str(NING): No datasets to compare.;
+%end;  
 
 data _null_;
   length code $400;
@@ -33,6 +36,10 @@ proc sql noprint;
   where libname="DATASDTM" and memtype="DATA"
   ;
 quit;
+
+%if %cstutilnobs(_cstDataSetName=members)=0 %then %do;
+  %put WAR%str(NING): No datasets to compare.;
+%end;  
 
 data _null_;
   length code $400;
