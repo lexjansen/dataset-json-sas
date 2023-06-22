@@ -7,3 +7,4 @@ work/
 *.lst
 *.sas7bdat
 develop/
+*.egp
