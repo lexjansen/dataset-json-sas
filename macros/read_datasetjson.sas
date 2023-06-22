@@ -125,10 +125,17 @@
   %create_template(type=TABLES, out=&metadataoutlib..metadata_tables);
   %create_template(type=COLUMNS, out=&metadataoutlib..metadata_columns);
 
-
-  data work.metadata_study;
-    merge out.root out.&_clinicalreferencedata_;
-  run;  
+  %if %sysfunc(exist(out.root)) %then %do; 
+    data work.metadata_study;
+      merge out.root out.&_clinicalreferencedata_;
+    run;  
+  %end;
+  %else %do;
+    data work.metadata_study;
+      set out.&_clinicalreferencedata_;
+    run;  
+  %end;  
+  
   data &metadataoutlib..metadata_study;
     set &metadataoutlib..metadata_study work.metadata_study;
   run;  
@@ -146,7 +153,7 @@
     order = _n_;
   run;  
 
-  data &metadataoutlib..metadata_columns;
+  data &metadataoutlib..metadata_columns(%if %substr(%upcase(&DropSeqVar),1,1) eq Y %then where=(upcase(name) ne "ITEMGROUPDATASEQ"););
     set &metadataoutlib..metadata_columns work.&_items_(rename=(type=json_datatype) in=init);
     if init then dataset_name = "&ItemGroupName";
   run;  
@@ -155,10 +162,10 @@
 
   /* get formats from Dataset-JSON metadata, but only when the displayformat variable exists */
   %let format=;
-  %if %cstutilcheckvarsexist(_cstDataSetName=work.&_items_, _cstVarList=displayformat) %then %do;
+  %if %cstutilcheckvarsexist(_cstDataSetName=out.&_items_, _cstVarList=displayformat) %then %do;
     proc sql noprint;
       select catx(' ', name, strip(displayformat)) into :format separated by ' '
-          from work.&_items_
+          from out.&_items_
           where not(missing(displayformat)) /* and (type in ('integer' 'float' 'double' 'decimal')) */;
     quit;
   %end;

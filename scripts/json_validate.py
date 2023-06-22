@@ -16,6 +16,7 @@ def validate_json(json_data, schema_file):
         with open(schema_file) as f:
             schema = json.load(f)
         JSD.validate(json_data, schema=schema)
+        print("  Ok!")
         return True
     except Exception as e:
         print(f"Error encountered while validating json schema: {e}")
@@ -34,9 +35,10 @@ if __name__ == "__main__":
     schemafile = args.schemafile
 
     files = [join(args.directory,f) for f in listdir(args.directory) if isfile(join(args.directory, f))]
+    print(f"Validating against schemafile {schemafile}")
     for f in files:
           isJson = f.find(".json")
           if isJson > 0:
-            print(f"Validating {f} with schema {schemafile}")
-            validate_json(json.load(open(f)), schemafile)
+            print(f"Validating {f}")
+            validate_json(json.load(open(f, encoding="utf8")), schemafile)
 

@@ -1,10 +1,11 @@
 .vscode/
 .hypothesis/
 __pycache__/
+develop/
+test/
 venv/
 work/
 *.log
 *.lst
 *.sas7bdat
-develop/
 *.egp

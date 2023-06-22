@@ -1,9 +1,10 @@
 %macro write_datasetjson(
   dataset=, 
-  xptfile=,
+  xptpath=,
   jsonpath=, 
   usemetadata=, 
   metadatalib=, 
+  datasetJSONVersion=1.0.0,
   _FileOID=,
   _AsOfDateTime=,
   _Originator=,
@@ -32,9 +33,9 @@
     %end;
     %else %do;
       %let _Random=%sysfunc(putn(%sysevalf(%sysfunc(ranuni(0))*10000,floor),z4.));  
-      %let dataset_name=%scan(&xptfile, -2, %str(/\.));
+      %let dataset_name=%scan(&xptpath, -2, %str(/\.));
       %put %sysfunc(dcreate(xpttmp, %sysfunc(pathname(work))));
-      %if %sysfunc(libname(xpt&_Random, &xptfile, xport)) ne 0
+      %if %sysfunc(libname(xpt&_Random, &xptpath, xport)) ne 0
         %then %put %sysfunc(sysmsg());
       libname xpttmp "%sysfunc(pathname(work))/xpttmp";
       
@@ -46,6 +47,8 @@
       %let dataset_new=xpttmp.&dataset_name;
       %let _delete_temp_dataset=1;
     %end;
+  
+  %if %sysevalf(%superq(datasetJSONVersion)=, boolean) %then %let datasetJSONVersion = %str(1.0.0);
   
   %let dataset_label=;
   %let fileOID=;
@@ -60,7 +63,6 @@
   
   %* Check for missing parameters ;
   %let _Missing=;
-  /* %if %sysevalf(%superq(dataset)=, boolean) %then %let _Missing = &_Missing dataset; */
   %if %sysevalf(%superq(jsonpath)=, boolean) %then %let _Missing = &_Missing jsonpath;
   %if %sysevalf(%superq(usemetadata)=, boolean) %then %let _Missing = &_Missing usemetadata;
 
@@ -172,7 +174,7 @@
   quit;
 
   data work.column_metadata;
-    set itemgroupdataseq work.column_metadata;
+    set itemgroupdataseq work.column_metadata(where=(upcase(name) ne "ITEMGROUPDATASEQ"));
   run;
   
   proc delete data=work.itemgroupdataseq;
