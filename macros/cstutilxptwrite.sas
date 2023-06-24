@@ -1,3 +1,6 @@
+%* Copyright (c) 2022, SAS Institute Inc., Cary, NC, USA.  All Rights Reserved.   *;
+%* SPDX-License-Identifier: Apache-2.0                                            *;
+%*                                                                                *;
 %* cstutilxptwrite                                                                *;
 %*                                                                                *;
 %* Creates SAS Version 5 XPORT files from a library of SAS data sets.             *;
@@ -28,24 +31,24 @@
 %* @exposure external                                                             *;
 
 %macro cstutilxptwrite(
-  _cstSourceLibrary=,
+  _cstSourceLibrary=, 
   _cstOutputFolder=,
   _cstOptions=,
   _cstReturn=_cst_rc,
   _cstReturnMsg=_cst_rcmsg
   ) / des='CST: Create XPT files from SAS Data Sets';
 
-  %local
+  %local 
     _cstSrcMacro
     _cstDatasets
-    _cstCounter
+    _cstCounter 
     _cstRandom
     dsid
     ;
 
   %let _cstSrcMacro=&SYSMACRONAME;
   %let _cstRandom=%sysfunc(putn(%sysevalf(%sysfunc(ranuni(0))*10000,floor),z4.));
-
+  
   %***************************************************;
   %*  Check _cstReturn and _cstReturnMsg parameters  *;
   %***************************************************;
@@ -116,13 +119,13 @@
     call symputx(mvname,kcompress(klowcase(memname)));
     if end then call symputx('_cstDatasets',kleft(put(_n_,2.)));
   run;
-
+  
   %do _cstCounter=1 %to &_cstDatasets;
-
+    
     %if %sysfunc(libname(xpt&_cstRandom, &_cstOutputFolder/&&ds&_cstCounter...xpt, xport)) ne 0
       %then %put %sysfunc(sysmsg());
     %* libname xpt&_cstRandom xport "&_cstOutputFolder/&&ds&_cstCounter...xpt";
-    proc copy in=&_cstSourceLibrary OUT=xpt&_cstRandom &_cstOptions;
+    proc copy in=&_cstSourceLibrary OUT=xpt&_cstRandom &_cstOptions; 
       select &&ds&_cstCounter;
     run;
     %* libname xpt&_cstRandom clear;

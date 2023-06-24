@@ -1,6 +1,6 @@
 %macro utl_comparedata(baselib=, complib=, dsname=);
   
-proc compare base=&baselib..&dsname compare=&complib..&dsname(drop=ITEMGROUPDATASEQ) listall
+proc compare base=&baselib..&dsname compare=&complib..&dsname listall
   criterion=1e-8 method=absolute;
 run;
 
