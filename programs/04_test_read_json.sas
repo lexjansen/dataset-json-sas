@@ -3,11 +3,11 @@
 %include "&root/programs/config.sas";
 
 
-%get_dirtree(dir=&root/json_out/adam, outds=dirtree_adam);
+%get_dirtree(dir=&root/json_out/adam, outds=work.dirtree_adam);
 
 data _null_;
   length code $2048;
-  set dirtree_adam(where=(ext="json" and dir=0));
+  set work.dirtree_adam(where=(ext="json" and dir=0));
     code=cats('%nrstr(%read_datasetjson(',
                 'jsonpath=', fullpath, ', ',
                 'dataoutlib=outadam, ',
@@ -19,12 +19,16 @@ data _null_;
     call execute(code);
 run;
 
+proc delete data=work.dirtree_adam;
+run;
 
-%get_dirtree(dir=&root/json_out/sdtm, outds=dirtree_sdtm);
+
+
+%get_dirtree(dir=&root/json_out/sdtm, outds=work.dirtree_sdtm);
 
 data _null_;
   length code $2048;
-  set dirtree_sdtm(where=(ext="json" and dir=0));
+  set work.dirtree_sdtm(where=(ext="json" and dir=0));
     code=cats('%nrstr(%read_datasetjson(',
                 'jsonpath=', fullpath, ', ',
                 'dataoutlib=outsdtm, ',
@@ -36,7 +40,8 @@ data _null_;
     call execute(code);
 run;
 
-
+proc delete data=work.dirtree_sdtm;
+run;
 
 /*
 libname metaadam clear;

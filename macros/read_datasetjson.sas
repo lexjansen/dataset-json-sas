@@ -126,19 +126,23 @@
   %create_template(type=COLUMNS, out=&metadataoutlib..metadata_columns);
 
   %if %sysfunc(exist(out.root)) %then %do; 
-    data work.metadata_study;
+    data work._metadata_study;
       merge out.root out.&_clinicalreferencedata_;
     run;  
   %end;
   %else %do;
-    data work.metadata_study;
+    data work._metadata_study;
       set out.&_clinicalreferencedata_;
     run;  
   %end;  
   
   data &metadataoutlib..metadata_study;
-    set &metadataoutlib..metadata_study work.metadata_study;
+    set &metadataoutlib..metadata_study work._metadata_study;
   run;  
+  
+  proc delete data=work._metadata_study;
+  run;
+
 
   data &metadataoutlib..metadata_tables;
     set &metadataoutlib..metadata_tables out.&_itemgroupdata_(in=inigd drop=records);
@@ -157,6 +161,9 @@
     set &metadataoutlib..metadata_columns work.&_items_(rename=(type=json_datatype) in=init);
     if init then dataset_name = "&ItemGroupName";
   run;  
+
+  proc delete data=work.&_items_;
+  run;
 
 %end;
 

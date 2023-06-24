@@ -251,10 +251,7 @@
 
   filename jsonfout clear;
 
-  proc delete data=work.column_metadata;
-  run;
-
-  proc delete data=work.column_data;
+  proc delete data=work.column_metadata work.column_data;
   run;
 
   %exit_macro:

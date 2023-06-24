@@ -7,11 +7,11 @@
 %let StudyOID=%str(TDF_ADaM.ADaMIG.1.1);
 %let MetaDataVersionOID=%str(MDV.TDF_ADaM.ADaMIG.1.1);
 
-%get_dirtree(dir=%sysfunc(pathname(dataadam)), outds=dirtree);
+%get_dirtree(dir=%sysfunc(pathname(dataadam)), outds=work.dirtree_adam);
 
 data _null_;
   length datasetname $64 jsonpath $512 fileoid $128 code $2048;
-  set dirtree(where=(ext="xpt" and dir=0));
+  set work.dirtree_adam(where=(ext="xpt" and dir=0));
     datasetname=scan(filename, 1, ".");
     jsonpath=cats("&root/json_out/adam/", datasetname, ".json");
     fileoid=cats("&FileOID", "/", "%sysfunc(date(), is8601da.)", "/", datasetname);
@@ -33,16 +33,19 @@ data _null_;
     call execute(code);
 run;
 
+proc delete data=work.dirtree_adam;
+run;
+
 
 
 %let StudyOID=%str(cdisc.com/CDISCPILOT01);
 %let MetaDataVersionOID=%str(MDV.MSGv2.0.SDTMIG.3.3.SDTM.1.7);
 
-%get_dirtree(dir=%sysfunc(pathname(datasdtm)), outds=dirtree);
+%get_dirtree(dir=%sysfunc(pathname(datasdtm)), outds=dirtree_sdtm);
 
 data _null_;
   length datasetname $64 jsonpath $512 fileoid $128 code $2048;
-  set dirtree(where=(ext="xpt" and dir=0));
+  set dirtree_sdtm(where=(ext="xpt" and dir=0));
     datasetname=scan(filename, 1, ".");
     jsonpath=cats("&root/json_out/sdtm/", datasetname, ".json");
     fileoid=cats("&FileOID", "/", "%sysfunc(date(), is8601da.)", "/", datasetname);
@@ -63,6 +66,9 @@ data _null_;
       , "_MetaDataRef=https://metadata.location.org/CDISCPILOT01/define.xml"
     ,');)');
     call execute(code);
+run;
+
+proc delete data=work.dirtree_sdtm;
 run;
 
 /*
