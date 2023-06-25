@@ -17,7 +17,6 @@ data _null_;
     fileoid=cats("&FileOID", "/", "%sysfunc(date(), is8601da.)", "/", datasetname);
     code=cats('%nrstr(%write_datasetjson('
       /* , 'dataset=dataadam.', name, ',' */
-      , 'dataset=', ','
       , 'xptpath=', fullpath,','
       , 'jsonpath=', jsonpath, ','
       , 'usemetadata=Y,'
@@ -51,7 +50,6 @@ data _null_;
     fileoid=cats("&FileOID", "/", "%sysfunc(date(), is8601da.)", "/", datasetname);
     code=cats('%nrstr(%write_datasetjson('
       /* , 'dataset=datasdtm.', name, ',' */
-      , 'dataset=', ','
       , 'xptpath=', fullpath,','
       , 'jsonpath=', jsonpath, ','
       , 'usemetadata=Y,'
