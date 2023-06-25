@@ -1,9 +1,7 @@
 %macro read_datasetjson(
   jsonpath=, 
   dataoutlib=, 
-  usemetadata=, 
-  dropseqvar=,
-  metadatalib=, 
+  dropseqvar=N,
   metadataoutlib=
   ) / des = 'Read a Dataset-JSON file to a SAS dataset';
 
@@ -20,7 +18,6 @@
   %let _Missing=;
   %if %sysevalf(%superq(jsonpath)=, boolean) %then %let _Missing = &_Missing jsonpath;
   %if %sysevalf(%superq(dataoutlib)=, boolean) %then %let _Missing = &_Missing dataoutlib;
-  %if %sysevalf(%superq(usemetadata)=, boolean) %then %let _Missing = &_Missing usemetadata;
   %if %sysevalf(%superq(dropseqvar)=, boolean) %then %let _Missing = &_Missing dropseqvar;
 
   %if %length(&_Missing) gt 0
@@ -28,13 +25,6 @@
       %put ERR%str(OR): [&sysmacroname] Required macro parameter(s) missing: &_Missing;
       %goto exit_macro;
     %end;
-
-  %* Rule: usemetadata has to be Y or N  *;
-  %if "%substr(%upcase(&usemetadata),1,1)" ne "Y" and "%substr(%upcase(&usemetadata),1,1)" ne "N" %then
-  %do;
-    %put ERR%str(OR): [&sysmacroname] Required macro parameter usemetadata=&usemetadata must be Y or N.;
-    %goto exit_macro;
-  %end;
 
   %* Rule: dropseqvar has to be Y or N  *;
   %if "%substr(%upcase(&dropseqvar),1,1)" ne "Y" and "%substr(%upcase(&dropseqvar),1,1)" ne "N" %then
@@ -177,18 +167,6 @@
     quit;
   %end;
 
-  %if %substr(%upcase(&UseMetadata),1,1) eq Y %then %do;
-    
-    /* get formats from metadata */
-    %let format=;
-    proc sql noprint;
-      select catx(' ', name, strip(displayformat)) into :format separated by ' '
-          from &metadatalib..metadata_columns
-          where upcase(dataset_name)="%upcase(&dsname)"
-          and not(missing(displayformat)) /* and (xml_datatype in ('integer' 'float' 'double' 'decimal')) */;
-    quit;
-  %end;
-
   proc datasets library=&dataoutlib noprint nolist nodetails;
     %if %sysfunc(exist(&dataoutlib..&dsname)) %then %do; delete &dsname; %end;
     change &_itemdata_ = &dsname;
@@ -196,7 +174,6 @@
       rename &rename;
       label &label;
   quit;
-
 
   /* Update lengths */
   proc sql noprint;

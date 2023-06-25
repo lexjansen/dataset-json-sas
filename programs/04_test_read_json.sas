@@ -11,9 +11,7 @@ data _null_;
     code=cats('%nrstr(%read_datasetjson(',
                 'jsonpath=', fullpath, ', ',
                 'dataoutlib=outadam, ',
-                'usemetadata=N, ',
                 'dropseqvar=Y, ',
-                'metadatalib=metaadam, ',
                 'metadataoutlib=metainad',
               ');)');
     call execute(code);
@@ -32,9 +30,7 @@ data _null_;
     code=cats('%nrstr(%read_datasetjson(',
                 'jsonpath=', fullpath, ', ',
                 'dataoutlib=outsdtm, ',
-                'usemetadata=N, ',
                 'dropseqvar=Y, ',
-                'metadatalib=metasdtm, ',
                 'metadataoutlib=metainsd',
               ');)');
     call execute(code);
