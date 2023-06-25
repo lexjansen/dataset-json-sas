@@ -7,11 +7,19 @@
 %let StudyOID=%str(TDF_ADaM.ADaMIG.1.1);
 %let MetaDataVersionOID=%str(MDV.TDF_ADaM.ADaMIG.1.1);
 
-%get_dirtree(dir=%sysfunc(pathname(dataadam)), outds=work.dirtree_adam);
+%get_dirtree(
+  dir=%sysfunc(pathname(dataadam)), 
+  outds=work.dirtree_adam, 
+  where=%str(ext="xpt" and dir=0)
+);
+
+%if %cstutilnobs(_cstDataSetName=work.dirtree_adam)=0 %then %do;
+  %put WAR%str(NING): No XPT files to read in directory %sysfunc(pathname(dataadam).;
+%end;  
 
 data _null_;
   length datasetname $64 jsonpath $512 fileoid $128 code $2048;
-  set work.dirtree_adam(where=(ext="xpt" and dir=0));
+  set work.dirtree_adam;
     datasetname=scan(filename, 1, ".");
     jsonpath=cats("&root/json_out/adam/", datasetname, ".json");
     fileoid=cats("&FileOID", "/", "%sysfunc(date(), is8601da.)", "/", datasetname);
@@ -40,11 +48,19 @@ run;
 %let StudyOID=%str(cdisc.com/CDISCPILOT01);
 %let MetaDataVersionOID=%str(MDV.MSGv2.0.SDTMIG.3.3.SDTM.1.7);
 
-%get_dirtree(dir=%sysfunc(pathname(datasdtm)), outds=dirtree_sdtm);
+%get_dirtree(
+  dir=%sysfunc(pathname(datasdtm)), 
+  outds=dirtree_sdtm, 
+  where=%str(ext="xpt" and dir=0)
+);
+
+%if %cstutilnobs(_cstDataSetName=work.dirtree_sdtm)=0 %then %do;
+  %put WAR%str(NING): No XPT files to read in directory %sysfunc(pathname(datasdtm).;
+%end;  
 
 data _null_;
   length datasetname $64 jsonpath $512 fileoid $128 code $2048;
-  set dirtree_sdtm(where=(ext="xpt" and dir=0));
+  set dirtree_sdtm;
     datasetname=scan(filename, 1, ".");
     jsonpath=cats("&root/json_out/sdtm/", datasetname, ".json");
     fileoid=cats("&FileOID", "/", "%sysfunc(date(), is8601da.)", "/", datasetname);

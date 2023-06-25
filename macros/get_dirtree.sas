@@ -1,4 +1,4 @@
-%macro get_dirtree(dir=, outds=work.dirtree);
+%macro get_dirtree(dir=, outds=work.dirtree, where=);
 
   /*
   credit:
@@ -36,5 +36,9 @@
     rc=filename('tmp');
   run;
   
+  data &outds;
+    set &outds %if %sysevalf(%superq(where)=, boolean)=0 %then (where=(&where));;
+  run;  
+
   
 %mend get_dirtree ;

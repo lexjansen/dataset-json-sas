@@ -3,11 +3,19 @@
 %include "&root/programs/config.sas";
 
 
-%get_dirtree(dir=&root/json_out/adam, outds=work.dirtree_adam);
+%get_dirtree(
+  dir=&root/json_out/adam, 
+  outds=work.dirtree_adam, 
+  where=%str(ext="json" and dir=0)
+);
+
+%if %cstutilnobs(_cstDataSetName=work.dirtree_adam)=0 %then %do;
+  %put WAR%str(NING): No JSON files to read in directory &root/json_out/adam.;
+%end;  
 
 data _null_;
   length code $2048;
-  set work.dirtree_adam(where=(ext="json" and dir=0));
+  set work.dirtree_adam;
     code=cats('%nrstr(%read_datasetjson(',
                 'jsonpath=', fullpath, ', ',
                 'dataoutlib=outadam, ',
@@ -22,11 +30,19 @@ run;
 
 
 
-%get_dirtree(dir=&root/json_out/sdtm, outds=work.dirtree_sdtm);
+%get_dirtree(
+  dir=&root/json_out/sdtm, 
+  outds=work.dirtree_sdtm, 
+  where=%str(ext="json" and dir=0)
+);
+
+%if %cstutilnobs(_cstDataSetName=work.dirtree_sdtm)=0 %then %do;
+  %put WAR%str(NING): No JSON files to read in directory &root/json_out/sdtm.;
+%end;  
 
 data _null_;
   length code $2048;
-  set work.dirtree_sdtm(where=(ext="json" and dir=0));
+  set work.dirtree_sdtm;
     code=cats('%nrstr(%read_datasetjson(',
                 'jsonpath=', fullpath, ', ',
                 'dataoutlib=outsdtm, ',
