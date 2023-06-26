@@ -6,13 +6,17 @@
   ) / des = 'Read a Dataset-JSON file to a SAS dataset';
 
   %local _Missing 
+         _SaveOptions
          _clinicalreferencedata_ _items_ _itemdata_ _itemgroupdata_ ItemGroupOID ItemGroupName 
          dslabel dsname variables rename label length format;
 
+  %* Save options;
+  %let _SaveOptions = %sysfunc(getoption(dlcreatedir));
+  options dlcreatedir;
 
-    %******************************************************************************;
-    %* Parameter checks                                                           *;
-    %******************************************************************************;
+  %******************************************************************************;
+  %* Parameter checks                                                           *;
+  %******************************************************************************;
   
   %* Check for missing parameters ;
   %let _Missing=;
@@ -237,5 +241,8 @@
   libname out clear;
 
   %exit_macro:
+
+  %* Restore options;
+  options &_SaveOptions; 
 
 %mend read_datasetjson;

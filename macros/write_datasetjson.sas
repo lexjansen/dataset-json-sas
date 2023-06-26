@@ -17,12 +17,17 @@
   
   %local 
     _Random
+    _SaveOptions
     _Missing
     _delete_temp_dataset
     dataset_new dataset_name dataset_label records 
     fileOID studyOID metaDataVersionOID
     ClinicalReferenceData ItemGroupOID
     CurrentDataTime;
+  
+  %* Save options;
+  %let _SaveOptions = %sysfunc(getoption(dlcreatedir));
+  options dlcreatedir;
   
   %let _delete_temp_dataset=0;
     
@@ -34,7 +39,6 @@
     %else %do;
       %let _Random=%sysfunc(putn(%sysevalf(%sysfunc(ranuni(0))*10000,floor),z4.));  
       %let dataset_name=%scan(&xptpath, -2, %str(/\.));
-      %put %sysfunc(dcreate(xpttmp, %sysfunc(pathname(work))));
       %if %sysfunc(libname(xpt&_Random, &xptpath, xport)) ne 0
         %then %put %sysfunc(sysmsg());
       libname xpttmp "%sysfunc(pathname(work))/xpttmp";
@@ -256,5 +260,7 @@
 
   %exit_macro:
 
+  %* Restore options;
+  options &_SaveOptions; 
 
 %mend write_datasetjson;

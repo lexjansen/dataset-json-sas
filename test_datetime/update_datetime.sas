@@ -3,9 +3,6 @@
 
 %include "&root/programs/config.sas";
 
-%let datasetJSONVersion=1.0.0;
-
-
 %let model=adam;
 libname adamdata "&root/data/&model";
 
@@ -44,8 +41,6 @@ data work.adaedt(label="Adverse Events with DateTime");
   ASTDTM = DHMS(ASTDT, rand('integer', 0, 23), rand('integer', 0, 59), round(ranuni(0) * 59, 0.01));
   ASTDTMC = strip(put(ASTDTM, E8601DT24.2));
 run;
-
-options ls=max;
 
 data work.metadata_tables;
   name="ADAEDT";
@@ -87,14 +82,11 @@ run;
   );
 
 libname data "&root/test_datetime";
-options mlogic symbolgen;
   
 %read_datasetjson(
   jsonpath=adaedt.json, 
   dataoutlib=data, 
-  usemetadata=N,
-  dropseqvar=Y,
-  metadatalib=work
+  dropseqvar=Y
   );
 
 proc compare base=work.adaedt comp=data.adaedt listall;
