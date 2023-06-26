@@ -29,29 +29,6 @@
   %let _SaveOptions = %sysfunc(getoption(dlcreatedir));
   options dlcreatedir;
   
-  %let _delete_temp_dataset=0;
-    
-  %if %sysevalf(%superq(dataset)=, boolean)=0 
-    %then %do;
-      %let dataset_name=%scan(&dataset, -1, %str(.));
-      %let dataset_new=&dataset;
-    %end;
-    %else %do;
-      %let _Random=%sysfunc(putn(%sysevalf(%sysfunc(ranuni(0))*10000,floor),z4.));  
-      %let dataset_name=%scan(&xptpath, -2, %str(/\.));
-      %if %sysfunc(libname(xpt&_Random, &xptpath, xport)) ne 0
-        %then %put %sysfunc(sysmsg());
-      libname xpttmp "%sysfunc(pathname(work))/xpttmp";
-      
-      proc copy in=xpt&_Random out=xpttmp memtype=data;
-      run;
-      
-      %if %sysfunc(libname(xpt&_Random)) ne 0
-        %then %put %sysfunc(sysmsg());
-      %let dataset_new=xpttmp.&dataset_name;
-      %let _delete_temp_dataset=1;
-    %end;
-  
   %if %sysevalf(%superq(datasetJSONVersion)=, boolean) %then %let datasetJSONVersion = %str(1.0.0);
   
   %let dataset_label=;
@@ -83,10 +60,40 @@
     %goto exit_macro;
   %end;
 
+  %* Rule: usemetadata has to be Y or N  *;
+  %if "&datasetJSONVersion" ne "1.0.0" %then
+  %do;
+    %put ERR%str(OR): [&sysmacroname] Required macro parameter datasetJSONVersion=&datasetJSONVersion must be 1.0.0.;
+    %goto exit_macro;
+  %end;
+
   %******************************************************************************;
   %* End of parameter checks                                                    *;
   %******************************************************************************;
  
+  %let _delete_temp_dataset=0;
+    
+  %if %sysevalf(%superq(dataset)=, boolean)=0 
+    %then %do;
+      %let dataset_name=%scan(&dataset, -1, %str(.));
+      %let dataset_new=&dataset;
+    %end;
+    %else %do;
+      %let _Random=%sysfunc(putn(%sysevalf(%sysfunc(ranuni(0))*10000,floor),z4.));  
+      %let dataset_name=%scan(&xptpath, -2, %str(/\.));
+      %if %sysfunc(libname(xpt&_Random, &xptpath, xport)) ne 0
+        %then %put %sysfunc(sysmsg());
+      libname xpttmp "%sysfunc(pathname(work))/xpttmp";
+      
+      proc copy in=xpt&_Random out=xpttmp memtype=data;
+      run;
+      
+      %if %sysfunc(libname(xpt&_Random)) ne 0
+        %then %put %sysfunc(sysmsg());
+      %let dataset_new=xpttmp.&dataset_name;
+      %let _delete_temp_dataset=1;
+    %end;
+  
   %if %cstutilcheckvarsexist(_cstDataSetName=&dataset_new, _cstVarList=usubjid) %then
       %let ClinicalReferenceData=clinicalData;
     %else %let ClinicalReferenceData=referenceData;
