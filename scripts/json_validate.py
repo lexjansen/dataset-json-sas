@@ -10,7 +10,7 @@ def validate_json(json_data, schema_file):
 
     Arguments:
         json_data: The resulting Dataset-JSON file to validate
-        schema_file: Path to a schema file defining ct package schema
+        schema_file: Path to a schema file defining dataset-JSON schema
     """
     try:
         with open(schema_file) as f:
