@@ -21,7 +21,7 @@
     _Missing
     _delete_temp_dataset
     dataset_new dataset_name dataset_label records 
-    fileOID studyOID metaDataVersionOID
+    studyOID metaDataVersionOID
     ClinicalReferenceData ItemGroupOID
     CurrentDataTime;
   
@@ -32,7 +32,6 @@
   %if %sysevalf(%superq(datasetJSONVersion)=, boolean) %then %let datasetJSONVersion = %str(1.0.0);
   
   %let dataset_label=;
-  %let fileOID=;
   %let ItemGroupOID=;
   %let studyOID=;
   %let metaDataVersionOID=;
@@ -101,14 +100,13 @@
   %let records=%cstutilnobs(_cstDataSetName=&dataset_new);
 
   %if %substr(%upcase(&UseMetadata),1,1) eq Y %then %do;
-
-    /* Get StudyOID and metaDataVersionOID */
+    /* Get StudyOID and metaDataVersionOID from the metadata */
     proc sql noprint;
       %if %sysfunc(exist(&metadatalib..metadata_study)) %then %do;  
         select studyOID, metaDataVersionOID into :studyOID trimmed, :metaDataVersionOID trimmed
           from &metadatalib..metadata_study;
       %end;  
-    /* Get dataset label and ItemGroupOID */
+    /* Get dataset label and ItemGroupOID from the metadata */
       %if %sysfunc(exist(&metadatalib..metadata_tables)) %then %do;  
         select label, oid into :dataset_label, :ItemGroupOID trimmed
           from &metadatalib..metadata_tables
@@ -118,15 +116,17 @@
   %end;
 
   
-  %if %sysevalf(%superq(fileOID)=, boolean) %then %let fileOID=&_FileOId;
-  %if %sysevalf(%superq(fileOID)=, boolean) %then %let fileOID=%sysfunc(uuidgen());
-  %if %sysevalf(%superq(studyOID)=, boolean) %then %let studyOID=&_StudyOId;
-  %if %sysevalf(%superq(studyOID)=, boolean) %then %let studyOID=STUDY1;
-  %if %sysevalf(%superq(metaDataVersionOID)=, boolean) %then %let metaDataVersionOID=&_MetaDataVersionOID;
-  %if %sysevalf(%superq(metaDataVersionOID)=, boolean) %then %let metaDataVersionOID=METADATAVERSION1;
+  %if %sysevalf(%superq(studyOID)=, boolean) and %sysevalf(%superq(_StudyOId)=, boolean)=0 %then 
+    %let studyOID=&_StudyOId;
+  
+  %if %sysevalf(%superq(metaDataVersionOID)=, boolean) and %sysevalf(%superq(_MetaDataVersionOID)=, boolean)=0 %then 
+    %let metaDataVersionOID=&_MetaDataVersionOID;
+  
   %if %sysevalf(%superq(ItemGroupOID)=, boolean) %then %let ItemGroupOID=IG.%upcase(&dataset_name);
+  
   %if %sysevalf(%superq(dataset_label)=, boolean) %then 
     %let dataset_label=%cstutilgetattribute(_cstDataSetName=&dataset_new,_cstAttribute=LABEL);
+    
   %if %sysevalf(%superq(dataset_label)=, boolean) %then %do;
     /* %let dataset_label=&dataset_name; */
     %put %str(WAR)NING: &dataset_name: no dataset label.;
@@ -211,12 +211,14 @@
                          NOFMTCHARACTER NOFMTDATETIME NOFMTNUMERIC;
     WRITE OPEN OBJECT;
     
-    WRITE VALUES "fileOID" "&fileOID";
     WRITE VALUES "creationDateTime" "&CurrentDateTime";
+    WRITE VALUES "datasetJSONVersion" "&datasetJSONVersion";
+    %if %sysevalf(%superq(_FileOID)=, boolean)=0 %then
+      WRITE VALUES "fileOID" "&_FileOID";
+    ;  
     %if %sysevalf(%superq(_AsOfDateTime)=, boolean)=0 %then
       WRITE VALUES "asOfDateTime" "&_AsOfDateTime";
     ;    
-    WRITE VALUES "datasetJSONVersion" "&datasetJSONVersion";
     %if %sysevalf(%superq(_Originator)=, boolean)=0 %then
       WRITE VALUES "originator" "&_Originator";
     ;
@@ -229,8 +231,12 @@
     
     WRITE VALUES "&ClinicalReferenceData";
     WRITE OPEN OBJECT;
-    WRITE VALUES "studyOID" "&studyOID";
-    WRITE VALUES "metaDataVersionOID" "&metaDataVersionOID";
+    %if %sysevalf(%superq(studyOID)=, boolean)=0 %then
+      WRITE VALUES "studyOID" "&studyOID";
+    ;  
+    %if %sysevalf(%superq(metaDataVersionOID)=, boolean)=0 %then
+      WRITE VALUES "metaDataVersionOID" "&metaDataVersionOID";
+    ;  
     %if %sysevalf(%superq(_MetaDataRef)=, boolean)=0 %then
       WRITE VALUES "metaDataRef" "&_MetaDataRef";
     ;  
@@ -243,7 +249,6 @@
     /* WRITE VALUES "label" %sysfunc(quote(&dataset_label)); */
     WRITE VALUES "label" "%nrbquote(&dataset_label)";
     
-
     WRITE VALUE "items";
     %* Use macro to avoid creating null values for missing attributes;
     %* Instead do not create the attribute;

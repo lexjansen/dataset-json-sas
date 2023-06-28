@@ -28,10 +28,10 @@ data _null_;
 run;
 
 %if &compinfo ne 0 %then %do;
-  %put %str(WARN)ING: &dsname - &compinfo - &resultc;
+  %put %str(WARN)ING: Differences for dataset &dsname - &resultc (SysInfo=&compinfo);
 %end;
 %else %do;
-  %put %str(NOT)E: &dsname - &compinfo - &resultc;
+  %put %str(NOT)E: No differences for dataset &dsname - &resultc (SysInfo=&compinfo);
 %end;
   
 %mend utl_comparedata;

@@ -50,6 +50,13 @@
   run;
 
   /* Find the names of the dataset that were created */
+
+  %let _clinicalreferencedata_=;
+  %if %sysfunc(exist(out.clinicaldata)) 
+    %then %let _clinicalreferencedata_=out.clinicaldata;
+    %else %if %sysfunc(exist(out.referencedata)) 
+            %then %let _clinicalreferencedata_=out.referencedata;
+
   proc sql noprint;
     create table members 
     as select upcase(memname) as name
@@ -58,14 +65,11 @@
     ;
   quit;
 
-  %let _clinicalreferencedata_=;
   %let _items=;
   %let _itemdata=;
   %let _itemgroupdata_=;
   data _null_;
     set members;
-    if upcase(name)="CLINICALDATA" or upcase(name)="REFERENCEDATA" then 
-      call symputx('_clinicalreferencedata_', strip(name));
     if index(upcase(name), '_ITEMS') then 
       call symputx('_items_', strip(name));
     if index(upcase(name), '_ITEMDATA') then 
@@ -121,13 +125,15 @@
 
   %if %sysfunc(exist(out.root)) %then %do; 
     data work._metadata_study;
-      merge out.root out.&_clinicalreferencedata_;
+      merge out.root &_clinicalreferencedata_;
     run;  
   %end;
   %else %do;
-    data work._metadata_study;
-      set out.&_clinicalreferencedata_;
-    run;  
+    %if %sysfunc(exist(&_clinicalreferencedata_)) %then %do;
+      data work._metadata_study;
+        set &_clinicalreferencedata_;
+      run;  
+    %end;
   %end;  
   
   data &metadataoutlib..metadata_study;
