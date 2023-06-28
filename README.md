@@ -16,3 +16,4 @@ Documentation in the **doc** folder is based on an earlier version of the code.
 
 ![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)
 This project is using the [MIT](http://www.opensource.org/licenses/MIT "The MIT License | Open Source Initiative") license (see [`LICENSE`](LICENSE)).
+The macros cstutilcheckvarsexist.sas, cstutilgetattribute.sas, cstutilnobs.sas, cstutilxptread.sas, cstutilxptwrite.sas are licensed under the [`Apache 2.0 License`](Apache-2.0-LICENSE).

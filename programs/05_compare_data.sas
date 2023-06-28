@@ -21,9 +21,10 @@ data _null_;
   set members;
   name=lowcase(name);
   code=cats('%nrstr(%utl_comparedata(',
-              'baselib=DATAADAM, ',
-              'complib=OUTADAM, ',
-              'dsname=', name, 
+              'baselib=dataadam, ',
+              'complib=outadam, ',
+              'dsname=', name, ', ',
+              'compareoptions=%str(listall criterion=0.00000001 method=absolute)',
             ');)');
   call execute(code);
 run;
@@ -46,9 +47,10 @@ data _null_;
   set members;
   name=lowcase(name);
   code=cats('%nrstr(%utl_comparedata(',
-              'baselib=DATASDTM, ',
-              'complib=OUTSDTM, ',
-              'dsname=', name, 
+              'baselib=datasdtm, ',
+              'complib=outsdtm, ',
+              'dsname=', name, ', ',
+              'compareoptions=%str(listall criterion=0.00000001 method=absolute)',
             ');)');
   call execute(code);
 run;

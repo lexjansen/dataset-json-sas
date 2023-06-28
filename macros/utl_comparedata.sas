@@ -1,7 +1,8 @@
-%macro utl_comparedata(baselib=, complib=, dsname=);
+%macro utl_comparedata(baselib=, complib=, dsname=, compareoptions=%str(listall criterion=0.00000001 method=absolute));
+
+%local compinfo;
   
-proc compare base=&baselib..&dsname compare=&complib..&dsname listall
-  criterion=1e-8 method=absolute;
+proc compare base=&baselib..&dsname compare=&complib..&dsname %NRBQUOTE(&compareoptions);
 run;
 
 %let compinfo=&sysinfo;
