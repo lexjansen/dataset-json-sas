@@ -4,6 +4,7 @@ __pycache__/
 develop/
 json_out/*/*.json
 test/
+test_big_xpt/lb.*
 venv/
 work/
 *.log

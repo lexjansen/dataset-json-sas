@@ -6,14 +6,15 @@
   ) / des = 'Read a Dataset-JSON file to a SAS dataset';
 
   %local _Missing 
-         _SaveOptions
+         _SaveOptions1
+         _SaveOptions2
          _clinicalreferencedata_ _items_ _itemdata_ _itemgroupdata_ ItemGroupOID ItemGroupName 
          dslabel dsname variables rename label length format;
 
   %* Save options;
-  %let _SaveOptions = %sysfunc(getoption(dlcreatedir));
+  %let _SaveOptions1 = %sysfunc(getoption(dlcreatedir));
   options dlcreatedir;
-
+  
   %******************************************************************************;
   %* Parameter checks                                                           *;
   %******************************************************************************;
@@ -41,27 +42,36 @@
   %* End of parameter checks                                                    *;
   %******************************************************************************;
 
+  
+  %* Save options;
+  %let _SaveOptions2 = %sysfunc(getoption(compress, keyword)) %sysfunc(getoption(reuse, keyword));
+  options compress=Yes reuse=Yes;
+
   filename jsonfile "&jsonpath";
   filename mapfile "%sysfunc(pathname(work))/%scan(&jsonpath, -2, %str(.\/)).map";
-  libname out "%sysfunc(pathname(work))/%scan(&jsonpath, -2, %str(.\/))";
+  libname out__ "%sysfunc(pathname(work))/%scan(&jsonpath, -2, %str(.\/))";
 
-  libname jsonfile json map=mapfile automap=create fileref=jsonfile /* noalldata */ ordinalcount=none;
-  proc copy in=jsonfile out=out;
+  libname jsonfile json map=mapfile automap=create fileref=jsonfile 
+          %if %sysevalf(%superq(metadataoutlib)=, boolean) %then noalldata; ordinalcount=none;
+  proc copy in=jsonfile out=out__;
   run;
+
+  %* Restore options;
+  options &_SaveOptions2; 
 
   /* Find the names of the dataset that were created */
 
   %let _clinicalreferencedata_=;
-  %if %sysfunc(exist(out.clinicaldata)) 
-    %then %let _clinicalreferencedata_=out.clinicaldata;
-    %else %if %sysfunc(exist(out.referencedata)) 
-            %then %let _clinicalreferencedata_=out.referencedata;
+  %if %sysfunc(exist(out__.clinicaldata)) 
+    %then %let _clinicalreferencedata_=out__.clinicaldata;
+    %else %if %sysfunc(exist(out__.referencedata)) 
+            %then %let _clinicalreferencedata_=out__.referencedata;
 
   proc sql noprint;
     create table members 
     as select upcase(memname) as name
     from dictionary.tables
-    where libname="OUT" and memtype="DATA"
+    where libname="OUT__" and memtype="DATA"
     ;
   quit;
 
@@ -83,13 +93,13 @@
 
   proc sql noprint;
     select name into :variables separated by ' '
-      from out.&_items_;
+      from out__.&_items_;
     select cats("element", monotonic(), '=', name) into :rename separated by ' '
-      from out.&_items_;
+      from out__.&_items_;
     select cats(name, '=', quote(strip(label))) into :label separated by ' '
-      from out.&_items_;
+      from out__.&_items_;
     select catt(name, ' $', length) into :length separated by ' '
-      from out.&_items_
+      from out__.&_items_
       where type="string" and (not(missing(length)));
   quit;
 
@@ -102,30 +112,30 @@
   %let dsname=;
   proc sql noprint;
     select label, name into :dslabel, :dsname trimmed
-      from out.&_itemgroupdata_
+      from out__.&_itemgroupdata_
     ;
   quit;
 
-  proc copy in=out out=&dataoutlib;
+  proc copy in=out__ out=&dataoutlib;
     select &_itemdata_;
   run;
+
+%if %sysevalf(%superq(metadataoutlib)=, boolean)=0 %then %do;
 
   %let ItemGroupOID=;
   proc sql noprint;
     select P3 into :ItemGroupOID trimmed
-      from out.alldata
+      from out__.alldata
       where P2 = "itemGroupData" and P = 3;
   quit;
-
-%if %sysevalf(%superq(metadataoutlib)=, boolean)=0 %then %do;
 
   %create_template(type=STUDY, out=&metadataoutlib..metadata_study);
   %create_template(type=TABLES, out=&metadataoutlib..metadata_tables);
   %create_template(type=COLUMNS, out=&metadataoutlib..metadata_columns);
 
-  %if %sysfunc(exist(out.root)) %then %do; 
+  %if %sysfunc(exist(out__.root)) %then %do; 
     data work._metadata_study;
-      merge out.root &_clinicalreferencedata_;
+      merge out__.root &_clinicalreferencedata_;
     run;  
   %end;
   %else %do;
@@ -145,7 +155,7 @@
 
 
   data &metadataoutlib..metadata_tables;
-    set &metadataoutlib..metadata_tables out.&_itemgroupdata_(in=inigd drop=records);
+    set &metadataoutlib..metadata_tables out__.&_itemgroupdata_(in=inigd drop=records);
     if inigd then do;
       oid = "&ItemGroupOID";
       call symputx('ItemGroupName', name);
@@ -153,7 +163,7 @@
   run;  
 
   data work.&_items_;
-    set out.&_items_;
+    set out__.&_items_;
     order = _n_;
   run;  
 
@@ -169,10 +179,10 @@
 
   /* get formats from Dataset-JSON metadata, but only when the displayformat variable exists */
   %let format=;
-  %if %cstutilcheckvarsexist(_cstDataSetName=out.&_items_, _cstVarList=displayformat) %then %do;
+  %if %cstutilcheckvarsexist(_cstDataSetName=out__.&_items_, _cstVarList=displayformat) %then %do;
     proc sql noprint;
       select catx(' ', name, strip(displayformat)) into :format separated by ' '
-          from out.&_items_
+          from out__.&_items_
           where not(missing(displayformat)) /* and (type in ('integer' 'float' 'double' 'decimal')) */;
     quit;
   %end;
@@ -189,7 +199,7 @@
   proc sql noprint;
     select catt(d.name, ' $', i.length) into :length separated by ' '
       from dictionary.columns d,
-           out.&_items_ i
+           out__.&_items_ i
     where upcase(libname)="%upcase(&dataoutlib)" and
          upcase(memname)="%upcase(&dsname)" and
          d.name = i.name and
@@ -207,9 +217,6 @@
     set &dataoutlib..&dsname;
   run;
 
-
-
-
   /*  Validate datatypes and lengths */
   proc sql ;
    create table column_metadata
@@ -225,7 +232,7 @@
     i.length,
     d.format
    from dictionary.columns d,
-        out.&_items_ i
+        out__.&_items_ i
    where upcase(libname)="%upcase(&dataoutlib)" and
          upcase(memname)="%upcase(&dsname)" and
          d.name = i.name
@@ -244,11 +251,24 @@
 
   filename jsonfile clear;
   filename mapfile clear;
-  libname out clear;
+
+  proc datasets nolist lib=out__ kill;
+  quit  
+  libname out__ clear;
+  
+  filename out__ "%sysfunc(pathname(work))/%scan(&jsonpath, -2, %str(.\/))";
+  data _null_;
+     rc=fdelete("out__");
+     put rc=;
+     msg=sysmsg();
+     put msg=;
+  run;    
+  filename out__ clear;
+  
 
   %exit_macro:
 
   %* Restore options;
-  options &_SaveOptions; 
+  options &_SaveOptions1; 
 
 %mend read_datasetjson;

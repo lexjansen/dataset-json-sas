@@ -17,7 +17,8 @@
   
   %local 
     _Random
-    _SaveOptions
+    _SaveOptions1
+    _SaveOptions2
     _Missing
     _delete_temp_dataset
     dataset_new dataset_name dataset_label records 
@@ -26,8 +27,10 @@
     CurrentDataTime;
   
   %* Save options;
-  %let _SaveOptions = %sysfunc(getoption(dlcreatedir));
+  %let _SaveOptions1 = %sysfunc(getoption(dlcreatedir));
+  %let _SaveOptions2 = %sysfunc(getoption(compress, keyword)) %sysfunc(getoption(reuse, keyword));
   options dlcreatedir;
+  options compress=Yes reuse=Yes;
   
   %if %sysevalf(%superq(datasetJSONVersion)=, boolean) %then %let datasetJSONVersion = %str(1.0.0);
   
@@ -203,6 +206,16 @@
     proc delete data=xpttmp.&dataset_name;
     run;
     libname xpttmp clear;
+    
+    filename xpttmp "%sysfunc(pathname(work))/xpttmp";
+    data _null_;
+       rc=fdelete("xpttmp");
+       put rc=;
+       msg=sysmsg();
+       put msg=;
+    run;    
+    filename xpttmp clear;
+    
   %end;  
 
   filename jsonfout "&jsonpath";
@@ -269,10 +282,11 @@
 
   proc delete data=work.column_metadata work.column_data;
   run;
-
+  
   %exit_macro:
 
   %* Restore options;
-  options &_SaveOptions; 
+  options &_SaveOptions1; 
+  options &_SaveOptions2; 
 
 %mend write_datasetjson;
