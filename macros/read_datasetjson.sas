@@ -1,24 +1,27 @@
 %macro read_datasetjson(
-  jsonpath=, 
-  dataoutlib=, 
+  jsonpath=,
+  dataoutlib=,
   dropseqvar=N,
   metadataoutlib=
   ) / des = 'Read a Dataset-JSON file to a SAS dataset';
 
-  %local _Missing 
+  %local _Missing
          _SaveOptions1
          _SaveOptions2
-         _clinicalreferencedata_ _items_ _itemdata_ _itemgroupdata_ ItemGroupOID ItemGroupName 
+         _Random
+         _clinicalreferencedata_ _items_ _itemdata_ _itemgroupdata_ ItemGroupOID ItemGroupName
          dslabel dsname variables rename label length format;
+
+  %let _Random=%sysfunc(putn(%sysevalf(%sysfunc(ranuni(0))*10000,floor),z4.));
 
   %* Save options;
   %let _SaveOptions1 = %sysfunc(getoption(dlcreatedir));
   options dlcreatedir;
-  
+
   %******************************************************************************;
   %* Parameter checks                                                           *;
   %******************************************************************************;
-  
+
   %* Check for missing parameters ;
   %let _Missing=;
   %if %sysevalf(%superq(jsonpath)=, boolean) %then %let _Missing = &_Missing jsonpath;
@@ -42,36 +45,36 @@
   %* End of parameter checks                                                    *;
   %******************************************************************************;
 
-  
+
   %* Save options;
   %let _SaveOptions2 = %sysfunc(getoption(compress, keyword)) %sysfunc(getoption(reuse, keyword));
   options compress=Yes reuse=Yes;
 
-  filename jsonfile "&jsonpath";
-  filename mapfile "%sysfunc(pathname(work))/%scan(&jsonpath, -2, %str(.\/)).map";
-  libname out__ "%sysfunc(pathname(work))/%scan(&jsonpath, -2, %str(.\/))";
+  filename json&_Random "&jsonpath";
+  filename map&_Random "%sysfunc(pathname(work))/%scan(&jsonpath, -2, %str(.\/)).map";
+  libname out_&_Random "%sysfunc(pathname(work))/%scan(&jsonpath, -2, %str(.\/))";
 
-  libname jsonfile json map=mapfile automap=create fileref=jsonfile 
+  libname json&_Random json map=map&_Random automap=create fileref=json&_Random
           %if %sysevalf(%superq(metadataoutlib)=, boolean) %then noalldata; ordinalcount=none;
-  proc copy in=jsonfile out=out__;
+  proc copy in=json&_Random out=out_&_Random;
   run;
 
   %* Restore options;
-  options &_SaveOptions2; 
+  options &_SaveOptions2;
 
   /* Find the names of the dataset that were created */
 
   %let _clinicalreferencedata_=;
-  %if %sysfunc(exist(out__.clinicaldata)) 
-    %then %let _clinicalreferencedata_=out__.clinicaldata;
-    %else %if %sysfunc(exist(out__.referencedata)) 
-            %then %let _clinicalreferencedata_=out__.referencedata;
+  %if %sysfunc(exist(out_&_Random..clinicaldata))
+    %then %let _clinicalreferencedata_=out_&_Random..clinicaldata;
+    %else %if %sysfunc(exist(out_&_Random..referencedata))
+            %then %let _clinicalreferencedata_=out_&_Random..referencedata;
 
   proc sql noprint;
-    create table members 
+    create table members
     as select upcase(memname) as name
     from dictionary.tables
-    where libname="OUT__" and memtype="DATA"
+    where upcase(libname)=upcase("OUT_&_Random") and memtype="DATA"
     ;
   quit;
 
@@ -80,11 +83,11 @@
   %let _itemgroupdata_=;
   data _null_;
     set members;
-    if index(upcase(name), '_ITEMS') then 
+    if index(upcase(name), '_ITEMS') then
       call symputx('_items_', strip(name));
-    if index(upcase(name), '_ITEMDATA') then 
+    if index(upcase(name), '_ITEMDATA') then
       call symputx('_itemdata_', strip(name));
-    if index(upcase(name), 'ITEMGROUPDATA_') then 
+    if index(upcase(name), 'ITEMGROUPDATA_') then
       call symputx('_itemgroupdata_', strip(name));
   run;
 
@@ -93,13 +96,13 @@
 
   proc sql noprint;
     select name into :variables separated by ' '
-      from out__.&_items_;
+      from out_&_Random..&_items_;
     select cats("element", monotonic(), '=', name) into :rename separated by ' '
-      from out__.&_items_;
+      from out_&_Random..&_items_;
     select cats(name, '=', quote(strip(label))) into :label separated by ' '
-      from out__.&_items_;
+      from out_&_Random..&_items_;
     select catt(name, ' $', length) into :length separated by ' '
-      from out__.&_items_
+      from out_&_Random..&_items_
       where type="string" and (not(missing(length)));
   quit;
 
@@ -112,11 +115,11 @@
   %let dsname=;
   proc sql noprint;
     select label, name into :dslabel, :dsname trimmed
-      from out__.&_itemgroupdata_
+      from out_&_Random..&_itemgroupdata_
     ;
   quit;
 
-  proc copy in=out__ out=&dataoutlib;
+  proc copy in=out_&_Random out=&dataoutlib;
     select &_itemdata_;
   run;
 
@@ -125,7 +128,7 @@
   %let ItemGroupOID=;
   proc sql noprint;
     select P3 into :ItemGroupOID trimmed
-      from out__.alldata
+      from out_&_Random..alldata
       where P2 = "itemGroupData" and P = 3;
   quit;
 
@@ -133,44 +136,44 @@
   %create_template(type=TABLES, out=&metadataoutlib..metadata_tables);
   %create_template(type=COLUMNS, out=&metadataoutlib..metadata_columns);
 
-  %if %sysfunc(exist(out__.root)) %then %do; 
+  %if %sysfunc(exist(out_&_Random..root)) %then %do;
     data work._metadata_study;
-      merge out__.root &_clinicalreferencedata_;
-    run;  
+      merge out_&_Random..root &_clinicalreferencedata_;
+    run;
   %end;
   %else %do;
     %if %sysfunc(exist(&_clinicalreferencedata_)) %then %do;
       data work._metadata_study;
         set &_clinicalreferencedata_;
-      run;  
+      run;
     %end;
-  %end;  
-  
+  %end;
+
   data &metadataoutlib..metadata_study;
     set &metadataoutlib..metadata_study work._metadata_study;
-  run;  
-  
+  run;
+
   proc delete data=work._metadata_study;
   run;
 
 
   data &metadataoutlib..metadata_tables;
-    set &metadataoutlib..metadata_tables out__.&_itemgroupdata_(in=inigd drop=records);
+    set &metadataoutlib..metadata_tables out_&_Random..&_itemgroupdata_(in=inigd drop=records);
     if inigd then do;
       oid = "&ItemGroupOID";
       call symputx('ItemGroupName', name);
-    end;  
-  run;  
+    end;
+  run;
 
   data work.&_items_;
-    set out__.&_items_;
+    set out_&_Random..&_items_;
     order = _n_;
-  run;  
+  run;
 
   data &metadataoutlib..metadata_columns(%if %substr(%upcase(&DropSeqVar),1,1) eq Y %then where=(upcase(name) ne "ITEMGROUPDATASEQ"););
     set &metadataoutlib..metadata_columns work.&_items_(rename=(type=json_datatype) in=init);
     if init then dataset_name = "&ItemGroupName";
-  run;  
+  run;
 
   proc delete data=work.&_items_;
   run;
@@ -179,13 +182,15 @@
 
   /* get formats from Dataset-JSON metadata, but only when the displayformat variable exists */
   %let format=;
-  %if %cstutilcheckvarsexist(_cstDataSetName=out__.&_items_, _cstVarList=displayformat) %then %do;
+  %if %cstutilcheckvarsexist(_cstDataSetName=out_&_Random..&_items_, _cstVarList=displayformat) %then %do;
     proc sql noprint;
       select catx(' ', name, strip(displayformat)) into :format separated by ' '
-          from out__.&_items_
-          where not(missing(displayformat)) /* and (type in ('integer' 'float' 'double' 'decimal')) */;
+          from out_&_Random..&_items_
+          where (not(missing(displayformat)) and (displayformat ne ".")) /* and (type in ('integer' 'float' 'double' 'decimal')) */;
     quit;
   %end;
+  
+  %put &=format;
 
   proc datasets library=&dataoutlib noprint nolist nodetails;
     %if %sysfunc(exist(&dataoutlib..&dsname)) %then %do; delete &dsname; %end;
@@ -199,7 +204,7 @@
   proc sql noprint;
     select catt(d.name, ' $', i.length) into :length separated by ' '
       from dictionary.columns d,
-           out__.&_items_ i
+           out_&_Random..&_items_ i
     where upcase(libname)="%upcase(&dataoutlib)" and
          upcase(memname)="%upcase(&dsname)" and
          d.name = i.name and
@@ -221,7 +226,7 @@
   proc sql ;
    create table column_metadata
    as select
-    case upcase(d.name) 
+    case upcase(d.name)
       when "ITEMGROUPDATASEQ" then d.name
       else cats("IT.", "%upcase(&dsname).", d.name)
     end as OID,
@@ -232,7 +237,7 @@
     i.length,
     d.format
    from dictionary.columns d,
-        out__.&_items_ i
+        out_&_Random..&_items_ i
    where upcase(libname)="%upcase(&dataoutlib)" and
          upcase(memname)="%upcase(&dsname)" and
          d.name = i.name
@@ -249,26 +254,20 @@
   proc delete data=work.column_metadata;
   run;
 
-  filename jsonfile clear;
-  filename mapfile clear;
+  filename json&_Random clear;
+  filename map&_Random clear;
 
-  proc datasets nolist lib=out__ kill;
-  quit  
-  libname out__ clear;
-  
-  filename out__ "%sysfunc(pathname(work))/%scan(&jsonpath, -2, %str(.\/))";
-  data _null_;
-     rc=fdelete("out__");
-     put rc=;
-     msg=sysmsg();
-     put msg=;
-  run;    
-  filename out__ clear;
-  
+  proc datasets nolist lib=out_&_Random kill;
+  quit;
+
+  %put %sysfunc(filename(fref,%sysfunc(pathname(out_&_Random))));
+  %put %sysfunc(fdelete(&fref));
+  libname out_&_Random clear;
+
 
   %exit_macro:
 
   %* Restore options;
-  options &_SaveOptions1; 
+  options &_SaveOptions1;
 
 %mend read_datasetjson;
