@@ -94,7 +94,6 @@
 %mend expand;
 
 
-options compress=No reuse=No msglevel=N;
 
 %let _dataset_=lb;
 %let _random_=%sysfunc(putn(%sysevalf(%sysfunc(ranuni(0))*10000,floor),z4.));
