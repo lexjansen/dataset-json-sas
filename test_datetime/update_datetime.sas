@@ -1,5 +1,6 @@
 %* update this location to your own location;
 %let root=/_github/lexjansen/dataset-json-sas;
+options mprint;
 
 %include "&root/programs/config.sas";
 
@@ -7,8 +8,7 @@
 libname adamdata "&root/data/&model";
 
 
-%let _File=%sysfunc(pathname(adamdata))/adae.xpt;
-libname xptFile xport "&_File";
+libname xptFile xport "%sysfunc(pathname(adamdata))/adae.xpt";
 proc copy in=xptFile out=work;
 run;
 
