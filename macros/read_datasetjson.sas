@@ -51,7 +51,7 @@
   options compress=Yes reuse=Yes;
 
   filename json&_Random "&jsonpath";
-  filename map&_Random "%sysfunc(pathname(work))/%scan(&jsonpath, -2, %str(.\/)).map";
+  filename map&_Random temp;
   libname out_&_Random "%sysfunc(pathname(work))/%scan(&jsonpath, -2, %str(.\/))";
 
   libname json&_Random json map=map&_Random automap=create fileref=json&_Random
