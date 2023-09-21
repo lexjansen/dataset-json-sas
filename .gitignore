@@ -3,9 +3,6 @@
 __pycache__/
 develop/
 json_out/*/*.json
-test/
-test_big_xpt/lb.*
-test_datetime/adaedt.*
 venv/
 work/
 *.log
