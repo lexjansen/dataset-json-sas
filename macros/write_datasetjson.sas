@@ -24,7 +24,8 @@
     dataset_new dataset_name dataset_label records
     studyOID metaDataVersionOID
     ClinicalReferenceData ItemGroupOID
-    CurrentDataTime;
+    CurrentDataTime
+    _dataset_to_write;
 
   
   %let _Random=%sysfunc(putn(%sysevalf(%sysfunc(ranuni(0))*10000,floor),z4.));
@@ -68,7 +69,7 @@
   %* Rule: usemetadata has to be Y or N  *;
   %if "&datasetJSONVersion" ne "1.0.0" %then
   %do;
-    %put ERR%str(OR): [&sysmacroname] Required macro parameter datasetJSONVersion=&datasetJSONVersion must be 1.0.0.;
+    %put ERR%str(OR): [&sysmacroname] Macro parameter datasetJSONVersion=&datasetJSONVersion. Allowed values: 1.0.0.;
     %goto exit_macro;
   %end;
 
@@ -133,23 +134,30 @@
     %let dataset_label=%cstutilgetattribute(_cstDataSetName=&dataset_new,_cstAttribute=LABEL);
 
   %if %sysevalf(%superq(dataset_label)=, boolean) %then %do;
-    /* %let dataset_label=&dataset_name; */
-    %put %str(WAR)NING: &dataset_name: no dataset label.;
+    %let dataset_label=%sysfunc(propcase(&dataset_name));
+    %if %sysevalf(%superq(xptpath)=, boolean) %then %put %str(WAR)NING: [&sysmacroname] Dataset &dataset has no dataset label. "%sysfunc(propcase(&dataset_name))" will be used as label.;
+                                              %else %put %str(WAR)NING: [&sysmacroname] Dataset &dataset_name (&xptpath) has no dataset label. "%sysfunc(propcase(&dataset_name))" will be used as label.;
   %end;
 
-  %put ### &=dataset &=records &=ClinicalReferenceData &=ItemGroupOID dslabel=%bquote(&dataset_label);
+  %put NOTE: [&sysmacroname] &=dataset &=records &=ClinicalReferenceData &=ItemGroupOID dslabel=%bquote(&dataset_label);
 
   %if %substr(%upcase(&UseMetadata),1,1) eq Y %then %do;
     /* Get column metadata - oid, label, type, length, displayformat, keysequence  */
     data work.column_metadata(keep=OID name label type length displayFormat keySequence);
       retain OID name label type length displayFormat keySequence;
+      length _label $ 32;
       set &metadatalib..metadata_columns(
         rename=(json_datatype=type)
         where=(upcase(dataset_name) = %upcase("&dataset_name")));
-        if missing(oid) then putlog 'WAR' 'NING: Missing oid for variable: ' name= ;
-        if missing(name) then putlog 'WAR' 'NING: Missing name for variable: ' oid= ;
-        if missing(label) then putlog 'WAR' 'NING: Missing label for variable: ' oid= name= ;
-        if missing(type) then putlog 'WAR' 'NING: Missing type for variable: ' oid= name= ;
+        _label = "";
+        if missing(oid) then putlog "WAR" "NING: [&sysmacroname] Missing oid for variable: " name ;
+        if missing(name) then putlog "WAR" "NING: [&sysmacroname] Missing name for variable: " oid ;
+        if missing(label) then do;
+          _label = propcase(name);
+          putlog "WAR" "NING: [&sysmacroname] Missing label for variable: " name +(-1) ", " oid= +(-1) ". " _label "will be used as label.";
+          label = _label;
+        end;  
+        if missing(type) then putlog "WAR" "NING: [&sysmacroname] Missing type for variable: " name +(-1) ", " oid=;
     run;
   %end;
   %else %do;
@@ -165,44 +173,67 @@
       by varnum;
     run;
 
-    data work.column_metadata(drop=sas_type varnum formatl formatd);
+    data work.column_metadata(drop=sas_type varnum formatl formatd _label);
       retain OID name label type length;
-      length OID $128 type $32;
+      length OID $ 128 type _label $ 32;
       set work.column_metadata;
+      _label = "";
       OID = cats("IT", ".", upcase("&dataset_name"), ".", upcase(name));
       if sas_type=1 then type="float";
                     else type="string";
       if formatl gt 0 then displayFormat=cats(displayFormat, put(formatl, best.), ".");
       if formatd gt 0 then displayFormat=cats(displayFormat, put(formatd, best.));
-      if missing(label) then putlog 'WAR' 'NING: Missing label for variable: ' oid= name= ;
-      if missing(type) then putlog 'WAR' 'NING: Missing type for variable: ' oid= name= ;
+      if missing(label) then do;
+        _label = propcase(name);
+        putlog "WAR" "NING: [&sysmacroname] Missing label for variable " name +(-1) ", " oid= +(-1) ". " _label "will be used as label.";
+        label = _label;
+      end;  
+      if missing(type) then putlog "WAR" "NING: [&sysmacroname] Missing type for variable " name +(-1) ", "  oid=;
     run;
 
   %end;
 
-  /* Create a 1-obs dataset with the same structure as the column_metadata dataset */
-  proc sql noprint;
-    create table itemgroupdataseq
-      like work.column_metadata;
-    insert into itemgroupdataseq
-      set OID="ITEMGROUPDATASEQ", name="ITEMGROUPDATASEQ", label="Record Identifier",
-        type="integer";
-  quit;
+  %if %cstutilcheckvarsexist(_cstDataSetName=&dataset_new, _cstVarList=ITEMGROUPDATASEQ) %then %do;
+  /* There already is a ITEMGROUPDATASEQ variable */  
+    %put %str(WAR)NING: [&sysmacroname] Dataset &dataset_new already contains a variable ITEMGROUPDATASEQ.;
+    %if %cstutilgetattribute(_cstDataSetName=&dataset_new, _cstVarName=ITEMGROUPDATASEQ, _cstAttribute=VARTYPE) eq C %then %do;
+      /* The datatype of the ITEMGROUPDATASEQ variable is character*/
+      %put %str(ERR)OR: [&sysmacroname] The ITEMGROUPDATASEQ in the dataset &dataset_new is a character variable.;
+      %put %str(ERR)OR: [&sysmacroname] It is required to drop this variable.;
+    %end;
+    %let _dataset_to_write = &dataset_new;
+  %end;
+  %else %do;
+    /* Create the numeric ITEMGROUPDATASEQ variable */
+    /* Create a 1-obs dataset with the same structure as the column_metadata dataset */
+    proc sql noprint;
+      create table itemgroupdataseq_metadata
+        like work.column_metadata;
+      insert into itemgroupdataseq_metadata
+        set OID="ITEMGROUPDATASEQ", name="ITEMGROUPDATASEQ", label="Record Identifier",
+          type="integer";
+    quit;
 
-  data work.column_metadata;
-    set itemgroupdataseq work.column_metadata(where=(upcase(name) ne "ITEMGROUPDATASEQ"));
-  run;
+    data work.column_metadata;
+      set itemgroupdataseq_metadata 
+          work.column_metadata(where=(upcase(name) ne "ITEMGROUPDATASEQ"));
+    run;
 
-  proc delete data=work.itemgroupdataseq;
-  run;
+    data work.column_data;
+      length ITEMGROUPDATASEQ 8.;
+      set &dataset_new;
+      ITEMGROUPDATASEQ = _n_;
+    run;
+    %let _dataset_to_write = work.column_data;
+
+    proc delete data=work.itemgroupdataseq_metadata;
+    run;
+
+  %end;
+
 
 
   %******************************************************************************;
-  data work.column_data;
-    length ITEMGROUPDATASEQ 8.;
-    set &dataset_new;
-    ITEMGROUPDATASEQ = _n_;
-  run;
 
   %if &_delete_temp_dataset=1 %then %do;
     proc delete data=xpt&_Random..&dataset_name;
@@ -266,7 +297,7 @@
 
     WRITE VALUE "itemData";
     WRITE OPEN ARRAY;
-    EXPORT work.column_data / NOKEYS;
+    EXPORT &_dataset_to_write / NOKEYS;
     WRITE CLOSE;
     WRITE CLOSE;
     WRITE CLOSE;
@@ -276,8 +307,14 @@
 
   filename json&_random clear;
 
-  proc delete data=work.column_metadata work.column_data;
-  run;
+  %if %sysfunc(exist(work.column_metadata)) %then %do;
+    proc delete data=work.column_metadata;
+    run;
+  %end;
+  %if %sysfunc(exist(work.column_data)) %then %do;
+    proc delete data=work.column_data;
+    run;
+  %end;
 
   %exit_macro:
 

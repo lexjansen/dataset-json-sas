@@ -100,7 +100,8 @@
     select cats("element", monotonic(), '=', name) into :rename separated by ' '
       from out_&_Random..&_items_;
     select cats(name, '=', quote(strip(label))) into :label separated by ' '
-      from out_&_Random..&_items_;
+      from out_&_Random..&_items_
+      where not(missing(label));
     select catt(name, ' $', length) into :length separated by ' '
       from out_&_Random..&_items_
       where type="string" and (not(missing(length)));
@@ -246,9 +247,9 @@
 
   data _null_;
     set column_metadata;
-    if DataType="char" and not (type in ('string')) then put "WAR" "NING: TYPE ISSUE: dataset=&dsname " OID= name= DataType= type=;
-    if DataType="num" and not (type in ('integer' 'double' 'float' 'decimal')) then put "WAR" "NING: TYPE ISSUE: dataset=&dsname " OID= name= DataType= type=;
-    if DataType="char" and not(missing(length)) and (length lt sas_length) then put "WAR" "NING: LENGTH ISSUE: dataset=&dsname " OID= name= length= sas_length=;
+    if DataType="char" and not (type in ('string')) then put "WAR" "NING: [&sysmacroname] TYPE ISSUE: dataset=&dsname " OID= name= DataType= type=;
+    if DataType="num" and not (type in ('integer' 'double' 'float' 'decimal')) then put "WAR" "NING: [&sysmacroname] TYPE ISSUE: dataset=&dsname " OID= name= DataType= type=;
+    if DataType="char" and not(missing(length)) and (length lt sas_length) then put "WAR" "NING: [&sysmacroname] LENGTH ISSUE: dataset=&dsname " OID= name= length= sas_length=;
   run;
 
   proc delete data=work.column_metadata;
