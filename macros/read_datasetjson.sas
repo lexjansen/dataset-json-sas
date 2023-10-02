@@ -9,7 +9,7 @@
          _SaveOptions1
          _SaveOptions2
          _Random
-         _clinicalreferencedata_ _items_ _itemdata_ _itemgroupdata_ ItemGroupOID ItemGroupName
+         _clinicalreferencedata_ _items_ _itemdata_ _itemgroupdata_ ItemGroupOID _ItemGroupName
          dslabel dsname variables rename label length format;
 
   %let _Random=%sysfunc(putn(%sysevalf(%sysfunc(ranuni(0))*10000,floor),z4.));
@@ -162,7 +162,7 @@
     set &metadataoutlib..metadata_tables out_&_Random..&_itemgroupdata_(in=inigd drop=records);
     if inigd then do;
       oid = "&ItemGroupOID";
-      call symputx('ItemGroupName', name);
+      call symputx('_ItemGroupName', name);
     end;
   run;
 
@@ -173,7 +173,7 @@
 
   data &metadataoutlib..metadata_columns(%if %substr(%upcase(&DropSeqVar),1,1) eq Y %then where=(upcase(name) ne "ITEMGROUPDATASEQ"););
     set &metadataoutlib..metadata_columns work.&_items_(rename=(type=json_datatype) in=init);
-    if init then dataset_name = "&ItemGroupName";
+    if init then dataset_name = "&_ItemGroupName";
   run;
 
   proc delete data=work.&_items_;

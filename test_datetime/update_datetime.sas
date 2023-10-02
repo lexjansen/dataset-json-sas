@@ -77,8 +77,8 @@ run;
   jsonpath=adaedt.json, 
   usemetadata=N, 
   metadatalib=work, 
-  _studyOID=%str(CDISCPILOT01), 
-  _MetaDataVersionOID=%str(CDISC.ADaM.2.1)
+  studyOID=%str(CDISCPILOT01), 
+  MetaDataVersionOID=%str(CDISC.ADaM.2.1)
   );
 
 libname data "&root/test_datetime";

@@ -2,10 +2,10 @@
 %let root=/_github/lexjansen/dataset-json-sas;
 %include "&root/programs/config.sas";
 
-%let FileOID=%str(www.cdisc.org/StudyMSGv2/1/Define-XML_2.1.0);
+%let _fileOID=%str(www.cdisc.org/StudyMSGv2/1/Define-XML_2.1.0);
 
-%let StudyOID=%str(TDF_ADaM.ADaMIG.1.1);
-%let MetaDataVersionOID=%str(MDV.TDF_ADaM.ADaMIG.1.1);
+%let _studyOID=%str(TDF_ADaM.ADaMIG.1.1);
+%let _metaDataVersionOID=%str(MDV.TDF_ADaM.ADaMIG.1.1);
 
 %get_dirtree(
   dir=%sysfunc(pathname(dataadam)), 
@@ -22,20 +22,20 @@ data _null_;
   set work.dirtree_adam;
     datasetname=scan(filename, 1, ".");
     jsonpath=cats("&root/json_out/adam/", datasetname, ".json");
-    fileoid=cats("&FileOID", "/", "%sysfunc(date(), is8601da.)", "/", datasetname);
+    fileoid=cats("&_fileOID", "/", "%sysfunc(date(), is8601da.)", "/", datasetname);
     code=cats('%nrstr(%write_datasetjson('
       /* , 'dataset=dataadam.', name, ',' */
       , 'xptpath=', fullpath,','
       , 'jsonpath=', jsonpath, ','
       , 'usemetadata=Y,'
       , 'metadatalib=metaadam,'
-      , "_FileOID=", fileoid, ","
-      , "_Originator=CDISC ADaM MSG Team", ","
-      , "_SourceSystem=Sponsor System,"
-      , "_SourceSystemVersion=1.0,"
-      , "_studyOID=&StudyOID,"
-      , "_MetaDataVersionOID=&MetaDataVersionOID,"
-      , "_MetaDataRef=https://metadata.location.org/TDF_ADaM_ADaMIG11/define.xml"
+      , "fileOID=", fileoid, ","
+      , "originator=CDISC ADaM MSG Team", ","
+      , "sourceSystem=Sponsor System,"
+      , "sourceSystemVersion=1.0,"
+      , "studyOID=&_studyOID,"
+      , "metaDataVersionOID=&_metaDataVersionOID,"
+      , "metaDataRef=https://metadata.location.org/TDF_ADaM_ADaMIG11/define.xml"
     ,');)');
     call execute(code);
 run;
@@ -45,8 +45,8 @@ run;
 
 
 
-%let StudyOID=%str(cdisc.com/CDISCPILOT01);
-%let MetaDataVersionOID=%str(MDV.MSGv2.0.SDTMIG.3.3.SDTM.1.7);
+%let _studyOID=%str(cdisc.com/CDISCPILOT01);
+%let _metaDataVersionOID=%str(MDV.MSGv2.0.SDTMIG.3.3.SDTM.1.7);
 
 %get_dirtree(
   dir=%sysfunc(pathname(datasdtm)), 
@@ -63,21 +63,21 @@ data _null_;
   set dirtree_sdtm;
     datasetname=scan(filename, 1, ".");
     jsonpath=cats("&root/json_out/sdtm/", datasetname, ".json");
-    fileoid=cats("&FileOID", "/", "%sysfunc(date(), is8601da.)", "/", datasetname);
+    fileoid=cats("&_fileOID", "/", "%sysfunc(date(), is8601da.)", "/", datasetname);
     code=cats('%nrstr(%write_datasetjson('
       /* , 'dataset=datasdtm.', name, ',' */
       , 'xptpath=', fullpath,','
       , 'jsonpath=', jsonpath, ','
       , 'usemetadata=Y,'
       , 'metadatalib=metasdtm,'
-      , "_FileOID=", fileoid, ","
-      , "_AsOfDateTime=2023-05-31T00:00:00, "
-      , "_Originator=CDISC SDTM MSG Team,"
-      , "_SourceSystem=Sponsor System,"
-      , "_SourceSystemVersion=1.0,"
-      , "_studyOID=&StudyOID,"
-      , "_MetaDataVersionOID=&MetaDataVersionOID,"
-      , "_MetaDataRef=https://metadata.location.org/CDISCPILOT01/define.xml"
+      , "fileOID=", fileoid, ","
+      , "asOfDateTime=2023-05-31T00:00:00, "
+      , "originator=CDISC SDTM MSG Team,"
+      , "sourceSystem=Sponsor System,"
+      , "sourceSystemVersion=1.0,"
+      , "studyOID=&_studyOID,"
+      , "metaDataVersionOID=&_metaDataVersionOID,"
+      , "metaDataRef=https://metadata.location.org/CDISCPILOT01/define.xml"
     ,');)');
     call execute(code);
 run;
