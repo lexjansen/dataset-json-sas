@@ -8,5 +8,6 @@ work/
 *.zip
 *.log
 *.lst
+*.html
 *.sas7bdat
 *.egp

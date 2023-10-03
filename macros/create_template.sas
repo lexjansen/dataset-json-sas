@@ -53,6 +53,20 @@
     quit;
   %end;
   
+  %if %upcase(&type) eq RESULTS %then %do;
+    proc sql;
+    create table &out
+      (
+       baselib char(8),
+       baselib_path char(1024),
+       complib char(8),
+       complib_path char(1024),
+       dataset_name  char(32),
+       result num,
+       resultc char(512)
+      );
+    quit;
+  %end;
   
 %mend;
   

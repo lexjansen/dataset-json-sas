@@ -3,6 +3,10 @@
 %include "&root/programs/config.sas";
 
 
+ods listing close;
+ods html5 file="&root/programs/05_compare_data_detail.html";
+title01 "Compare Detail";
+
 /* Find the names of the datasets */
 proc sql noprint;
   create table members 
@@ -16,6 +20,8 @@ quit;
   %put WAR%str(NING): No datasets to compare.;
 %end;  
 
+%create_template(type=RESULTS, out=work.results);
+
 data _null_;
   length code $400;
   set members;
@@ -24,7 +30,8 @@ data _null_;
               'baselib=dataadam, ',
               'complib=outadam, ',
               'dsname=', name, ', ',
-              'compareoptions=%str(listall criterion=0.00000001 method=absolute)',
+              'compareoptions=%str(listall criterion=0.00000001 method=absolute), ',
+              'resultds=work.results',
             ');)');
   call execute(code);
 run;
@@ -50,7 +57,8 @@ data _null_;
               'baselib=datasdtm, ',
               'complib=outsdtm, ',
               'dsname=', name, ', ',
-              'compareoptions=%str(listall criterion=0.00000001 method=absolute)',
+              'compareoptions=%str(listall criterion=0.00000001 method=absolute), ',
+              'resultds=work.results',
             ');)');
   call execute(code);
 run;
@@ -58,6 +66,18 @@ run;
 
 proc delete data=members;
 run;
+
+
+ods html5 close;
+ods html5 file="&root/programs/05_compare_data_summary.html";
+
+proc print data=work.results;
+  title01 "Compare Summary";
+run;
+  
+ods html5 close;
+ods listing;
+title01;
 
 /*
 libname dataaadam clear;
