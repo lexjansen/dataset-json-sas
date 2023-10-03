@@ -6,8 +6,8 @@ It is recommended to run the test programs in the following order:
 
 - 01_convert_xpt.sas
 - 02_create_metadata_from_definexml.sas
-- 03_test_write_datasetjson.sas
-- 04_test_read_datasetjson.sas
+- 03_write_datasetjson.sas
+- 04_read_datasetjson.sas
 - 05_compare_data.sas
 
 Documentation is in the **doc** folder.
