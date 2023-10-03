@@ -28,7 +28,8 @@ run;
       dataset=work.class,
       xptpath=C:\_github\lexjansen\dataset-json-sas\test\class.xpt,
       jsonpath=class.json,
-      usemetadata=N);
+      usemetadata=N,
+      pretty=PRETTY);
 
 proc datasets library=work noprint nolist nodetails;
   change class = class_old;

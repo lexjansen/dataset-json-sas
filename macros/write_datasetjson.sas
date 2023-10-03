@@ -12,7 +12,8 @@
   sourceSystemVersion=,
   studyOID=,
   metaDataVersionOID=,
-  metaDataRef=
+  metaDataRef=,
+  pretty=NOPRETTY
   ) / des = 'Write a SAS dataset to a Dataset-JSON file';
 
   %local
@@ -247,7 +248,7 @@
 
   filename json&_random "&jsonpath";
 
-  PROC JSON OUT=json&_random NOPRETTY NOSASTAGS SCAN TRIMBLANKS
+  PROC JSON OUT=json&_random &pretty NOSASTAGS SCAN TRIMBLANKS
                          NOFMTCHARACTER NOFMTDATETIME NOFMTNUMERIC;
     WRITE OPEN OBJECT;
 
@@ -286,15 +287,18 @@
     WRITE OPEN OBJECT;
     WRITE VALUES "records" &records;
     WRITE VALUES "name" "%upcase(&dataset_name)";
-    /* WRITE VALUES "label" %sysfunc(quote(&dataset_label)); */
     WRITE VALUES "label" "%nrbquote(&dataset_label)";
 
     WRITE VALUE "items";
     %* Use macro to avoid creating null values for missing attributes;
     %* Instead do not create the attribute;
     %write_json_metadata_array(work.column_metadata);
-    WRITE CLOSE;
-
+    /*
+    WRITE OPEN ARRAY;
+      EXPORT work.column_metadata / KEYS;
+    WRITE CLOSE
+    */
+ 
     WRITE VALUE "itemData";
     WRITE OPEN ARRAY;
     EXPORT &_dataset_to_write / NOKEYS;

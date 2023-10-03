@@ -16,7 +16,7 @@
  %end;
  %*put &=varlist;
 
-  WRITE OPEN ARRAY;
+ WRITE OPEN ARRAY;
 
  %do _cnt=1 %to &nobs;
    %let rc=%sysfunc(fetchobs(&dset_id,&_cnt));
@@ -38,8 +38,10 @@
    WRITE OPEN OBJECT;
    WRITE VALUES &code;
    WRITE CLOSE;
-
+   
  %end;
+ 
+ WRITE CLOSE;
 
  %let dset_id=%sysfunc(close(&dset_id));
 
