@@ -85,9 +85,9 @@ libname data "&root/test_datetime";
   
 %read_datasetjson(
   jsonpath=adaedt.json, 
-  dataoutlib=data, 
+  datalib=data, 
   dropseqvar=Y
   );
 
-proc compare base=work.adaedt comp=data.adaedt listall;
+proc compare base=work.adaedt comp=data.adaedt;
 run;

@@ -17,8 +17,6 @@
         );
     quit;
   %end;
-
-
   
   %if %upcase(&type) eq TABLES %then %do;
     proc sql;
@@ -57,11 +55,11 @@
     proc sql;
     create table &out
       (
+       dataset_name char(32),
        baselib char(8),
        baselib_path char(1024),
        complib char(8),
        complib_path char(1024),
-       dataset_name  char(32),
        result num,
        resultc char(512)
       );

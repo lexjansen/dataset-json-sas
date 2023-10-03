@@ -5,6 +5,7 @@ develop/
 json_out/*/*.json
 venv/
 work/
+~$*.*
 *.zip
 *.log
 *.lst

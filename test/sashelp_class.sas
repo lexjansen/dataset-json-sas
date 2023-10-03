@@ -37,8 +37,9 @@ quit;
 
 %read_datasetjson(
   jsonpath=class.json,
-  dataoutlib=work,
-  dropseqvar=Y);
+  datalib=work,
+  dropseqvar=Y
+);
 
 proc compare base=work.class_old compare=work.class;
 run;

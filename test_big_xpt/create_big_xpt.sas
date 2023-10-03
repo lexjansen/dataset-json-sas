@@ -121,16 +121,13 @@ libname sasout "%sysfunc(pathname(work))/sas&_random_";
 
 %read_datasetjson(
   jsonpath=%sysfunc(pathname(xptout))/&_dataset_..json,
-  dataoutlib=sasout,
+  datalib=sasout,
   dropseqvar=Y
   );
 
-  %utl_comparedata(
-    baselib=work,
-    complib=sasout,
-    dsname=&_dataset_,
-    compareoptions=%str(listall criterion=0.00000001 method=absolute)
-  );
+
+proc compare base=work.lb compare=sasout.lb criterion=0.00000001 method=absolute;
+run;
 
 proc delete data=work.&_dataset_ sasout.&_dataset_;
 run;

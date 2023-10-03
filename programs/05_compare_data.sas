@@ -30,8 +30,9 @@ data _null_;
               'baselib=dataadam, ',
               'complib=outadam, ',
               'dsname=', name, ', ',
-              'compareoptions=%str(listall criterion=0.00000001 method=absolute), ',
-              'resultds=work.results',
+              'compareoptions=%str(criterion=0.00000001 method=absolute), ',
+              'resultds=work.results, ',
+              'detailall=Y',
             ');)');
   call execute(code);
 run;
@@ -57,8 +58,9 @@ data _null_;
               'baselib=datasdtm, ',
               'complib=outsdtm, ',
               'dsname=', name, ', ',
-              'compareoptions=%str(listall criterion=0.00000001 method=absolute), ',
-              'resultds=work.results',
+              'compareoptions=%str(criterion=0.00000001 method=absolute), ',
+              'resultds=work.results, ',
+              'detailall=Y',
             ');)');
   call execute(code);
 run;

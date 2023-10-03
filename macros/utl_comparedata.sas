@@ -3,14 +3,15 @@
   complib=, 
   dsname=, 
   compareoptions=%str(listall criterion=0.00000001 method=absolute),
-  resultds=
+  resultds=,
+  detailall=N
   );
 
   %local compinfo _Random;
 
   %let _Random=%sysfunc(putn(%sysevalf(%sysfunc(ranuni(0))*10000,floor),z4.));
     
-  proc compare base=&baselib..&dsname compare=&complib..&dsname %NRBQUOTE(&compareoptions);
+  proc compare base=&baselib..&dsname compare=&complib..&dsname %NRBQUOTE(&compareoptions) noprint;
   run;
 
   %let compinfo=&sysinfo;
@@ -37,7 +38,7 @@
     if index(resultc,'/')=1 then resultc=substr(resultc,2);
     call symputx ('resultc', resultc);
     
-    dataset_name="&dsname";
+    dataset_name=upcase("&dsname");
     baselib="&baselib";
     baselib_path="%sysfunc(pathname(&baselib))";
     complib="&complib";
@@ -47,9 +48,20 @@
 
   %if &compinfo ne 0 %then %do;
     %put %str(WARN)ING: Differences for dataset &dsname - &resultc (SysInfo=&compinfo);
+
+    proc compare base=&baselib..&dsname compare=&complib..&dsname listall %NRBQUOTE(&compareoptions);
+      title "Compare results for dataset %upcase(&dsname)";
+    run;
+
   %end;
   %else %do;
     %put %str(NOT)E: No differences for dataset &dsname - &resultc (SysInfo=&compinfo);
+
+    %if "%substr(%upcase(&detailall),1,1)" eq "Y" %then %do;
+      proc compare base=&baselib..&dsname compare=&complib..&dsname listall %NRBQUOTE(&compareoptions);
+        title "Compare results for dataset %upcase(&dsname)";
+      run;
+    %end;
   %end;
 
   %if %sysevalf(%superq(resultds)=, boolean)=0 %then %do;

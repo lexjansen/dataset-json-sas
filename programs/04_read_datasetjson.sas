@@ -2,7 +2,6 @@
 %let root=/_github/lexjansen/dataset-json-sas;
 %include "&root/programs/config.sas";
 
-
 %get_dirtree(
   dir=&root/json_out/adam, 
   outds=work.dirtree_adam, 
@@ -18,9 +17,9 @@ data _null_;
   set work.dirtree_adam;
     code=cats('%nrstr(%read_datasetjson(',
                 'jsonpath=', fullpath, ', ',
-                'dataoutlib=outadam, ',
+                'datalib=outadam, ',
                 'dropseqvar=Y, ',
-                'metadataoutlib=metainad',
+                'metadatalib=metainad',
               ');)');
     call execute(code);
 run;
@@ -45,9 +44,9 @@ data _null_;
   set work.dirtree_sdtm;
     code=cats('%nrstr(%read_datasetjson(',
                 'jsonpath=', fullpath, ', ',
-                'dataoutlib=outsdtm, ',
+                'datalib=outsdtm, ',
                 'dropseqvar=Y, ',
-                'metadataoutlib=metainsd',
+                'metadatalib=metainsd',
               ');)');
     call execute(code);
 run;
