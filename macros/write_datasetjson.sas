@@ -122,7 +122,6 @@
     quit;
   %end;
 
-
   %if %sysevalf(%superq(_studyOID)=, boolean) and %sysevalf(%superq(studyOId)=, boolean)=0 %then
     %let _studyOID=&studyOId;
 
@@ -140,7 +139,7 @@
                                               %else %put %str(WAR)NING: [&sysmacroname] Dataset &dataset_name (&xptpath) has no dataset label. "&dataset_label" will be used as label.;
   %end;
 
-  %put NOTE: [&sysmacroname] &=dataset &=records &=_clinicalReferenceData &=_itemGroupOID dslabel=%bquote(&dataset_label);
+  %put NOTE: DATASET=&dataset_name &=records &=_clinicalReferenceData &=_itemGroupOID dslabel=%bquote(&dataset_label);
 
   %if %substr(%upcase(&UseMetadata),1,1) eq Y %then %do;
     /* Get column metadata - oid, label, type, length, displayformat, keysequence  */

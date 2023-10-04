@@ -27,15 +27,16 @@ data _null_;
       /* , 'dataset=dataadam.', name, ',' */
       , 'xptpath=', fullpath,','
       , 'jsonpath=', jsonpath, ','
-      , 'usemetadata=Y,'
+      , 'usemetadata=N,'
       , 'metadatalib=metaadam,'
       , "fileOID=", fileoid, ","
+      , "asOfDateTime=2023-05-31T00:00:00, "
       , "originator=CDISC ADaM MSG Team", ","
       , "sourceSystem=Sponsor System,"
       , "sourceSystemVersion=1.0,"
       , "studyOID=&_studyOID,"
       , "metaDataVersionOID=&_metaDataVersionOID,"
-      , "metaDataRef=https://metadata.location.org/TDF_ADaM_ADaMIG11/define.xml"
+      , "metaDataRef=define.xml"
     ,');)');
     call execute(code);
 run;
@@ -75,9 +76,7 @@ data _null_;
       , "originator=CDISC SDTM MSG Team,"
       , "sourceSystem=Sponsor System,"
       , "sourceSystemVersion=1.0,"
-      , "studyOID=&_studyOID,"
-      , "metaDataVersionOID=&_metaDataVersionOID,"
-      , "metaDataRef=https://metadata.location.org/CDISCPILOT01/define.xml"
+      , "metaDataRef=define.xml"
     ,');)');
     call execute(code);
 run;

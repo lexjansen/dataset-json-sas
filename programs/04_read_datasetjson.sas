@@ -12,6 +12,10 @@
   %put WAR%str(NING): No JSON files to read in directory &root/json_out/adam.;
 %end;  
 
+proc datasets lib=metainad nolist kill; 
+quit; 
+run;
+  
 data _null_;
   length code $2048;
   set work.dirtree_adam;
@@ -19,6 +23,7 @@ data _null_;
                 'jsonpath=', fullpath, ', ',
                 'datalib=outadam, ',
                 'dropseqvar=Y, ',
+                'savemetadata=Y, ',
                 'metadatalib=metainad',
               ');)');
     call execute(code);
@@ -39,6 +44,10 @@ run;
   %put WAR%str(NING): No JSON files to read in directory &root/json_out/sdtm.;
 %end;  
 
+proc datasets lib=metainsd nolist kill; 
+quit; 
+run;
+  
 data _null_;
   length code $2048;
   set work.dirtree_sdtm;
@@ -46,7 +55,8 @@ data _null_;
                 'jsonpath=', fullpath, ', ',
                 'datalib=outsdtm, ',
                 'dropseqvar=Y, ',
-                'metadatalib=metainsd',
+                'savemetadata=Y, ',
+                'metadatalib=metasdtm',
               ');)');
     call execute(code);
 run;

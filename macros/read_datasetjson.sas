@@ -64,7 +64,7 @@
   libname out_&_Random "%sysfunc(pathname(work))/%scan(&jsonpath, -2, %str(.\/))";
 
   libname json&_Random json map=map&_Random automap=create fileref=json&_Random
-          %if "%substr(%upcase(&savemetadata),1,1)" eq "Y" %then noalldata; ordinalcount=none;
+          %if "%substr(%upcase(&savemetadata),1,1)" ne "Y" %then noalldata; ordinalcount=none;
   proc copy in=json&_Random out=out_&_Random;
   run;
 
@@ -142,9 +142,9 @@
       where P2 = "itemGroupData" and P = 3;
   quit;
 
-  %create_template(type=STUDY, out=&metadatalib..metadata_study);
-  %create_template(type=TABLES, out=&metadatalib..metadata_tables);
-  %create_template(type=COLUMNS, out=&metadatalib..metadata_columns);
+  %if not %sysfunc(exist(&metadatalib..metadata_study)) %then %create_template(type=STUDY, out=&metadatalib..metadata_study);;
+  %if not %sysfunc(exist(&metadatalib..metadata_tables)) %then %create_template(type=TABLES, out=&metadatalib..metadata_tables);;
+  %if not %sysfunc(exist(&metadatalib..metadata_columns)) %then %create_template(type=COLUMNS, out=&metadatalib..metadata_columns);;
 
   %if %sysfunc(exist(out_&_Random..root)) %then %do;
     data work._metadata_study;
