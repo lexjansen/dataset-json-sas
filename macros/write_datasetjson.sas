@@ -144,7 +144,7 @@
 
   %if %substr(%upcase(&UseMetadata),1,1) eq Y %then %do;
     /* Get column metadata - oid, label, type, length, displayformat, keysequence  */
-    data work.column_metadata(keep=OID name label type length displayFormat keySequence);
+    data work._column_metadata(keep=OID name label order type length displayFormat keySequence);
       retain OID name label type length displayFormat keySequence;
       length _label $ 32;
       set &metadatalib..metadata_columns(
@@ -160,6 +160,50 @@
         end;  
         if missing(type) then putlog "WAR" "NING: [&sysmacroname] Missing type for variable: " name +(-1) ", " oid=;
     run;
+ 
+     
+    /* Check lengths */
+    proc contents noprint varnum data=&dataset_new
+      out=work.column_metadata_sas(keep=name type length varnum);
+    run;
+    
+    proc sql noprint;
+      create table work.column_metadata as
+      select 
+        t2.name as sas_name,
+        t2.length as sas_length,
+        t2.type as sas_type,
+        t2.varnum,
+        t1.*
+        from work.column_metadata_sas t2
+          left join work._column_metadata t1
+        on t1.name = t2.name
+        order by varnum
+        ;
+    quit ;
+    
+    data work.column_metadata(drop=sas_type sas_length sas_name order varnum);
+      set work.column_metadata;
+      if (sas_type=2) and (not missing(length)) and (length lt sas_length) 
+        then putlog 'WAR' 'NING:' "&dataset_name.." name +(-1) ": metadata length is smaller than SAS length - " 
+                    length= +(-1) ", SAS length=" sas_length;
+      if missing(name) then do;
+        putlog 'WAR' 'NING:' "&dataset_name.." sas_name 
+                +(-1) ": variable is missing from metadata. SAS metadata will be used."; 
+        OID = cats("IT", ".", upcase("&dataset_name"), ".", upcase(sas_name));
+        name = sas_name;
+        length = sas_length;
+        if sas_type=1 then type="float";
+                      else type="string";
+        label = propcase(name);              
+      end;  
+    run;  
+ 
+    proc delete data=work._column_metadata;
+    run;
+    proc delete data=work.column_metadata_sas;
+    run;
+
   %end;
   %else %do;
     /* Get column metadata from the datasets - label, type, length, format and derive as much as we can */
@@ -279,7 +323,7 @@
       WRITE VALUES "metaDataVersionOID" "&_metaDataVersionOID";
     ;
     %if %sysevalf(%superq(metaDataRef)=, boolean)=0 %then
-      WRITE VALUES "metaDataRef" "metaDataRef";
+      WRITE VALUES "metaDataRef" "&metaDataRef";
     ;
     WRITE VALUE "itemGroupData";
     WRITE OPEN OBJECT;

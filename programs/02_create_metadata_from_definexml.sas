@@ -10,7 +10,7 @@
 
 /* Create metadata from Define-XML for ADaM */
 %CreateMetadataFromDefineXML(
-   definexml=&root/json/adam/define.xml, 
+   definexml=&root/data/adam/define.xml, 
    metadatalib=metaadam
    );
 
@@ -24,7 +24,7 @@ run;
 
 /* Create metadata from Define-XML for SDTM */
 %CreateMetadataFromDefineXML(
-   definexml=&root/json/sdtm/define.xml, 
+   definexml=&root/data/sdtm/define.xml, 
    metadatalib=metasdtm
    );
 

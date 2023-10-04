@@ -2,7 +2,7 @@
 %let root=/_github/lexjansen/dataset-json-sas;
 %include "&root/programs/config.sas";
 
-%get_dirtree(
+%utl_gettree(
   dir=&root/json_out/adam, 
   outds=work.dirtree_adam, 
   where=%str(ext="json" and dir=0)
@@ -29,7 +29,7 @@ run;
 
 
 
-%get_dirtree(
+%utl_gettree(
   dir=&root/json_out/sdtm, 
   outds=work.dirtree_sdtm, 
   where=%str(ext="json" and dir=0)
