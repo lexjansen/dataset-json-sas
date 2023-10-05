@@ -24,20 +24,20 @@ data _null_;
     jsonpath=cats("&project_folder/json_out/adam/", datasetname, ".json");
     fileoid=cats("&_fileOID", "/", "%sysfunc(date(), is8601da.)", "/", datasetname);
     code=cats('%nrstr(%write_datasetjson('
-      , 'dataset=dataadam.', datasetname, ','
-      /* , 'xptpath=', fullpath,',' */
-      , 'jsonpath=', jsonpath, ','
-      , 'usemetadata=N,'
-      , 'metadatalib=metaadam,'
-      , "fileOID=", fileoid, ","
-      , "asOfDateTime=2023-05-31T00:00:00, "
-      , "originator=CDISC ADaM MSG Team", ","
-      , "sourceSystem=Sponsor System,"
-      , "sourceSystemVersion=1.0,"
-      , "studyOID=&_studyOID,"
-      , "metaDataVersionOID=&_metaDataVersionOID,"
-      , "metaDataRef=define.xml"
-    ,');)');
+                      , 'dataset=dataadam.', datasetname, ','
+                      /* , 'xptpath=', fullpath,',' */
+                      , 'jsonpath=', jsonpath, ','
+                      , 'usemetadata=N,'
+                      , 'metadatalib=metaadam,'
+                      , "fileOID=", fileoid, ","
+                      , "asOfDateTime=2023-05-31T00:00:00, "
+                      , "originator=CDISC ADaM MSG Team", ","
+                      , "sourceSystem=Sponsor System,"
+                      , "sourceSystemVersion=1.0,"
+                      , "studyOID=&_studyOID,"
+                      , "metaDataVersionOID=&_metaDataVersionOID,"
+                      , "metaDataRef=define.xml"
+                    ,');)');
     call execute(code);
 run;
 
@@ -50,7 +50,7 @@ run;
 
 %util_gettree(
   dir=&project_folder/data/sdtm_xpt, 
-  outds=dirtree_sdtm, 
+  outds=work.dirtree_sdtm, 
   where=%str(ext="xpt" and dir=0)
 );
 
@@ -60,27 +60,25 @@ run;
 
 data _null_;
   length datasetname $64 jsonpath $512 fileoid $128 code $2048;
-  set dirtree_sdtm;
+  set work.dirtree_sdtm;
     datasetname=scan(filename, 1, ".");
     jsonpath=cats("&project_folder/json_out/sdtm/", datasetname, ".json");
     fileoid=cats("&_fileOID", "/", "%sysfunc(date(), is8601da.)", "/", datasetname);
     code=cats('%nrstr(%write_datasetjson('
-      /* , 'dataset=datasdtm.', name, ',' */
-      , 'xptpath=', fullpath,','
-      , 'jsonpath=', jsonpath, ','
-      , 'usemetadata=Y,'
-      , 'metadatalib=metasdtm,'
-      , "fileOID=", fileoid, ","
-      , "asOfDateTime=2023-05-31T00:00:00, "
-      , "originator=CDISC SDTM MSG Team,"
-      , "sourceSystem=Sponsor System,"
-      , "sourceSystemVersion=1.0,"
-      /*
-      , "studyOID=&_studyOID,"
-      , "metaDataVersionOID=&_metaDataVersionOID,"
-      */
-      , "metaDataRef=define.xml"
-    ,');)');
+                      /* , 'dataset=datasdtm.', name, ',' */
+                      , 'xptpath=', fullpath,','
+                      , 'jsonpath=', jsonpath, ','
+                      , 'usemetadata=Y,'
+                      , 'metadatalib=metasdtm,'
+                      , "fileOID=", fileoid, ","
+                      , "asOfDateTime=2023-05-31T00:00:00, "
+                      , "originator=CDISC SDTM MSG Team,"
+                      , "sourceSystem=Sponsor System,"
+                      , "sourceSystemVersion=1.0,"
+                      /* , "studyOID=&_studyOID," */
+                      /* , "metaDataVersionOID=&_metaDataVersionOID," */
+                      , "metaDataRef=define.xml"
+                    ,');)');
     call execute(code);
 run;
 

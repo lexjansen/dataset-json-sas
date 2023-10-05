@@ -13,7 +13,7 @@
   %put WAR%str(NING): No JSON files to read in directory &root/json_out/adam.;
 %end;  
 
-proc datasets lib=metainad nolist kill; 
+proc datasets lib=metasvad nolist kill; 
 quit; 
 run;
   
@@ -21,12 +21,12 @@ data _null_;
   length code $2048;
   set work.dirtree_adam;
     code=cats('%nrstr(%read_datasetjson(',
-                'jsonpath=', fullpath, ', ',
-                'datalib=outadam, ',
-                'dropseqvar=Y, ',
-                'savemetadata=Y, ',
-                'metadatalib=metainad',
-              ');)');
+                        'jsonpath=', fullpath, ', ',
+                        'datalib=outadam, ',
+                        'dropseqvar=Y, ',
+                        'savemetadata=Y, ',
+                        'metadatalib=metasvad',
+                    ');)');
     call execute(code);
 run;
 
@@ -44,7 +44,7 @@ run;
   %put WAR%str(NING): No JSON files to read in directory &root/json_out/sdtm.;
 %end;  
 
-proc datasets lib=metainsd nolist kill; 
+proc datasets lib=metasvsd nolist kill; 
 quit; 
 run;
   
@@ -52,12 +52,12 @@ data _null_;
   length code $2048;
   set work.dirtree_sdtm;
     code=cats('%nrstr(%read_datasetjson(',
-                'jsonpath=', fullpath, ', ',
-                'datalib=outsdtm, ',
-                'dropseqvar=Y, ',
-                'savemetadata=Y, ',
-                'metadatalib=metasdtm',
-              ');)');
+                        'jsonpath=', fullpath, ', ',
+                        'datalib=outsdtm, ',
+                        'dropseqvar=Y, ',
+                        'savemetadata=Y, ',
+                        'metadatalib=metasvsd',
+                    ');)');
     call execute(code);
 run;
 

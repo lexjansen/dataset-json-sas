@@ -21,5 +21,5 @@
     dropseqvar=Y
 );
 
-proc compare base=sashelp.class compare=work.class;
+proc compare base=sashelp.class compare=work.class listall;
 run;

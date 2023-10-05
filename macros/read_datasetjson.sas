@@ -264,6 +264,7 @@
   proc delete data=work.column_metadata;
   run;
 
+  libname json&_Random clear;
   filename json&_Random clear;
   filename map&_Random clear;
 

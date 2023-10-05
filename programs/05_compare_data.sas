@@ -27,13 +27,13 @@ data _null_;
   set members;
   name=lowcase(name);
   code=cats('%nrstr(%util_comparedata(',
-              'baselib=dataadam, ',
-              'complib=outadam, ',
-              'dsname=', name, ', ',
-              'compareoptions=%str(criterion=0.00000001 method=absolute), ',
-              'resultds=work.results, ',
-              'detailall=N',
-            ');)');
+                      'baselib=dataadam, ',
+                      'complib=outadam, ',
+                      'dsname=', name, ', ',
+                      'compareoptions=%str(criterion=0.00000001 method=absolute), ',
+                      'resultds=work.results, ',
+                      'detailall=N',
+                  ');)');
   call execute(code);
 run;
 
@@ -55,13 +55,13 @@ data _null_;
   set members;
   name=lowcase(name);
   code=cats('%nrstr(%util_comparedata(',
-              'baselib=datasdtm, ',
-              'complib=outsdtm, ',
-              'dsname=', name, ', ',
-              'compareoptions=%str(criterion=0.00000001 method=absolute), ',
-              'resultds=work.results, ',
-              'detailall=N',
-            ');)');
+                      'baselib=datasdtm, ',
+                      'complib=outsdtm, ',
+                      'dsname=', name, ', ',
+                      'compareoptions=%str(criterion=0.00000001 method=absolute), ',
+                      'resultds=work.results, ',
+                      'detailall=N',
+                  ');)');
   call execute(code);
 run;
 
