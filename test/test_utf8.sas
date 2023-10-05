@@ -1,12 +1,11 @@
 %* update this location to your own location;
-%let root=/_github/lexjansen/dataset-json-sas;
+%let project_folder=/_github/lexjansen/dataset-json-sas;
+%include "&project_folder/programs/config.sas";
 
-%include "&root/programs/config.sas";
-
-libname data "&root/test";
+libname data "&project_folder/test";
 
 %read_datasetjson(
-  jsonpath=&root/test/ae_utf8.json, 
+  jsonpath=&project_folder/test/ae_utf8.json, 
   datalib=data, 
   dropseqvar=Y,
   metadatalib=data
@@ -14,14 +13,14 @@ libname data "&root/test";
 
 %write_datasetjson(
   dataset=data.ae, 
-  jsonpath=&root/test/ae_out.json, 
+  jsonpath=&project_folder/test/ae_out.json, 
   datasetJSONVersion=1.0.0,
   usemetadata=Y, 
   metadatalib=data
   );
 
 %read_datasetjson(
-  jsonpath=&root/test/ae_out.json, 
+  jsonpath=&project_folder/test/ae_out.json, 
   datalib=work, 
   dropseqvar=Y,
   metadatalib=work

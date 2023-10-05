@@ -1,9 +1,10 @@
-%let root=/_github/lexjansen/dataset-json-sas;
-%include "&root/programs/config.sas";
+%* update this location to your own location;
+%let project_folder=/_github/lexjansen/dataset-json-sas;
+%include "&project_folder/programs/config.sas";
 
 %write_datasetjson(
     dataset=sashelp.class,
-    jsonpath=&root/demo/class.json,
+    jsonpath=&project_folder/demo/class.json,
     fileOID=,
     asOfDateTime=,
     originator=,
@@ -15,7 +16,7 @@
     );
 
 %read_datasetjson(
-    jsonpath=class.json,
+    jsonpath=&project_folder/demo/class.json,
     datalib=work,
     dropseqvar=Y
 );

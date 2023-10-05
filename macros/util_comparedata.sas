@@ -1,4 +1,4 @@
-%macro utl_comparedata(
+%macro util_comparedata(
   baselib=, 
   complib=, 
   dsname=, 
@@ -73,4 +73,4 @@
   proc delete data=work.compare_results_&_Random;
   run;
   
-%mend utl_comparedata;
+%mend util_comparedata;

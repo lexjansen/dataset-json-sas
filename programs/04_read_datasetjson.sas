@@ -1,9 +1,10 @@
 %* update this location to your own location;
-%let root=/_github/lexjansen/dataset-json-sas;
-%include "&root/programs/config.sas";
+%let project_folder=/_github/lexjansen/dataset-json-sas;
+%include "&project_folder/programs/config.sas";
 
-%utl_gettree(
-  dir=&root/json_out/adam, 
+
+%util_gettree(
+  dir=&project_folder/json_out/adam, 
   outds=work.dirtree_adam, 
   where=%str(ext="json" and dir=0)
 );
@@ -33,9 +34,8 @@ proc delete data=work.dirtree_adam;
 run;
 
 
-
-%utl_gettree(
-  dir=&root/json_out/sdtm, 
+%util_gettree(
+  dir=&project_folder/json_out/sdtm, 
   outds=work.dirtree_sdtm, 
   where=%str(ext="json" and dir=0)
 );

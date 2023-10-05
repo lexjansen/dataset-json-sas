@@ -1,10 +1,10 @@
 %* update this location to your own location;
-%let root=/_github/lexjansen/dataset-json-sas;
-%include "&root/programs/config.sas";
+%let project_folder=/_github/lexjansen/dataset-json-sas;
+%include "&project_folder/programs/config.sas";
 
 
 ods listing close;
-ods html5 file="&root/programs/05_compare_data_detail.html";
+ods html5 file="&project_folder/programs/05_compare_data_detail.html";
 title01 "Compare Detail";
 
 /* Find the names of the datasets */
@@ -26,13 +26,13 @@ data _null_;
   length code $400;
   set members;
   name=lowcase(name);
-  code=cats('%nrstr(%utl_comparedata(',
+  code=cats('%nrstr(%util_comparedata(',
               'baselib=dataadam, ',
               'complib=outadam, ',
               'dsname=', name, ', ',
               'compareoptions=%str(criterion=0.00000001 method=absolute), ',
               'resultds=work.results, ',
-              'detailall=Y',
+              'detailall=N',
             ');)');
   call execute(code);
 run;
@@ -54,24 +54,22 @@ data _null_;
   length code $400;
   set members;
   name=lowcase(name);
-  code=cats('%nrstr(%utl_comparedata(',
+  code=cats('%nrstr(%util_comparedata(',
               'baselib=datasdtm, ',
               'complib=outsdtm, ',
               'dsname=', name, ', ',
               'compareoptions=%str(criterion=0.00000001 method=absolute), ',
               'resultds=work.results, ',
-              'detailall=Y',
+              'detailall=N',
             ');)');
   call execute(code);
 run;
 
-
 proc delete data=members;
 run;
 
-
 ods html5 close;
-ods html5 file="&root/programs/05_compare_data_summary.html";
+ods html5 file="&project_folder/programs/05_compare_data_summary.html";
 
 proc print data=work.results;
   title01 "Compare Summary";
