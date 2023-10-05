@@ -1,15 +1,16 @@
 %macro read_datasetjson(
   jsonpath=,
-  dataoutlib=,
+  datalib=,
   dropseqvar=N,
-  metadataoutlib=
+  savemetadata=N,
+  metadatalib=
   ) / des = 'Read a Dataset-JSON file to a SAS dataset';
 
   %local _Missing
          _SaveOptions1
          _SaveOptions2
          _Random
-         _clinicalreferencedata_ _items_ _itemdata_ _itemgroupdata_ ItemGroupOID ItemGroupName
+         _clinicalreferencedata_ _items_ _itemdata_ _itemgroupdata_ ItemGroupOID _ItemGroupName
          dslabel dsname variables rename label length format;
 
   %let _Random=%sysfunc(putn(%sysevalf(%sysfunc(ranuni(0))*10000,floor),z4.));
@@ -25,8 +26,9 @@
   %* Check for missing parameters ;
   %let _Missing=;
   %if %sysevalf(%superq(jsonpath)=, boolean) %then %let _Missing = &_Missing jsonpath;
-  %if %sysevalf(%superq(dataoutlib)=, boolean) %then %let _Missing = &_Missing dataoutlib;
+  %if %sysevalf(%superq(datalib)=, boolean) %then %let _Missing = &_Missing datalib;
   %if %sysevalf(%superq(dropseqvar)=, boolean) %then %let _Missing = &_Missing dropseqvar;
+  %if %sysevalf(%superq(savemetadata)=, boolean) %then %let _Missing = &_Missing savemetadata;
 
   %if %length(&_Missing) gt 0
     %then %do;
@@ -38,6 +40,13 @@
   %if "%substr(%upcase(&dropseqvar),1,1)" ne "Y" and "%substr(%upcase(&dropseqvar),1,1)" ne "N" %then
   %do;
     %put ERR%str(OR): [&sysmacroname] Required macro parameter dropseqvar=&dropseqvar must be Y or N.;
+    %goto exit_macro;
+  %end;
+
+  %* Rule: savemetadata has to be Y or N  *;
+  %if "%substr(%upcase(&savemetadata),1,1)" ne "Y" and "%substr(%upcase(&savemetadata),1,1)" ne "N" %then
+  %do;
+    %put ERR%str(OR): [&sysmacroname] Required macro parameter savemetadata=&savemetadata must be Y or N.;
     %goto exit_macro;
   %end;
 
@@ -55,7 +64,7 @@
   libname out_&_Random "%sysfunc(pathname(work))/%scan(&jsonpath, -2, %str(.\/))";
 
   libname json&_Random json map=map&_Random automap=create fileref=json&_Random
-          %if %sysevalf(%superq(metadataoutlib)=, boolean) %then noalldata; ordinalcount=none;
+          %if "%substr(%upcase(&savemetadata),1,1)" ne "Y" %then noalldata; ordinalcount=none;
   proc copy in=json&_Random out=out_&_Random;
   run;
 
@@ -120,11 +129,11 @@
     ;
   quit;
 
-  proc copy in=out_&_Random out=&dataoutlib;
+  proc copy in=out_&_Random out=&datalib;
     select &_itemdata_;
   run;
 
-%if %sysevalf(%superq(metadataoutlib)=, boolean)=0 %then %do;
+%if "%substr(%upcase(&savemetadata),1,1)" eq "Y" %then %do;
 
   %let ItemGroupOID=;
   proc sql noprint;
@@ -133,9 +142,9 @@
       where P2 = "itemGroupData" and P = 3;
   quit;
 
-  %create_template(type=STUDY, out=&metadataoutlib..metadata_study);
-  %create_template(type=TABLES, out=&metadataoutlib..metadata_tables);
-  %create_template(type=COLUMNS, out=&metadataoutlib..metadata_columns);
+  %if not %sysfunc(exist(&metadatalib..metadata_study)) %then %create_template(type=STUDY, out=&metadatalib..metadata_study);;
+  %if not %sysfunc(exist(&metadatalib..metadata_tables)) %then %create_template(type=TABLES, out=&metadatalib..metadata_tables);;
+  %if not %sysfunc(exist(&metadatalib..metadata_columns)) %then %create_template(type=COLUMNS, out=&metadatalib..metadata_columns);;
 
   %if %sysfunc(exist(out_&_Random..root)) %then %do;
     data work._metadata_study;
@@ -150,19 +159,19 @@
     %end;
   %end;
 
-  data &metadataoutlib..metadata_study;
-    set &metadataoutlib..metadata_study work._metadata_study;
+  data &metadatalib..metadata_study;
+    set &metadatalib..metadata_study work._metadata_study;
   run;
 
   proc delete data=work._metadata_study;
   run;
 
 
-  data &metadataoutlib..metadata_tables;
-    set &metadataoutlib..metadata_tables out_&_Random..&_itemgroupdata_(in=inigd drop=records);
+  data &metadatalib..metadata_tables;
+    set &metadatalib..metadata_tables out_&_Random..&_itemgroupdata_(in=inigd drop=records);
     if inigd then do;
       oid = "&ItemGroupOID";
-      call symputx('ItemGroupName', name);
+      call symputx('_ItemGroupName', name);
     end;
   run;
 
@@ -171,9 +180,9 @@
     order = _n_;
   run;
 
-  data &metadataoutlib..metadata_columns(%if %substr(%upcase(&DropSeqVar),1,1) eq Y %then where=(upcase(name) ne "ITEMGROUPDATASEQ"););
-    set &metadataoutlib..metadata_columns work.&_items_(rename=(type=json_datatype) in=init);
-    if init then dataset_name = "&ItemGroupName";
+  data &metadatalib..metadata_columns(%if %substr(%upcase(&DropSeqVar),1,1) eq Y %then where=(upcase(name) ne "ITEMGROUPDATASEQ"););
+    set &metadatalib..metadata_columns work.&_items_(rename=(type=json_datatype) in=init);
+    if init then dataset_name = "&_ItemGroupName";
   run;
 
   proc delete data=work.&_items_;
@@ -193,8 +202,8 @@
   
   %put &=format;
 
-  proc datasets library=&dataoutlib noprint nolist nodetails;
-    %if %sysfunc(exist(&dataoutlib..&dsname)) %then %do; delete &dsname; %end;
+  proc datasets library=&datalib noprint nolist nodetails;
+    %if %sysfunc(exist(&datalib..&dsname)) %then %do; delete &dsname; %end;
     change &_itemdata_ = &dsname;
     modify &dsname %if %sysevalf(%superq(dslabel)=, boolean)=0 %then %str((label = %sysfunc(quote(%nrbquote(&dslabel)))));;
       rename &rename;
@@ -206,21 +215,21 @@
     select catt(d.name, ' $', i.length) into :length separated by ' '
       from dictionary.columns d,
            out_&_Random..&_items_ i
-    where upcase(libname)="%upcase(&dataoutlib)" and
+    where upcase(libname)="%upcase(&datalib)" and
          upcase(memname)="%upcase(&dsname)" and
          d.name = i.name and
          d.type="char" and (not(missing(i.length))) and (i.length gt d.length)
    ;
   quit ;
 
-  data &dataoutlib..&dsname(
+  data &datalib..&dsname(
       %if %sysevalf(%superq(dslabel)=, boolean)=0 %then %str(label = %sysfunc(quote(%nrbquote(&dslabel))));
       %if %substr(%upcase(&DropSeqVar),1,1) eq Y %then drop=ITEMGROUPDATASEQ;
     );
     retain &variables;
     length &length;
     %if %sysevalf(%superq(format)=, boolean)=0 %then format &format;;
-    set &dataoutlib..&dsname;
+    set &datalib..&dsname;
   run;
 
   /*  Validate datatypes and lengths */
@@ -239,7 +248,7 @@
     d.format
    from dictionary.columns d,
         out_&_Random..&_items_ i
-   where upcase(libname)="%upcase(&dataoutlib)" and
+   where upcase(libname)="%upcase(&datalib)" and
          upcase(memname)="%upcase(&dsname)" and
          d.name = i.name
    ;

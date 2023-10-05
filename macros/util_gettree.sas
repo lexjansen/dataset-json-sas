@@ -1,4 +1,4 @@
-%macro get_dirtree(dir=, outds=work.dirtree, where=);
+%macro util_gettree(dir=, outds=work.dirtree, where=);
 
   /*
   credit:
@@ -41,4 +41,4 @@
   run;  
 
   
-%mend get_dirtree ;
+%mend util_gettree ;

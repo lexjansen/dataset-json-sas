@@ -1,14 +1,12 @@
 %* update this location to your own location;
-%let root=/_github/lexjansen/dataset-json-sas;
-options mprint;
-
-%include "&root/programs/config.sas";
+%let project_folder=/_github/lexjansen/dataset-json-sas;
+%include "&project_folder/programs/config.sas";
 
 %let model=adam;
-libname adamdata "&root/data/&model";
+libname adamdata "&project_folder/data/&model";
 
 
-libname xptFile xport "%sysfunc(pathname(adamdata))/adae.xpt";
+libname xptFile xport "&project_folder/data/adam_xpt/adae.xpt";
 proc copy in=xptFile out=work;
 run;
 
@@ -72,22 +70,22 @@ data work.metadata_columns(drop=sas_type varnum);
   if displayformat="DATETIME." then displayformat="E8601DT24.2";
 run;
 
+libname data "&project_folder/test_datetime";
+  
 %write_datasetjson(
   dataset=work.adaedt, 
-  jsonpath=adaedt.json, 
+  jsonpath=%sysfunc(pathname(data))/adaedt.json, 
   usemetadata=N, 
   metadatalib=work, 
-  _studyOID=%str(CDISCPILOT01), 
-  _MetaDataVersionOID=%str(CDISC.ADaM.2.1)
+  studyOID=%str(CDISCPILOT01), 
+  MetaDataVersionOID=%str(CDISC.ADaM.2.1)
   );
 
-libname data "&root/test_datetime";
-  
 %read_datasetjson(
-  jsonpath=adaedt.json, 
-  dataoutlib=data, 
+  jsonpath=%sysfunc(pathname(data))/adaedt.json, 
+  datalib=data, 
   dropseqvar=Y
   );
 
-proc compare base=work.adaedt comp=data.adaedt listall;
+proc compare base=work.adaedt comp=data.adaedt;
 run;

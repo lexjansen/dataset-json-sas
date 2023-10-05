@@ -1,6 +1,6 @@
 %* update this location to your own location;
-%let root=/_github/lexjansen/dataset-json-sas;
-%include "&root/programs/config.sas";
+%let project_folder=/_github/lexjansen/dataset-json-sas;
+%include "&project_folder/programs/config.sas";
 
 %macro expand(
   xptin=,           /* Path to the XPT file used as input  */
@@ -100,11 +100,11 @@
 
 %put %sysfunc(dcreate(sas&_random_, %sysfunc(pathname(work))));
 
-libname xptout "&root/test_big_xpt";
+libname xptout "&project_folder/test_big_xpt";
 libname sasout "%sysfunc(pathname(work))/sas&_random_";
 
 %expand(
-  xptin=&root/data/sdtm/&_dataset_..xpt, 
+  xptin=&project_folder/data/sdtm_xpt/&_dataset_..xpt, 
   xptout=%sysfunc(pathname(xptout))/&_dataset_..xpt, 
   dataset=&_dataset_,  
   libout=work,
@@ -121,16 +121,13 @@ libname sasout "%sysfunc(pathname(work))/sas&_random_";
 
 %read_datasetjson(
   jsonpath=%sysfunc(pathname(xptout))/&_dataset_..json,
-  dataoutlib=sasout,
+  datalib=sasout,
   dropseqvar=Y
   );
 
-  %utl_comparedata(
-    baselib=work,
-    complib=sasout,
-    dsname=&_dataset_,
-    compareoptions=%str(listall criterion=0.00000001 method=absolute)
-  );
+
+proc compare base=work.lb compare=sasout.lb criterion=0.00000001 method=absolute;
+run;
 
 proc delete data=work.&_dataset_ sasout.&_dataset_;
 run;

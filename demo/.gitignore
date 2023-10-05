@@ -1,5 +1,3 @@
 *
 !.gitignore
 !sashelp_class.sas
-!test_utf8.sas
-!ae_utf8.json

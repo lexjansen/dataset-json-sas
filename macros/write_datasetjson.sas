@@ -2,17 +2,18 @@
   dataset=,
   xptpath=,
   jsonpath=,
-  usemetadata=,
+  usemetadata=N,
   metadatalib=,
   datasetJSONVersion=1.0.0,
-  _FileOID=,
-  _AsOfDateTime=,
-  _Originator=,
-  _SourceSystem=,
-  _SourceSystemVersion=,
-  _studyOID=,
-  _MetaDataVersionOID=,
-  _MetaDataRef=
+  fileOID=,
+  asOfDateTime=,
+  originator=,
+  sourceSystem=,
+  sourceSystemVersion=,
+  studyOID=,
+  metaDataVersionOID=,
+  metaDataRef=,
+  pretty=NOPRETTY
   ) / des = 'Write a SAS dataset to a Dataset-JSON file';
 
   %local
@@ -22,8 +23,8 @@
     _Missing
     _delete_temp_dataset
     dataset_new dataset_name dataset_label records
-    studyOID metaDataVersionOID
-    ClinicalReferenceData ItemGroupOID
+    _studyOID _metaDataVersionOID
+    _clinicalReferenceData _itemGroupOID
     CurrentDataTime
     _dataset_to_write;
 
@@ -39,9 +40,9 @@
   %if %sysevalf(%superq(datasetJSONVersion)=, boolean) %then %let datasetJSONVersion = %str(1.0.0);
 
   %let dataset_label=;
-  %let ItemGroupOID=;
-  %let studyOID=;
-  %let metaDataVersionOID=;
+  %let _itemGroupOID=;
+  %let _studyOID=;
+  %let _metaDataVersionOID=;
   %let CurrentDateTime=%sysfunc(datetime(), is8601dt.);
 
   %******************************************************************************;
@@ -100,8 +101,8 @@
     %end;
 
   %if %cstutilcheckvarsexist(_cstDataSetName=&dataset_new, _cstVarList=usubjid) %then
-      %let ClinicalReferenceData=clinicalData;
-    %else %let ClinicalReferenceData=referenceData;
+      %let _clinicalReferenceData=clinicalData;
+    %else %let _clinicalReferenceData=referenceData;
 
   %let records=%cstutilnobs(_cstDataSetName=&dataset_new);
 
@@ -109,41 +110,40 @@
     /* Get StudyOID and metaDataVersionOID from the metadata */
     proc sql noprint;
       %if %sysfunc(exist(&metadatalib..metadata_study)) %then %do;
-        select studyOID, metaDataVersionOID into :studyOID trimmed, :metaDataVersionOID trimmed
+        select studyOID, metaDataVersionOID into :_studyOID trimmed, :_metaDataVersionOID trimmed
           from &metadatalib..metadata_study;
       %end;
-    /* Get dataset label and ItemGroupOID from the metadata */
+    /* Get dataset label and _itemGroupOID from the metadata */
       %if %sysfunc(exist(&metadatalib..metadata_tables)) %then %do;
-        select label, oid into :dataset_label, :ItemGroupOID trimmed
+        select label, oid into :dataset_label, :_temGroupOID trimmed
           from &metadatalib..metadata_tables
             where upcase(name)="%upcase(&dataset_name)";
       %end;
     quit;
   %end;
 
+  %if %sysevalf(%superq(_studyOID)=, boolean) and %sysevalf(%superq(studyOId)=, boolean)=0 %then
+    %let _studyOID=&studyOId;
 
-  %if %sysevalf(%superq(studyOID)=, boolean) and %sysevalf(%superq(_StudyOId)=, boolean)=0 %then
-    %let studyOID=&_StudyOId;
+  %if %sysevalf(%superq(_metaDataVersionOID)=, boolean) and %sysevalf(%superq(metaDataVersionOID)=, boolean)=0 %then
+    %let _metaDataVersionOID=&metaDataVersionOID;
 
-  %if %sysevalf(%superq(metaDataVersionOID)=, boolean) and %sysevalf(%superq(_MetaDataVersionOID)=, boolean)=0 %then
-    %let metaDataVersionOID=&_MetaDataVersionOID;
-
-  %if %sysevalf(%superq(ItemGroupOID)=, boolean) %then %let ItemGroupOID=IG.%upcase(&dataset_name);
+  %if %sysevalf(%superq(_itemGroupOID)=, boolean) %then %let _itemGroupOID=IG.%upcase(&dataset_name);
 
   %if %sysevalf(%superq(dataset_label)=, boolean) %then
     %let dataset_label=%cstutilgetattribute(_cstDataSetName=&dataset_new,_cstAttribute=LABEL);
 
   %if %sysevalf(%superq(dataset_label)=, boolean) %then %do;
-    %let dataset_label=%sysfunc(propcase(&dataset_name));
-    %if %sysevalf(%superq(xptpath)=, boolean) %then %put %str(WAR)NING: [&sysmacroname] Dataset &dataset has no dataset label. "%sysfunc(propcase(&dataset_name))" will be used as label.;
-                                              %else %put %str(WAR)NING: [&sysmacroname] Dataset &dataset_name (&xptpath) has no dataset label. "%sysfunc(propcase(&dataset_name))" will be used as label.;
+    %let dataset_label=%sysfunc(lowcase(&dataset_name));
+    %if %sysevalf(%superq(xptpath)=, boolean) %then %put %str(WAR)NING: [&sysmacroname] Dataset &dataset has no dataset label. "&dataset_label" will be used as label.;
+                                              %else %put %str(WAR)NING: [&sysmacroname] Dataset &dataset_name (&xptpath) has no dataset label. "&dataset_label" will be used as label.;
   %end;
 
-  %put NOTE: [&sysmacroname] &=dataset &=records &=ClinicalReferenceData &=ItemGroupOID dslabel=%bquote(&dataset_label);
+  %put NOTE: DATASET=&dataset_name &=records &=_clinicalReferenceData &=_itemGroupOID dslabel=%bquote(&dataset_label);
 
   %if %substr(%upcase(&UseMetadata),1,1) eq Y %then %do;
     /* Get column metadata - oid, label, type, length, displayformat, keysequence  */
-    data work.column_metadata(keep=OID name label type length displayFormat keySequence);
+    data work._column_metadata(keep=OID name label order type length displayFormat keySequence);
       retain OID name label type length displayFormat keySequence;
       length _label $ 32;
       set &metadatalib..metadata_columns(
@@ -153,12 +153,56 @@
         if missing(oid) then putlog "WAR" "NING: [&sysmacroname] Missing oid for variable: " name ;
         if missing(name) then putlog "WAR" "NING: [&sysmacroname] Missing name for variable: " oid ;
         if missing(label) then do;
-          _label = propcase(name);
+          _label = lowcase(name);
           putlog "WAR" "NING: [&sysmacroname] Missing label for variable: " name +(-1) ", " oid= +(-1) ". " _label "will be used as label.";
           label = _label;
         end;  
         if missing(type) then putlog "WAR" "NING: [&sysmacroname] Missing type for variable: " name +(-1) ", " oid=;
     run;
+ 
+     
+    /* Check lengths */
+    proc contents noprint varnum data=&dataset_new
+      out=work.column_metadata_sas(keep=name type length varnum);
+    run;
+    
+    proc sql noprint;
+      create table work.column_metadata as
+      select 
+        t2.name as sas_name,
+        t2.length as sas_length,
+        t2.type as sas_type,
+        t2.varnum,
+        t1.*
+        from work.column_metadata_sas t2
+          left join work._column_metadata t1
+        on t1.name = t2.name
+        order by varnum
+        ;
+    quit ;
+    
+    data work.column_metadata(drop=sas_type sas_length sas_name order varnum);
+      set work.column_metadata;
+      if (sas_type=2) and (not missing(length)) and (length lt sas_length) 
+        then putlog 'WAR' 'NING:' "&dataset_name.." name +(-1) ": metadata length is smaller than SAS length - " 
+                    length= +(-1) ", SAS length=" sas_length;
+      if missing(name) then do;
+        putlog 'WAR' 'NING:' "&dataset_name.." sas_name 
+                +(-1) ": variable is missing from metadata. SAS metadata will be used."; 
+        OID = cats("IT", ".", upcase("&dataset_name"), ".", upcase(sas_name));
+        name = sas_name;
+        length = sas_length;
+        if sas_type=1 then type="float";
+                      else type="string";
+        label = propcase(name);              
+      end;  
+    run;  
+ 
+    proc delete data=work._column_metadata;
+    run;
+    proc delete data=work.column_metadata_sas;
+    run;
+
   %end;
   %else %do;
     /* Get column metadata from the datasets - label, type, length, format and derive as much as we can */
@@ -247,54 +291,57 @@
 
   filename json&_random "&jsonpath";
 
-  PROC JSON OUT=json&_random NOPRETTY NOSASTAGS SCAN TRIMBLANKS
+  PROC JSON OUT=json&_random &pretty NOSASTAGS SCAN TRIMBLANKS
                          NOFMTCHARACTER NOFMTDATETIME NOFMTNUMERIC;
     WRITE OPEN OBJECT;
 
     WRITE VALUES "creationDateTime" "&CurrentDateTime";
     WRITE VALUES "datasetJSONVersion" "&datasetJSONVersion";
-    %if %sysevalf(%superq(_FileOID)=, boolean)=0 %then
-      WRITE VALUES "fileOID" "&_FileOID";
+    %if %sysevalf(%superq(fileOID)=, boolean)=0 %then
+      WRITE VALUES "fileOID" "&fileOID";
     ;
-    %if %sysevalf(%superq(_AsOfDateTime)=, boolean)=0 %then
-      WRITE VALUES "asOfDateTime" "&_AsOfDateTime";
+    %if %sysevalf(%superq(asOfDateTime)=, boolean)=0 %then
+      WRITE VALUES "asOfDateTime" "&asOfDateTime";
     ;
-    %if %sysevalf(%superq(_Originator)=, boolean)=0 %then
-      WRITE VALUES "originator" "&_Originator";
+    %if %sysevalf(%superq(originator)=, boolean)=0 %then
+      WRITE VALUES "originator" "&originator";
     ;
-    %if %sysevalf(%superq(_SourceSystem)=, boolean)=0 %then
-      WRITE VALUES "sourceSystem" "&_SourceSystem";
+    %if %sysevalf(%superq(sourceSystem)=, boolean)=0 %then
+      WRITE VALUES "sourceSystem" "&sourceSystem";
     ;
-    %if %sysevalf(%superq(_SourceSystemVersion)=, boolean)=0 %then
-      WRITE VALUES "sourceSystemVersion" "&_SourceSystemVersion";
+    %if %sysevalf(%superq(sourceSystemVersion)=, boolean)=0 %then
+      WRITE VALUES "sourceSystemVersion" "&sourceSystemVersion";
     ;
 
-    WRITE VALUES "&ClinicalReferenceData";
+    WRITE VALUES "&_clinicalReferenceData";
     WRITE OPEN OBJECT;
-    %if %sysevalf(%superq(studyOID)=, boolean)=0 %then
-      WRITE VALUES "studyOID" "&studyOID";
+    %if %sysevalf(%superq(_studyOID)=, boolean)=0 %then
+      WRITE VALUES "studyOID" "&_studyOID";
     ;
-    %if %sysevalf(%superq(metaDataVersionOID)=, boolean)=0 %then
-      WRITE VALUES "metaDataVersionOID" "&metaDataVersionOID";
+    %if %sysevalf(%superq(_metaDataVersionOID)=, boolean)=0 %then
+      WRITE VALUES "metaDataVersionOID" "&_metaDataVersionOID";
     ;
-    %if %sysevalf(%superq(_MetaDataRef)=, boolean)=0 %then
-      WRITE VALUES "metaDataRef" "&_MetaDataRef";
+    %if %sysevalf(%superq(metaDataRef)=, boolean)=0 %then
+      WRITE VALUES "metaDataRef" "&metaDataRef";
     ;
     WRITE VALUE "itemGroupData";
     WRITE OPEN OBJECT;
-    WRITE VALUE "&ItemGroupOID";
+    WRITE VALUE "&_itemGroupOID";
     WRITE OPEN OBJECT;
     WRITE VALUES "records" &records;
     WRITE VALUES "name" "%upcase(&dataset_name)";
-    /* WRITE VALUES "label" %sysfunc(quote(&dataset_label)); */
     WRITE VALUES "label" "%nrbquote(&dataset_label)";
 
     WRITE VALUE "items";
     %* Use macro to avoid creating null values for missing attributes;
     %* Instead do not create the attribute;
     %write_json_metadata_array(work.column_metadata);
-    WRITE CLOSE;
-
+    /*
+    WRITE OPEN ARRAY;
+      EXPORT work.column_metadata / KEYS;
+    WRITE CLOSE
+    */
+ 
     WRITE VALUE "itemData";
     WRITE OPEN ARRAY;
     EXPORT &_dataset_to_write / NOKEYS;

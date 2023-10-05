@@ -1,8 +1,6 @@
 %* update this location to your own location;
-%let root=/_github/lexjansen/dataset-json-sas;
-%include "&root/programs/config.sas";
-options mprint ls=max;
-
+%let project_folder=/_github/lexjansen/dataset-json-sas;
+%include "&project_folder/programs/config.sas";
 
 data work.class(label="%cstutilgetattribute(_cstDataSetName=sashelp.class, _cstAttribute=LABEL)");
   * attrib ITEMGROUPDATASEQ length=8 label="Record Identifier";
@@ -26,24 +24,26 @@ run;
 
 %write_datasetjson(
       dataset=work.class,
-      xptpath=C:\_github\lexjansen\dataset-json-sas\test\class.xpt,
-      jsonpath=class.json,
-      usemetadata=N);
+      xptpath=&project_folder\test\class.xpt,
+      jsonpath=&project_folder\test\class.json,
+      usemetadata=N,
+      pretty=PRETTY);
 
 proc datasets library=work noprint nolist nodetails;
   change class = class_old;
 quit;
 
 %read_datasetjson(
-  jsonpath=class.json,
-  dataoutlib=work,
-  dropseqvar=Y);
+  jsonpath=&project_folder\test\class.json,
+  datalib=work,
+  dropseqvar=Y
+);
 
 proc compare base=work.class_old compare=work.class;
 run;
 
 %write_datasetjson(
       dataset=work.class,
-      jsonpath=class_new.json,
+      jsonpath=&project_folder\test\class_new.json,
       usemetadata=N);
 
