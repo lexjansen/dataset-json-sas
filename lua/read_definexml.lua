@@ -51,7 +51,11 @@
     for i, it in ipairs(define.Study.MetaDataVersion.ItemDef) do
       items = {}
       items["Name"] = it['@Name']
-      if it.Description then items["Description"] = it.Description.TranslatedText[1] end
+      if it.Description 
+        then items["Description"] = it.Description.TranslatedText[1] 
+      elseif it['@Label']
+        then items["Description"] = it['@Label']
+      end
       items["DataType"] = it['@DataType']
       items["Length"] = tonumber(it['@Length'])
       items["DisplayFormat"] = it['@DisplayFormat'] 
@@ -74,7 +78,11 @@
       sas.append(dsid_t)
       sas.put_value(dsid_t, "OID", itgd['@OID'])
       sas.put_value(dsid_t, "name", itgd['@Name'])
-      if itgd.Description then sas.put_value(dsid_t, "label", itgd.Description.TranslatedText[1]) end
+      if itgd.Description 
+        then sas.put_value(dsid_t, "label", itgd.Description.TranslatedText[1]) 
+      elseif itgd['@Label']
+        then sas.put_value(dsid_t, "label", itgd['@Label'])
+      end
       sas.put_value(dsid_t, "domain", itgd['@Domain'])
       sas.put_value(dsid_t, "repeating", itgd['@Repeating'])
       sas.put_value(dsid_t, "isreferencedata", itgd['@IsReferenceData'])
@@ -92,7 +100,17 @@
         sas.put_value(dsid_c, "order", tonumber(it['@OrderNumber']))
         if tonumber(itemtbl[it['@ItemOID']].Length) ~= nil then sas.put_value(dsid_c, "length", itemtbl[it['@ItemOID']].Length) end
         if itemtbl[it['@ItemOID']].DisplayFormat ~= nil then sas.put_value(dsid_c, "DisplayFormat", itemtbl[it['@ItemOID']].DisplayFormat) end
-        if it['@KeySequence'] ~= nil then sas.put_value(dsid_c, "keySequence", tonumber(it['@KeySequence'])) end
+
+        if it['@KeySequence'] ~= nil then -- Define-XML 2.x
+          sas.put_value(dsid_c, "keySequence", tonumber(it['@KeySequence'])) 
+        end
+        if itgd['@DomainKeys'] and it['@KeySequence'] == nil then -- Define-XML 1.0
+          i = 0
+          for key in itgd['@DomainKeys']:gmatch('[^,%s]+') do
+            i = i + 1
+            if key == itemtbl[it['@ItemOID']].Name then sas.put_value(dsid_c, "keySequence", i) end
+          end  
+        end
         sas.put_value(dsid_c, "json_datatype", datatype_mapping[itemtbl[it['@ItemOID']].DataType])
         sas.update(dsid_c)
       end
