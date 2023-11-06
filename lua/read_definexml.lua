@@ -87,6 +87,9 @@
       sas.put_value(dsid_t, "repeating", itgd['@Repeating'])
       sas.put_value(dsid_t, "isreferencedata", itgd['@IsReferenceData'])
       sas.put_value(dsid_t, "structure", itgd['@Structure'])
+      if itgd['@DomainKeys'] then
+        sas.put_value(dsid_t, "domainkeys", itgd['@DomainKeys']) 
+      end
       sas.update(dsid_t)
       
       itemref = itgd.ItemRef

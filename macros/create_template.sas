@@ -28,7 +28,8 @@
          domain char(32),
          repeating char(3),
          isreferencedata char(3),
-         structure char(256)
+         structure char(256),
+         domainkeys char(256)
         );
     quit;
   %end;
