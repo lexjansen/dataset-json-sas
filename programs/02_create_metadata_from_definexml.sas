@@ -3,12 +3,6 @@
 %include "&project_folder/programs/config.sas";
 
 
-%macro CreateMetadataFromDefineXML(definexml=, metadatalib=);
-  proc lua infile='read_definexml';
-  run;
-%mend CreateMetadataFromDefineXML;
-
-
 /* Create metadata from Define-XML for ADaM */
 %CreateMetadataFromDefineXML(
    definexml=&project_folder/data/adam_xpt/define.xml, 

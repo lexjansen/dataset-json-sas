@@ -3,6 +3,7 @@
 %include "&project_folder/programs/config.sas";
 
 
+/* Get the paths of the JSON files */
 %util_gettree(
   dir=&project_folder/json_out/adam, 
   outds=work.dirtree_adam, 
@@ -34,6 +35,7 @@ proc delete data=work.dirtree_adam;
 run;
 
 
+/* Get the paths of the JSON files */
 %util_gettree(
   dir=&project_folder/json_out/sdtm, 
   outds=work.dirtree_sdtm, 

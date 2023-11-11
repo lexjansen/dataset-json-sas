@@ -10,5 +10,6 @@ work/
 *.log
 *.lst
 *.html
-*.sas7bdat
+*.sas7b*
 *.egp
+programs/*.cmd

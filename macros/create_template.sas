@@ -52,20 +52,32 @@
     quit;
   %end;
   
-  %if %upcase(&type) eq RESULTS %then %do;
+  %if %upcase(&type) eq COMPARE_RESULTS %then %do;
     proc sql;
     create table &out
       (
-       dataset_name char(32),
-       baselib char(8),
-       baselib_path char(1024),
-       complib char(8),
-       complib_path char(1024),
-       result num,
-       resultc char(512)
+       dataset_name char(32) label="SAS Dataset Name",
+       baselib char(8) label="Base Library",
+       baselib_path char(1024) label="Base Library Path",
+       complib char(8) label="Compare Library",
+       complib_path char(1024) label="Compare Library Path",
+       result_code num label="Compare Result (Numeric)",
+       result_character char(512) label="Compare Result (Character)"
       );
     quit;
   %end;
   
+  %if %upcase(&type) eq VALIDATION_RESULTS %then %do;
+    proc sql;
+    create table &out
+      (
+       json_file char(1024) label="Dataset-JSON File",
+       json_schema char(1024) label="Dataset-JSON Schema",
+       result_code num label="Validation Result (Numeric)",
+       result_character char(512) label="Compare Result (Character)"
+      );
+    quit;
+  %end;
+
 %mend;
   
