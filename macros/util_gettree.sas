@@ -1,4 +1,10 @@
-%macro util_gettree(dir=, outds=work.dirtree, where=);
+%macro util_gettree(
+  dir=, 
+  outds=work.dirtree, 
+  where=,
+  keep=,
+  drop=ext
+  );
 
   /*
   credit:
@@ -36,7 +42,9 @@
     rc=filename('tmp');
   run;
   
-  data &outds;
+  data &outds(%if %sysevalf(%superq(keep)=, boolean)=0 %then keep=&keep;
+              %if %sysevalf(%superq(drop)=, boolean)=0 %then drop=&drop;
+              );
     set &outds %if %sysevalf(%superq(where)=, boolean)=0 %then (where=(&where));;
   run;  
 

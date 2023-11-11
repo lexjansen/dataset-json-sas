@@ -4,12 +4,12 @@
 
 
 ods listing close;
-ods html5 file="&project_folder/programs/05_compare_data_detail.html";
-title01 "Compare Detail";
+ods html5 file="&project_folder/programs/05_compare_data_detail_&today_iso8601..html";
+title01 "Compare Detail - &now_iso8601";
 
-/* Find the names of the datasets */
+/* Get the names of the SAS datasets */
 proc sql noprint;
-  create table members 
+  create table work.members 
   as select upcase(memname) as name
   from dictionary.tables
   where libname="DATAADAM" and memtype="DATA"
@@ -20,26 +20,26 @@ quit;
   %put WAR%str(NING): No datasets to compare.;
 %end;  
 
-%create_template(type=RESULTS, out=work.results);
+%create_template(type=COMPARE_RESULTS, out=results.dataset_compare_results);
 
 data _null_;
   length code $400;
-  set members;
+  set work.members;
   name=lowcase(name);
   code=cats('%nrstr(%util_comparedata(',
                       'baselib=dataadam, ',
                       'complib=outadam, ',
                       'dsname=', name, ', ',
                       'compareoptions=%str(criterion=0.00000001 method=absolute), ',
-                      'resultds=work.results, ',
+                      'resultds=results.dataset_compare_results, ',
                       'detailall=N',
                   ');)');
   call execute(code);
 run;
 
-/* Find the names of the datasets */
+/* Get the names of the SAS datasets */
 proc sql noprint;
-  create table members 
+  create table work.members 
   as select upcase(memname) as name
   from dictionary.tables
   where libname="DATASDTM" and memtype="DATA"
@@ -52,32 +52,33 @@ quit;
 
 data _null_;
   length code $400;
-  set members;
+  set work.members;
   name=lowcase(name);
   code=cats('%nrstr(%util_comparedata(',
                       'baselib=datasdtm, ',
                       'complib=outsdtm, ',
                       'dsname=', name, ', ',
                       'compareoptions=%str(criterion=0.00000001 method=absolute), ',
-                      'resultds=work.results, ',
+                      'resultds=results.dataset_compare_results, ',
                       'detailall=N',
                   ');)');
   call execute(code);
 run;
 
-proc delete data=members;
-run;
-
 ods html5 close;
-ods html5 file="&project_folder/programs/05_compare_data_summary.html";
+ods html5 file="&project_folder/programs/05_compare_data_summary_&today_iso8601..html";
 
-proc print data=work.results;
-  title01 "Compare Summary";
-run;
+  proc print data=results.dataset_compare_results label;
+    title01 "Compare Summary - &now_iso8601";
+  run;
   
 ods html5 close;
 ods listing;
 title01;
+
+
+proc delete data=work.members;
+run;
 
 /*
 libname dataaadam clear;

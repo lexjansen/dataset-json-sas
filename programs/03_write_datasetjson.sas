@@ -7,6 +7,7 @@
 %let _studyOID=%str(TDF_ADaM.ADaMIG.1.1);
 %let _metaDataVersionOID=%str(MDV.TDF_ADaM.ADaMIG.1.1);
 
+/* Get the paths of the XPT files */
 %util_gettree(
   dir=&project_folder/data/adam_xpt, 
   outds=work.dirtree_adam, 
@@ -48,6 +49,7 @@ run;
 %let _studyOID=%str(cdisc.com/CDISCPILOT01);
 %let _metaDataVersionOID=%str(MDV.MSGv2.0.SDTMIG.3.3.SDTM.1.7);
 
+/* Get the paths of the XPT files */
 %util_gettree(
   dir=&project_folder/data/sdtm_xpt, 
   outds=work.dirtree_sdtm, 
