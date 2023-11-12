@@ -21,7 +21,12 @@ The purpose of the test programs is to demonstrate the macros. The user at a min
 Other updates in the test programs may be needed to make them work in a specific SAS environment. The macros should work in any SAS environment with at least SAS 9.4 (TS1M7).
 This was tested on Windows 10 and SAS OnDemand (Linux).
 
-The **06_validate_datasetjson.sas** program assumes that your SAS environment is able to run Python objects. Python objects require environment variables to be set before you can use Python objects in your SAS environment. If the environment variables have not been set, or if they have been set incorrectly,  SAS returns an error when you publish your Python code. Environment variable related errors can look like these examples:
+The **06_validate_datasetjson.sas** program assumes that your SAS environment is able to run Python objects. 
+Check the programs/config.sas file for the Python cofiguration.
+Python objects require environment variables to be set before you can use Python objects in your SAS environment. 
+If the environment variables have not been set, or if they have been set incorrectly, 
+SAS returns an error when you publish your Python code. 
+Environment variable related errors can look like these examples:
 
 ```TEXT
 ERROR: MAS_PYPATH environment variable is undefined.

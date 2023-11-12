@@ -1,4 +1,4 @@
-proc fcmp outlib=macros.datasetjson_funcs.python;
+proc fcmp outlib=&fcmplib..datasetjson_funcs.python;
 
   subroutine validate_datasetjson(jsonfile $, jsonschema $, result_code, result_character $);
   

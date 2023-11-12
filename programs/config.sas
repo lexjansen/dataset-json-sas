@@ -20,4 +20,16 @@ libname metasvsd "&project_folder/metadata_save/sdtm";
 libname results "&project_folder/results";
 libname macros "&project_folder/macros";
 
-options cmplib=macros.datasetjson_funcs;
+
+%* This is needed to be able to run Python;
+%* Update to your own locations           ;
+options set=MAS_PYPATH="&project_folder/venv/Scripts/python.exe";
+options set=MAS_M2PATH="%sysget(SASROOT)/tkmas/sasmisc/mas2py.py";
+
+%let fcmplib=sasuser;
+/* Compile the validate_datasetjson function if not already there */
+%if not %sysfunc(exist(&fcmplib..datasetjson_funcs)) %then %do;
+  %include "&project_folder/macros/validate_datasetjson.sas";
+%end;
+
+options cmplib=&fcmplib..datasetjson_funcs;

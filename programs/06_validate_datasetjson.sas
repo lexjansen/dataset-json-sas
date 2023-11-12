@@ -2,15 +2,11 @@
 %let project_folder=/_github/lexjansen/dataset-json-sas;
 %include "&project_folder/programs/config.sas";
 
-%* This is needed to be able to run Python;
-%* Update to your own locations           ;
-options set=MAS_PYPATH="&project_folder/venv/Scripts/python.exe";
-options set=MAS_M2PATH="%sysget(sasroot)/tkmas/sasmisc/mas2py.py";
-
 
 
 /*
 This program assumes that your SAS environment is able to run Python objects.
+Check the programs/config.sas file for the Python cofiguration.
 
 Python objects require environment variables to be set before you can use Python objects in your SAS environment. 
 If the environment variables have not been set, or if they have been set incorrectly, 
@@ -31,11 +27,6 @@ More information:
   Configuring SAS to Run the Python Language:
   https://go.documentation.sas.com/doc/en/bicdc/9.4/biasag/n1mquxnfmfu83en1if8icqmx8cdf.htm
 */
-
-/* Compile the validate_datasetjson function if not already there */
-%if not %sysfunc(exist(macros.datasetjson_funcs)) %then %do;
-  %include "&project_folder/macros/validate_datasetjson.sas";
-%end;
 
 /* Get the path of the JSON file */
 %util_gettree(
