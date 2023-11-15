@@ -18,8 +18,14 @@ def validate_json(json_data, schema_file):
         JSD.validate(json_data, schema=schema)
         print("  Ok!")
         return True
-    except Exception as e:
-        print(f"Error encountered while validating json schema: {e}")
+
+    except JSD.exceptions.ValidationError as e:
+        print(f"Error encountered while validating against JSON schema:")
+        # print(f"{e}")
+        print(f"{e.message}")
+        print(f"{e.schema['description']}")
+        print(f"{e.schema_path}")
+        print(f"{e.json_path}")
         return False
 
 def parse_args():
@@ -40,5 +46,11 @@ if __name__ == "__main__":
           isJson = f.find(".json")
           if isJson > 0:
             print(f"Validating {f}")
-            validate_json(json.load(open(f, encoding="utf8")), schemafile)
+            try:
+              validate_json(json.load(open(f, encoding="utf8")), schemafile)
+            except json.JSONDecodeError as e:
+                print(f"Error encountered while JSON file:")
+                print(f"{e.msg} at position {e.pos}, row {e.lineno}, column {e.colno}")
+
+
 

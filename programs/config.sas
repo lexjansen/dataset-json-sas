@@ -26,10 +26,7 @@ libname macros "&project_folder/macros";
 options set=MAS_PYPATH="&project_folder/venv/Scripts/python.exe";
 options set=MAS_M2PATH="%sysget(SASROOT)/tkmas/sasmisc/mas2py.py";
 
-%let fcmplib=sasuser;
-/* Compile the validate_datasetjson function if not already there */
-%if not %sysfunc(exist(&fcmplib..datasetjson_funcs)) %then %do;
-  %include "&project_folder/macros/validate_datasetjson.sas";
-%end;
+%let fcmplib=work;
+%include "&project_folder/macros/validate_datasetjson.sas";
 
 options cmplib=&fcmplib..datasetjson_funcs;

@@ -74,7 +74,8 @@
        json_file char(1024) label="Dataset-JSON File",
        json_schema char(1024) label="Dataset-JSON Schema",
        result_code num label="Validation Result (Numeric)",
-       result_character char(512) label="Compare Result (Character)"
+       result_character char(255) label="Validation Result (Character)",
+       result_path char(255) label="JSON Path"
       );
     quit;
   %end;
