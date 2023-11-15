@@ -1,13 +1,15 @@
 proc fcmp outlib=&fcmplib..datasetjson_funcs.python;
 
-  subroutine validate_datasetjson(jsonfile $, jsonschema $, result_code, result_character $);
+  subroutine validate_datasetjson(jsonfile $, jsonschema $, result_code, result_character $, result_path $);
   
-    length jsonfile jsonschema $ 1024 result_character resultMessage $ 2000 result_code 8;
-    outargs result_code, result_character;
+    length jsonfile jsonschema $ 1024 
+           result_character resultMessage result_path resultPath $ 255 
+           result_code 8;
+    outargs result_code, result_character, result_path;
     declare object py4(python);
     submit into py4;
     def validatejson(jsonfile, jsonschema):
-      """Output: resultCode, resultMessage"""
+      """Output: resultCode, resultMessage, resultPath"""
       
       import json
       import jsonschema as JSD
@@ -19,11 +21,12 @@ proc fcmp outlib=&fcmplib..datasetjson_funcs.python;
         JSD.validate(jsonf, schema=schema)
         resultCode = 0
         resultMessage = "The document validated successfully"
-        return resultCode, resultMessage
+        resultPath = ""
       except Exception as e:
-        resultMessage = str(e)
         resultCode = 1
-        return resultCode, resultMessage
+        resultMessage = str(e.message) + " (" + (e.schema['description']) +")"
+        resultPath = str(e.json_path)
+      return resultCode, resultMessage, resultPath
         
     endsubmit;
     
@@ -31,6 +34,7 @@ proc fcmp outlib=&fcmplib..datasetjson_funcs.python;
     rc = py4.call('validatejson', jsonfile, jsonschema);
     result_code = py4.results['resultCode'];
     result_character = py4.results['resultMessage'];
+    result_path = py4.results['resultPath'];
   endsub;
 
 run;

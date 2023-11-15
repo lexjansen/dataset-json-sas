@@ -38,18 +38,18 @@ More information:
 
 data work.dirtree_sdtm;
   set work.dirtree_sdtm(rename=fullpath=json_file);
-  length result_code 8 result_character $255 json_file json_schema $512;
+  length result_code 8 result_character result_path $255 json_file json_schema $512;
   retain json_schema "&project_folder/schema/dataset.schema.json";
-  call missing(result_code, result_character);
+  call missing(result_code, result_character, result_path);
 
-  call validate_datasetjson(json_file, json_schema, result_code, result_character);
+  call validate_datasetjson(json_file, json_schema, result_code, result_character, result_path);
   if result_code = 1 then putlog 'ERR' 'OR:' json_file= result_character;
 run;
 
 
 /* Get the paths of the JSON files */
 %util_gettree(
-  dir=&project_folder/json_out/sdtm, 
+  dir=&project_folder/json_out/adam, 
   outds=work.dirtree_adam, 
   where=%str(ext="json" and dir=0),
   keep=fullpath
@@ -57,12 +57,12 @@ run;
 
 data work.dirtree_adam;
   set work.dirtree_adam(rename=fullpath=json_file);
-  length result_code 8 result_character $255 json_file json_schema $512;
+  length result_code 8 result_character result_path $255 json_file json_schema $512;
   retain json_schema "&project_folder/schema/dataset.schema.json";
-  call missing(result_code, result_character);
+  call missing(result_code, result_character, result_path);
 
-  call validate_datasetjson(json_file, json_schema, result_code, result_character);
-  if result_code = 1 then putlog 'ERR' 'OR:' json_file= result_character;
+  call validate_datasetjson(json_file, json_schema, result_code, result_character, result_path);
+  if result_code = 1 then putlog 'ERR' 'OR:' json_file= result_character= result_path=;
 run;
 
 
