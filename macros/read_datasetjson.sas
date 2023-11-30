@@ -77,7 +77,12 @@
   %if %sysfunc(exist(out_&_Random..clinicaldata))
     %then %let _clinicalreferencedata_=out_&_Random..clinicaldata;
     %else %if %sysfunc(exist(out_&_Random..referencedata))
-            %then %let _clinicalreferencedata_=out_&_Random..referencedata;
+      %then %let _clinicalreferencedata_=out_&_Random..referencedata;
+      %else %do;
+        %put ERR%str(OR): [&sysmacroname] JSON file &jsonpath contains no "clinicalData" or "referenceData" key.;
+        %goto exit_macro;
+      %end;  
+
 
   proc sql noprint;
     create table members
@@ -99,6 +104,24 @@
     if index(upcase(name), 'ITEMGROUPDATA_') then
       call symputx('_itemgroupdata_', strip(name));
   run;
+
+  %if %sysevalf(%superq(_itemgroupdata_)=, boolean)
+    %then %do;
+      %put ERR%str(OR): [&sysmacroname] JSON file &jsonpath contains no "itemGroupData" key.;
+      %goto exit_macro;      
+    %end;  
+
+  %if %sysevalf(%superq(_items_)=, boolean)
+    %then %do;
+      %put ERR%str(OR): [&sysmacroname] JSON file &jsonpath contains no "items" key.;
+      %goto exit_macro;      
+    %end;  
+
+  %if %sysevalf(%superq(_itemdata_)=, boolean)
+    %then %do;
+      %put ERR%str(OR): [&sysmacroname] JSON file &jsonpath contains no "itemData" key.;
+      %goto exit_macro;      
+    %end;  
 
   proc delete data=work.members;
   run;
