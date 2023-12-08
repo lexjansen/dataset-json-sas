@@ -28,7 +28,7 @@
     CurrentDataTime
     _dataset_to_write;
 
-  
+
   %let _Random=%sysfunc(putn(%sysevalf(%sysfunc(ranuni(0))*10000,floor),z4.));
 
   %* Save options;
@@ -156,19 +156,19 @@
           _label = lowcase(name);
           putlog "WAR" "NING: [&sysmacroname] Missing label for variable: " name +(-1) ", " oid= +(-1) ". " _label "will be used as label.";
           label = _label;
-        end;  
+        end;
         if missing(type) then putlog "WAR" "NING: [&sysmacroname] Missing type for variable: " name +(-1) ", " oid=;
     run;
- 
-     
+
+
     /* Check lengths */
     proc contents noprint varnum data=&dataset_new
       out=work.column_metadata_sas(keep=name type length varnum);
     run;
-    
+
     proc sql noprint;
       create table work.column_metadata as
-      select 
+      select
         t2.name as sas_name,
         t2.length as sas_length,
         t2.type as sas_type,
@@ -180,24 +180,24 @@
         order by varnum
         ;
     quit ;
-    
+
     data work.column_metadata(drop=sas_type sas_length sas_name order varnum);
       set work.column_metadata;
-      if (sas_type=2) and (not missing(length)) and (length lt sas_length) 
-        then putlog 'WAR' 'NING:' "&dataset_name.." name +(-1) ": metadata length is smaller than SAS length - " 
+      if (sas_type=2) and (not missing(length)) and (length lt sas_length)
+        then putlog 'WAR' 'NING:' "&dataset_name.." name +(-1) ": metadata length is smaller than SAS length - "
                     length= +(-1) ", SAS length=" sas_length;
       if missing(name) then do;
-        putlog 'WAR' 'NING:' "&dataset_name.." sas_name 
-                +(-1) ": variable is missing from metadata. SAS metadata will be used."; 
+        putlog 'WAR' 'NING:' "&dataset_name.." sas_name
+                +(-1) ": variable is missing from metadata. SAS metadata will be used.";
         OID = cats("IT", ".", upcase("&dataset_name"), ".", upcase(sas_name));
         name = sas_name;
         length = sas_length;
         if sas_type=1 then type="float";
                       else type="string";
-        label = propcase(name);              
-      end;  
-    run;  
- 
+        label = propcase(name);
+      end;
+    run;
+
     proc delete data=work._column_metadata;
     run;
     proc delete data=work.column_metadata_sas;
@@ -227,18 +227,20 @@
                     else type="string";
       if formatl gt 0 then displayFormat=cats(displayFormat, put(formatl, best.), ".");
       if formatd gt 0 then displayFormat=cats(displayFormat, put(formatd, best.));
+      %* put a dot on the end of format if we are still missing it;
+      if index(displayFormat,'.')=0 then displayFormat=strip(displayFormat)||'.';
       if missing(label) then do;
         _label = propcase(name);
         putlog "WAR" "NING: [&sysmacroname] Missing label for variable " name +(-1) ", " oid= +(-1) ". " _label "will be used as label.";
         label = _label;
-      end;  
+      end;
       if missing(type) then putlog "WAR" "NING: [&sysmacroname] Missing type for variable " name +(-1) ", "  oid=;
     run;
 
   %end;
 
   %if %cstutilcheckvarsexist(_cstDataSetName=&dataset_new, _cstVarList=ITEMGROUPDATASEQ) %then %do;
-  /* There already is a ITEMGROUPDATASEQ variable */  
+  /* There already is a ITEMGROUPDATASEQ variable */
     %put %str(WAR)NING: [&sysmacroname] Dataset &dataset_new already contains a variable ITEMGROUPDATASEQ.;
     %if %cstutilgetattribute(_cstDataSetName=&dataset_new, _cstVarName=ITEMGROUPDATASEQ, _cstAttribute=VARTYPE) eq C %then %do;
       /* The datatype of the ITEMGROUPDATASEQ variable is character*/
@@ -259,7 +261,7 @@
     quit;
 
     data work.column_metadata;
-      set itemgroupdataseq_metadata 
+      set itemgroupdataseq_metadata
           work.column_metadata(where=(upcase(name) ne "ITEMGROUPDATASEQ"));
     run;
 
@@ -286,7 +288,7 @@
     %put %sysfunc(filename(fref,%sysfunc(pathname(xpt&_Random))));
     %put %sysfunc(fdelete(&fref));
     libname xpt&_Random clear;
-    
+
   %end;
 
   filename json&_random "&jsonpath";
@@ -341,7 +343,7 @@
       EXPORT work.column_metadata / KEYS;
     WRITE CLOSE
     */
- 
+
     WRITE VALUE "itemData";
     WRITE OPEN ARRAY;
     EXPORT &_dataset_to_write / NOKEYS;
