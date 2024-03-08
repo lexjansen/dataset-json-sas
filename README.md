@@ -60,6 +60,12 @@ Documentation is in the **doc** folder:
 - [Detailed paper about this SAS Dataset-JSON implementation](doc/Working_with_Dataset-JSON_using_SAS.pdf)
 - [Detailed slides about this SAS Dataset-JSON implementation](doc/Dataset-JSON-SAS-implementation.pdf)
 
+## Example Data
+
+- ADaM: ADaM Metadata Submission Guidelines v1.0, 18 April 18 2023
+- SDTM: SDTM Metadata Submission Guidelines v2.0, published 30 March 2021
+- SEND: CBER Pilot
+
 ## Additional programs
 
 The **test_big_xpt** folder contains a SAS program to create a large XPT file (5Gb) from the XPT file **data/sdtm/lb.xpt**. The program will then create a Dataset-JSON file from that large XPT file, and also convert that large Dataset-JSON file back to a SAS dataset.
