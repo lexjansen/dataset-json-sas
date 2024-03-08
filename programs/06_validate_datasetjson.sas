@@ -28,26 +28,7 @@ More information:
   https://go.documentation.sas.com/doc/en/bicdc/9.4/biasag/n1mquxnfmfu83en1if8icqmx8cdf.htm
 */
 
-/* Get the path of the JSON file */
-%util_gettree(
-  dir=&project_folder/json_out/sdtm, 
-  outds=work.dirtree_sdtm, 
-  where=%str(ext="json" and dir=0),
-  keep=fullpath
-);
-
-data work.dirtree_sdtm;
-  set work.dirtree_sdtm(rename=fullpath=json_file);
-  length result_code 8 result_character result_path $255 json_file json_schema $512;
-  retain json_schema "&project_folder/schema/dataset.schema.json";
-  call missing(result_code, result_character, result_path);
-
-  call validate_datasetjson(json_file, json_schema, result_code, result_character, result_path);
-  if result_code = 1 then putlog 'ERR' 'OR:' json_file= result_character;
-run;
-
-
-/* Get the paths of the JSON files */
+/* Get the paths of the ADaM JSON filess */
 %util_gettree(
   dir=&project_folder/json_out/adam, 
   outds=work.dirtree_adam, 
@@ -66,10 +47,50 @@ data work.dirtree_adam;
 run;
 
 
+/* Get the path of the SDTM JSON files */
+%util_gettree(
+  dir=&project_folder/json_out/sdtm, 
+  outds=work.dirtree_sdtm, 
+  where=%str(ext="json" and dir=0),
+  keep=fullpath
+);
+
+data work.dirtree_sdtm;
+  set work.dirtree_sdtm(rename=fullpath=json_file);
+  length result_code 8 result_character result_path $255 json_file json_schema $512;
+  retain json_schema "&project_folder/schema/dataset.schema.json";
+  call missing(result_code, result_character, result_path);
+
+  call validate_datasetjson(json_file, json_schema, result_code, result_character, result_path);
+  if result_code = 1 then putlog 'ERR' 'OR:' json_file= result_character;
+run;
+
+
+/* Get the path of the SEND JSON files */
+%util_gettree(
+  dir=&project_folder/json_out/send, 
+  outds=work.dirtree_send, 
+  where=%str(ext="json" and dir=0),
+  keep=fullpath
+);
+
+data work.dirtree_send;
+  set work.dirtree_send(rename=fullpath=json_file);
+  length result_code 8 result_character result_path $255 json_file json_schema $512;
+  retain json_schema "&project_folder/schema/dataset.schema.json";
+  call missing(result_code, result_character, result_path);
+
+  call validate_datasetjson(json_file, json_schema, result_code, result_character, result_path);
+  if result_code = 1 then putlog 'ERR' 'OR:' json_file= result_character;
+run;
+
+
+
 /* Report the results */
 %create_template(type=VALIDATION_RESULTS, out=results.schema_validation_results);
 data results.schema_validation_results;
-  set results.schema_validation_results work.dirtree_sdtm work.dirtree_adam;
+  set results.schema_validation_results work.dirtree_adam work.dirtree_sdtm work.dirtree_send;
+  json_file = translate(json_file, '/', '\');
 run;  
 
 ods listing close;
@@ -83,7 +104,7 @@ ods html5 close;
 ods listing;
 title01;
 
-proc delete data=work.dirtree_sdtm work.dirtree_adam;
+proc delete data=work.dirtree_adam work.dirtree_sdtm work.dirtree_send;
 run;
 
 
