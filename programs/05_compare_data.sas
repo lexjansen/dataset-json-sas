@@ -7,6 +7,7 @@ ods listing close;
 ods html5 file="&project_folder/programs/05_compare_data_detail_&today_iso8601..html";
 title01 "Compare Detail - &now_iso8601";
 
+/* Compare ADaM datasets */
 /* Get the names of the SAS datasets */
 proc sql noprint;
   create table work.members 
@@ -37,6 +38,8 @@ data _null_;
   call execute(code);
 run;
 
+
+/* Compare SDTM datasets */
 /* Get the names of the SAS datasets */
 proc sql noprint;
   create table work.members 
@@ -65,6 +68,36 @@ data _null_;
   call execute(code);
 run;
 
+
+/* Compare SEND datasets */
+/* Get the names of the SAS datasets */
+proc sql noprint;
+  create table work.members 
+  as select upcase(memname) as name
+  from dictionary.tables
+  where libname="DATASEND" and memtype="DATA"
+  ;
+quit;
+
+%if %cstutilnobs(_cstDataSetName=members)=0 %then %do;
+  %put WAR%str(NING): No datasets to compare.;
+%end;  
+
+data _null_;
+  length code $400;
+  set work.members;
+  name=lowcase(name);
+  code=cats('%nrstr(%util_comparedata(',
+                      'baselib=datasend, ',
+                      'complib=outsend, ',
+                      'dsname=', name, ', ',
+                      'compareoptions=%str(criterion=0.00000001 method=absolute), ',
+                      'resultds=results.dataset_compare_results, ',
+                      'detailall=N',
+                  ');)');
+  call execute(code);
+run;
+
 ods html5 close;
 ods html5 file="&project_folder/programs/05_compare_data_summary_&today_iso8601..html";
 
@@ -85,4 +118,6 @@ libname dataaadam clear;
 libname outadam clear;
 libname datasdtm clear;
 libname outsdtm clear;
+libname datasend clear;
+libname outsend clear;
 */
