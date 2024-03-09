@@ -64,7 +64,7 @@ Documentation is in the **doc** folder:
 
 - ADaM: ADaM Metadata Submission Guidelines v1.0, 18 April 18 2023
 - SDTM: SDTM Metadata Submission Guidelines v2.0, published 30 March 2021
-- SEND: CBER Pilot
+- SEND: CBER Pilot (with updated stylesheet)
 
 ## Additional programs
 
