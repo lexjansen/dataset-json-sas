@@ -16,6 +16,8 @@
 %* @param  _cstNotExistVarList - optional - An existing macro variable to         *;
 %*            contain the variables that could not be found in the data set.      *;
 %*                                                                                *;
+%* @history 2024-07-24 Made i macro variable local                                *;
+%*                                                                                *;
 %* @since 1.7                                                                     *;
 %* @exposure external                                                             *;
 
@@ -25,7 +27,7 @@
   _cstNotExistVarList=
   ) / des = 'CST: Check if variables exist in data set';
   
-  %local _cstdsid _cstrc _cst_util_exists _cst_util_var _cst_util_noexistlist;
+  %local i _cstdsid _cstrc _cst_util_exists _cst_util_var _cst_util_noexistlist;
   
   %****************************************************;
   %*  Check for missing parameters that are required  *;

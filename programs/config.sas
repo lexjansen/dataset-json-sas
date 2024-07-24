@@ -34,3 +34,5 @@ options set=MAS_M2PATH="%sysget(SASROOT)/tkmas/sasmisc/mas2py.py";
 %include "&project_folder/macros/validate_datasetjson.sas";
 
 options cmplib=&fcmplib..datasetjson_funcs;
+
+options mprint nomlogic nosymbolgen;

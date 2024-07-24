@@ -33,7 +33,7 @@ data _null_;
                       'dsname=', name, ', ',
                       'compareoptions=%str(criterion=0.00000001 method=absolute), ',
                       'resultds=results.dataset_compare_results, ',
-                      'detailall=N',
+                      'detaillevel=2',
                   ');)');
   call execute(code);
 run;
@@ -63,7 +63,7 @@ data _null_;
                       'dsname=', name, ', ',
                       'compareoptions=%str(criterion=0.00000001 method=absolute), ',
                       'resultds=results.dataset_compare_results, ',
-                      'detailall=N',
+                      'detaillevel=2',
                   ');)');
   call execute(code);
 run;
@@ -93,7 +93,7 @@ data _null_;
                       'dsname=', name, ', ',
                       'compareoptions=%str(criterion=0.00000001 method=absolute), ',
                       'resultds=results.dataset_compare_results, ',
-                      'detailall=N',
+                      'detaillevel=2',
                   ');)');
   call execute(code);
 run;

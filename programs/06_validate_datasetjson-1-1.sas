@@ -2,8 +2,8 @@
 %let project_folder=/_github/lexjansen/dataset-json-sas;
 %include "&project_folder/programs/config.sas";
 
-%let json_schema=&project_folder/schema/dataset.schema1-0.json;
-%let json_folder=&project_folder/json_out;
+%let json_schema=&project_folder/schema/dataset.schema1-1-0.json;
+%let json_folder=&project_folder/json_out-1-1;
 
 /*
 This program assumes that your SAS environment is able to run Python objects.
@@ -95,7 +95,7 @@ data results.schema_validation_results;
 run;
 
 ods listing close;
-ods html5 file="&project_folder/programs/06_validate_datasetjson_results_&today_iso8601..html";
+ods html5 file="&project_folder/programs/06_validate_datasetjson_results_&today_iso8601.-1-1.html";
 
   proc print data=results.schema_validation_results label;
     title01 "Validation Results - &now_iso8601";

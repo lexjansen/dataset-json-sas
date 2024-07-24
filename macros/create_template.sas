@@ -7,10 +7,11 @@
          fileoid char(128),
          creationdatetime char(32),
          asofdatetime char(32),
+         modifieddatetime char(32),
          datasetJSONVersion char(32),
          originator char(128),
          sourcesystem char(128),
-         sourcesystemversion char(129),
+         sourcesystemversion char(128),
          studyoid char(128),
          metadataversionoid char(128),
          metaDataRef char(256)
@@ -23,9 +24,11 @@
       create table &out
         (
          oid char(128),
+         records num,
          name char(32),
          label char(256),
          domain char(32),
+         datasettype char(128),
          repeating char(3),
          isreferencedata char(3),
          structure char(256),
@@ -45,9 +48,11 @@
        order num,
        xml_datatype char(32),
        json_datatype char(32),
+       targetDataType char(32),
        length num,
-       displayformat char(32),
-       keysequence num
+       json_length num,
+       displayFormat char(32),
+       keySequence num
       );
     quit;
   %end;

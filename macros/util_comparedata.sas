@@ -4,7 +4,7 @@
   dsname=, 
   compareoptions=%str(listall criterion=0.00000001 method=absolute),
   resultds=,
-  detailall=N
+  detaillevel=2
   );
 
   %local compinfo _Random today_iso8601;
@@ -49,20 +49,15 @@
 
   %if &compinfo ne 0 %then %do;
     %put %str(WARN)ING: Differences for dataset &dsname - &result_character (SysInfo=&compinfo);
-
-    proc compare base=&baselib..&dsname compare=&complib..&dsname listall %NRBQUOTE(&compareoptions);
-      title "Compare results for dataset %upcase(&dsname) - &today_iso8601";
-    run;
-
   %end;
   %else %do;
     %put %str(NOT)E: No differences for dataset &dsname - &result_character (SysInfo=&compinfo);
+  %end;
 
-    %if "%substr(%upcase(&detailall),1,1)" eq "Y" %then %do;
-      proc compare base=&baselib..&dsname compare=&complib..&dsname listall %NRBQUOTE(&compareoptions);
-        title "Compare results for dataset %upcase(&dsname)";
-      run;
-    %end;
+  %if &compinfo ge &detaillevel %then %do;
+    proc compare base=&baselib..&dsname compare=&complib..&dsname listall %NRBQUOTE(&compareoptions);
+      title "Compare results for dataset %upcase(&dsname) - &today_iso8601";
+    run;
   %end;
 
   %if %sysevalf(%superq(resultds)=, boolean)=0 %then %do;

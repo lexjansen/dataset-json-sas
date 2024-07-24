@@ -2,7 +2,7 @@
 
  %* This macro avoids creating an attribute when the value is missing;
 
- %local dset_id nobs nvars varlist vartype i _cnt code _varnum _value;
+ %local dset_id nobs nvars varlist vartype i _cnt code _varnum _value dataset_name;
  %let dset_id =%sysfunc(open(&dset.));
  %let nobs=%sysfunc(attrn(&dset_id.,NOBS));
  %let nvars=%sysfunc(attrn(&dset_id, NVARS));
@@ -21,9 +21,12 @@
  %do _cnt=1 %to &nobs;
    %let rc=%sysfunc(fetchobs(&dset_id,&_cnt));
    %let code=;
+
    %do i=1 %to &nvars;
+    
      %let _varnum=%sysfunc(varnum(&dset_id, %scan(&varlist, &i)));
      %let _varname=%scan(&varlist, &i);
+     
      %if %scan(&vartype, &i) EQ C
        %then %do;
          %let _value=%nrbquote(%sysfunc(getvarc(&dset_id, &_varnum)));
@@ -33,6 +36,7 @@
          %let _value=%sysfunc(getvarn(&dset_id, &_varnum));
          %if &_value ne %str(.) %then %let code=&code "&_varname" &_value;
        %end;
+   
    %end;
 
    WRITE OPEN OBJECT;

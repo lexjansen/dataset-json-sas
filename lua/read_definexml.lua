@@ -18,20 +18,20 @@
             incompleteDate = "string",
             incompleteTime = "string",
             integer = "integer",
-            float = "float"            
+            float = "float"
           }
 
     sas.filename('define', sas.symget("definexml"))
-    
+
     local metadatalib = sas.symget("metadatalib")
-    
-    
+
+
     local define_string = fileutils.read('define')
     local define = sas.xml_parse(define_string)
     sas.symput('studyOID',define.Study["@OID"])
     sas.symput('metaDataVersionOID', define.Study.MetaDataVersion["@OID"])
 
-    sas.submit[[ 
+    sas.submit[[
        %create_template(type=STUDY, out=@metadatalib@.metadata_study);
     ]]
     dsid_s = sas.open(metadatalib..'.metadata_study', "u")
@@ -51,25 +51,25 @@
     for i, it in ipairs(define.Study.MetaDataVersion.ItemDef) do
       items = {}
       items["Name"] = it['@Name']
-      if it.Description 
-        then items["Description"] = it.Description.TranslatedText[1] 
+      if it.Description
+        then items["Description"] = it.Description.TranslatedText[1]
       elseif it['@Label']
         then items["Description"] = it['@Label']
       end
       items["DataType"] = it['@DataType']
       items["Length"] = tonumber(it['@Length'])
-      items["DisplayFormat"] = it['@DisplayFormat'] 
+      items["DisplayFormat"] = it['@DisplayFormat']
       itemtbl[it['@OID']] = items
     end
 
     -- print(tableutils.tprint(itemtbl))
     -- print(tableutils.tprint(define.Study.MetaDataVersion.ItemGroupDef))
 
-    sas.submit[[ 
+    sas.submit[[
        %create_template(type=TABLES, out=@metadatalib@.metadata_tables);
     ]]
     dsid_t = sas.open(metadatalib..'.metadata_tables', "u")
-    sas.submit[[ 
+    sas.submit[[
        %create_template(type=COLUMNS, out=@metadatalib@.metadata_columns);
     ]]
     dsid_c = sas.open(metadatalib..'.metadata_columns', "u")
@@ -78,8 +78,8 @@
       sas.append(dsid_t)
       sas.put_value(dsid_t, "OID", itgd['@OID'])
       sas.put_value(dsid_t, "name", itgd['@Name'])
-      if itgd.Description 
-        then sas.put_value(dsid_t, "label", itgd.Description.TranslatedText[1]) 
+      if itgd.Description
+        then sas.put_value(dsid_t, "label", itgd.Description.TranslatedText[1])
       elseif itgd['@Label']
         then sas.put_value(dsid_t, "label", itgd['@Label'])
       end
@@ -88,10 +88,13 @@
       sas.put_value(dsid_t, "isreferencedata", itgd['@IsReferenceData'])
       sas.put_value(dsid_t, "structure", itgd['@Structure'])
       if itgd['@DomainKeys'] then
-        sas.put_value(dsid_t, "domainkeys", itgd['@DomainKeys']) 
+        sas.put_value(dsid_t, "domainkeys", itgd['@DomainKeys'])
+      end
+      if itgd['@IsReferenceData'] == "Yes"
+        then sas.put_value(dsid_t, "datasettype", "ReferenceData")
       end
       sas.update(dsid_t)
-      
+
       itemref = itgd.ItemRef
       for j, it in ipairs(itemref) do
         sas.append(dsid_c)
@@ -105,21 +108,21 @@
         if itemtbl[it['@ItemOID']].DisplayFormat ~= nil then sas.put_value(dsid_c, "DisplayFormat", itemtbl[it['@ItemOID']].DisplayFormat) end
 
         if it['@KeySequence'] ~= nil then -- Define-XML 2.x
-          sas.put_value(dsid_c, "keySequence", tonumber(it['@KeySequence'])) 
+          sas.put_value(dsid_c, "keySequence", tonumber(it['@KeySequence']))
         end
         if itgd['@DomainKeys'] and it['@KeySequence'] == nil then -- Define-XML 1.0
           i = 0
           for key in itgd['@DomainKeys']:gmatch('[^,%s]+') do
             i = i + 1
             if key == itemtbl[it['@ItemOID']].Name then sas.put_value(dsid_c, "keySequence", i) end
-          end  
+          end
         end
-        sas.put_value(dsid_c, "json_datatype", datatype_mapping[itemtbl[it['@ItemOID']].DataType])
+        -- sas.put_value(dsid_c, "json_datatype", datatype_mapping[itemtbl[it['@ItemOID']].DataType])
         sas.update(dsid_c)
       end
-      
+
     end
     sas.close(dsid_c)
     sas.close(dsid_t)
-    
+
 sas.filename('define')

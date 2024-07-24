@@ -10,14 +10,15 @@
 
 /* Get the paths of the XPT files */
 %util_gettree(
-  dir=&project_folder/data/adam_xpt, 
-  outds=work.dirtree_adam, 
+  dir=&project_folder/data/adam_xpt,
+  outds=work.dirtree_adam,
   where=%str(ext="xpt" and dir=0)
 );
 
 %if %cstutilnobs(_cstDataSetName=work.dirtree_adam)=0 %then %do;
   %put WAR%str(NING): No XPT files to read in directory %sysfunc(pathname(dataadam).;
-%end;  
+%end;
+
 
 data _null_;
   length datasetname $64 jsonpath $512 fileoid $128 code $2048;
@@ -29,8 +30,9 @@ data _null_;
                       , 'dataset=dataadam.', datasetname, ','
                       /* , 'xptpath=', fullpath,',' */
                       , 'jsonpath=', jsonpath, ','
-                      , 'usemetadata=N,'
+                      , 'usemetadata=Y,'
                       , 'metadatalib=metaadam,'
+                      , 'datasetJSONVersion=1.1.0,'
                       , "fileOID=", fileoid, ","
                       , "asOfDateTime=2023-05-31T00:00:00, "
                       , "originator=CDISC ADaM MSG Team", ","
@@ -54,14 +56,14 @@ run;
 
 /* Get the paths of the XPT files */
 %util_gettree(
-  dir=&project_folder/data/sdtm_xpt, 
-  outds=work.dirtree_sdtm, 
+  dir=&project_folder/data/sdtm_xpt,
+  outds=work.dirtree_sdtm,
   where=%str(ext="xpt" and dir=0)
 );
 
 %if %cstutilnobs(_cstDataSetName=work.dirtree_sdtm)=0 %then %do;
   %put WAR%str(NING): No XPT files to read in directory %sysfunc(pathname(datasdtm).;
-%end;  
+%end;
 
 data _null_;
   length datasetname $64 jsonpath $512 fileoid $128 code $2048;
@@ -75,6 +77,7 @@ data _null_;
                       , 'jsonpath=', jsonpath, ','
                       , 'usemetadata=Y,'
                       , 'metadatalib=metasdtm,'
+                      , 'datasetJSONVersion=1.1.0,'
                       , "fileOID=", fileoid, ","
                       , "asOfDateTime=2023-05-31T00:00:00, "
                       , "originator=CDISC SDTM MSG Team,"
@@ -98,14 +101,14 @@ run;
 
 /* Get the paths of the XPT files */
 %util_gettree(
-  dir=&project_folder/data/send_xpt, 
-  outds=work.dirtree_send, 
+  dir=&project_folder/data/send_xpt,
+  outds=work.dirtree_send,
   where=%str(ext="xpt" and dir=0)
 );
 
 %if %cstutilnobs(_cstDataSetName=work.dirtree_send)=0 %then %do;
   %put WAR%str(NING): No XPT files to read in directory %sysfunc(pathname(datasdtm).;
-%end;  
+%end;
 
 data _null_;
   length datasetname $64 jsonpath $512 fileoid $128 code $2048;
@@ -119,6 +122,7 @@ data _null_;
                       , 'jsonpath=', jsonpath, ','
                       , 'usemetadata=Y,'
                       , 'metadatalib=metasend,'
+                      , 'datasetJSONVersion=1.1.0,'
                       , "fileOID=", fileoid, ","
                       , "asOfDateTime=2019-10-03T20:06:25, "
                       , "originator=CDISC SEND Team,"
