@@ -292,13 +292,16 @@
   quit;
  
   %if %sysevalf(%superq(_decimal_variables)=, boolean)=0 %then %do;
+
     %put #### &=dsname &=_decimal_variables;
     %convert_char_to_num(ds=&datalib..&dsname, outds=&datalib..&dsname, varlist=&_decimal_variables);
+
+    proc datasets library=&datalib noprint nolist nodetails;
+      modify &dsname %if %sysevalf(%superq(dslabel)=, boolean)=0 %then %str((label = %sysfunc(quote(%nrbquote(&dslabel)))));;
+    quit;
+
   %end;  
 
-  proc datasets library=&datalib noprint nolist nodetails;
-    modify &dsname %if %sysevalf(%superq(dslabel)=, boolean)=0 %then %str((label = %sysfunc(quote(%nrbquote(&dslabel)))));;
-  quit;
 %******************************************************************************;
   
   
