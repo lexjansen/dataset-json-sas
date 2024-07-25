@@ -12,7 +12,7 @@
          _Random
          _clinicalreferencedata_ _items_ _itemdata_ _itemgroupdata_ ItemGroupOID _ItemGroupName
          dslabel dsname variables rename label length format
-         _decimal_variables;
+         _decimal_variables _iso8601_variables;
 
   %let _Random=%sysfunc(putn(%sysevalf(%sysfunc(ranuni(0))*10000,floor),z4.));
 
@@ -288,7 +288,8 @@
   proc sql noprint;
     select name into :_decimal_variables separated by ' '
       from &metadatalib..metadata_columns
-      where json_datatype='decimal' and targetdatatype='decimal' and upcase(dataset_name) = upcase("&dsname");  
+      where (json_datatype='decimal' and targetdatatype='decimal') and
+            (upcase(dataset_name) = upcase("&dsname"));  
   quit;
  
   %if %sysevalf(%superq(_decimal_variables)=, boolean)=0 %then %do;
@@ -298,6 +299,26 @@
 
     proc datasets library=&datalib noprint nolist nodetails;
       modify &dsname %if %sysevalf(%superq(dslabel)=, boolean)=0 %then %str((label = %sysfunc(quote(%nrbquote(&dslabel)))));;
+        label &label;
+    quit;
+
+  %end;  
+
+  %let _iso8601_variables=;
+  proc sql noprint;
+    select name into :_iso8601_variables separated by ' '
+      from &metadatalib..metadata_columns
+      where (json_datatype in ('datetime' 'date' 'time')) and (targetdatatype = 'integer') and
+            (upcase(dataset_name) = upcase("&dsname"));  
+  quit;
+  %if %sysevalf(%superq(_iso8601_variables)=, boolean)=0 %then %do;
+
+    %put #### &=dsname &=_iso8601_variables;
+    %convert_iso_to_num(ds=&datalib..&dsname, outds=&datalib..&dsname, varlist=&_iso8601_variables);
+
+    proc datasets library=&datalib noprint nolist nodetails;
+      modify &dsname %if %sysevalf(%superq(dslabel)=, boolean)=0 %then %str((label = %sysfunc(quote(%nrbquote(&dslabel)))));;
+        label &label;
     quit;
 
   %end;  

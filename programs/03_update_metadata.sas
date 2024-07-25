@@ -32,8 +32,13 @@ data metaadam.metadata_columns;
 
   /* Define-XML v2 does not support decimal, but it is supported by Dataset-JSON. */
   /* This update is just to show that it works in Dataset-JSON.                   */
-  if xml_datatype='float' and index(name, 'VISIT') 
-    then json_datatype='decimal';
+  if name in ('VISITNUM' 'PCHG' 'AVAL' 'BASE' 'CHG' 'PCHG' 'R2A1LO' 'R2A1HI' 'BR2A1LO' 'BR2A1HI' 'A1LO' 'A1HI' 'R2A1LO' 'R2A1HI' 'ALBTRVAL' 'LBSTRESN' 'HEIGHTBL' 'WEIGHTBL') 
+     and xml_datatype in ('float' 'integer')
+     then do;
+      json_datatype='decimal';
+      targetDataType='decimal';
+    end;  
+    
 /*
   if missing(length) then do;
     if xml_datatype="date" then length=10;
@@ -60,9 +65,6 @@ data metaadam.metadata_columns;
       displayformat = "E8601TM.";
     end;
   end;  
-  if json_datatype = "decimal" then do;
-    targetDataType = "decimal";
-  end;  
 
 run;
 
@@ -76,8 +78,10 @@ data metasdtm.metadata_columns;
 
   /* Define-XML v2 does not support decimal, but it is supported by Dataset-JSON. */
   /* This update is just to show that it works in Dataset-JSON.                   */
-  if xml_datatype='float' 
-    then json_datatype='decimal';
+  if xml_datatype='float' then do;
+    json_datatype='decimal';
+    targetdatatype = "decimal";
+  end;  
 /*
   if missing(length) then do;
     if xml_datatype="date" then length=10;
@@ -87,10 +91,6 @@ data metasdtm.metadata_columns;
     if xml_datatype="datetime" then length=19;
   end;    
 */
-
-  if json_datatype = "decimal" then do;
-    targetdatatype = "decimal";
-  end;  
 
 run;
 
@@ -104,8 +104,10 @@ data metasend.metadata_columns;
 
   /* Define-XML v2 does not support decimal, but it is supported by Dataset-JSON. */
   /* This update is just to show that it works in Dataset-JSON.                   */
-  if xml_datatype='float' 
-    then json_datatype='decimal';
+  if xml_datatype='float' then do;
+    json_datatype='decimal';
+    targetdatatype = "decimal";
+  end;  
 /*
   if missing(length) then do;
     if xml_datatype="date" then length=10;
@@ -115,9 +117,6 @@ data metasend.metadata_columns;
     if xml_datatype="datetime" then length=19;
   end;    
 */
-  if json_datatype = "decimal" then do;
-    targetdatatype = "decimal";
-  end;  
 
 run;
 
