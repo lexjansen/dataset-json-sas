@@ -11,7 +11,8 @@
          _SaveOptions2
          _Random
          _clinicalreferencedata_ _items_ _itemdata_ _itemgroupdata_ ItemGroupOID _ItemGroupName
-         dslabel dsname variables rename label length format;
+         dslabel dsname variables rename label length format
+         _decimal_variables;
 
   %let _Random=%sysfunc(putn(%sysevalf(%sysfunc(ranuni(0))*10000,floor),z4.));
 
@@ -280,6 +281,27 @@
       rename &rename;
       label &label;
   quit;
+  
+
+  %******************************************************************************;
+  %let _decimal_variables=;
+  proc sql noprint;
+    select name into :_decimal_variables separated by ' '
+      from &metadatalib..metadata_columns
+      where json_datatype='decimal' and targetdatatype='decimal' and upcase(dataset_name) = upcase("&dsname");  
+  quit;
+ 
+  %if %sysevalf(%superq(_decimal_variables)=, boolean)=0 %then %do;
+    %put #### &=dsname &=_decimal_variables;
+    %convert_char_to_num(ds=&datalib..&dsname, outds=&datalib..&dsname, varlist=&_decimal_variables);
+  %end;  
+
+  proc datasets library=&datalib noprint nolist nodetails;
+    modify &dsname %if %sysevalf(%superq(dslabel)=, boolean)=0 %then %str((label = %sysfunc(quote(%nrbquote(&dslabel)))));;
+  quit;
+%******************************************************************************;
+  
+  
 
   /* Update lengths */
   proc sql noprint;
@@ -335,7 +357,7 @@
 
   data _null_;
     set column_metadata;
-    if DataType="char" and not (type in ('string')) then put "WAR" "NING: [&sysmacroname] TYPE ISSUE: dataset=&dsname " OID= name= DataType= type=;
+    if DataType="char" and not (type in ('string' 'datetime' 'date' 'time')) then put "WAR" "NING: [&sysmacroname] TYPE ISSUE: dataset=&dsname " OID= name= DataType= type=;
     if DataType="num" and not (type in ('integer' 'double' 'float' 'decimal')) then put "WAR" "NING: [&sysmacroname] TYPE ISSUE: dataset=&dsname " OID= name= DataType= type=;
     if DataType="char" and not(missing(length)) and (length lt sas_length) then put "WAR" "NING: [&sysmacroname] LENGTH ISSUE: dataset=&dsname " OID= name= length= sas_length=;
   run;

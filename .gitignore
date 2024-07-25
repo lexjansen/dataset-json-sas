@@ -14,3 +14,4 @@ programs/*.html
 *.sas7b*
 *.egp
 programs/*.cmd
+maps/*.map

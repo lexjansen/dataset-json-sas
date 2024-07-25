@@ -6,7 +6,6 @@
         (
          fileoid char(128),
          creationdatetime char(32),
-         asofdatetime char(32),
          modifieddatetime char(32),
          datasetJSONVersion char(32),
          originator char(128),
@@ -28,7 +27,6 @@
          name char(32),
          label char(256),
          domain char(32),
-         datasettype char(128),
          repeating char(3),
          isreferencedata char(3),
          structure char(256),

@@ -27,6 +27,7 @@
     _studyOID _metaDataVersionOID
     _datasetType _itemGroupOID _isReferenceData
     creationDateTime modifiedDateTime
+    _decimal_variables
     _dataset_to_write;
 
 
@@ -321,6 +322,19 @@
   %end;
 
   %******************************************************************************;
+  %let _decimal_variables=;
+  proc sql noprint;
+    select name into :_decimal_variables separated by ' '
+      from work.column_metadata
+      where type='decimal' and targetdatatype='decimal';  
+  quit;
+ 
+  %if %sysevalf(%superq(_decimal_variables)=, boolean)=0 %then %do;
+    %put #### &=dataset_name &=_decimal_variables;
+    %convert_num_to_char(ds=&_dataset_to_write, outds=&_dataset_to_write, varlist=&_decimal_variables);
+  %end;  
+
+  %******************************************************************************;
 
   %create_template(type=STUDY, out=work.study_metadata);
   
@@ -328,7 +342,6 @@
   insert into work.study_metadata  
     set fileoid = "&fileOID",
         creationdatetime = "&creationdatetime",
-        asofdatetime = "&asOfDateTime",
         modifiedDateTime = "&modifiedDateTime",
         datasetJSONVersion = "&datasetJSONVersion",
         originator = "&originator",
@@ -346,7 +359,6 @@ quit;
   insert into work.table_metadata  
     set oid = "&_itemGroupOID",
         isReferenceData = "&_isReferenceData",
-        dataSetType = "&_datasetType",
         records = &_records,
         name = "%upcase(&dataset_name)",
         label = "%nrbquote(&dataset_label)"
