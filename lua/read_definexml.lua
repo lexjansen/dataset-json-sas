@@ -24,12 +24,8 @@
     sas.filename('define', sas.symget("definexml"))
 
     local metadatalib = sas.symget("metadatalib")
-
-
     local define_string = fileutils.read('define')
     local define = sas.xml_parse(define_string)
-    sas.symput('studyOID',define.Study["@OID"])
-    sas.symput('metaDataVersionOID', define.Study.MetaDataVersion["@OID"])
 
     sas.submit[[
        %create_template(type=STUDY, out=@metadatalib@.metadata_study);
@@ -44,6 +40,7 @@
     if define["@SourceSystemVersion"] then sas.put_value(dsid_s, "sourcesystemversion", define["@SourceSystemVersion"]) end
     sas.put_value(dsid_s, "studyoid", define.Study["@OID"])
     sas.put_value(dsid_s, "metadataversionoid", define.Study.MetaDataVersion["@OID"])
+    sas.put_value(dsid_s, "definexmlversion", define.Study.MetaDataVersion["@DefineVersion"])
     sas.update(dsid_s)
     sas.close(dsid_s)
 
@@ -106,7 +103,6 @@
         sas.put_value(dsid_c, "order", tonumber(it['@OrderNumber']))
         if tonumber(itemtbl[it['@ItemOID']].Length) ~= nil then sas.put_value(dsid_c, "length", itemtbl[it['@ItemOID']].Length) end
         if itemtbl[it['@ItemOID']].DisplayFormat ~= nil then sas.put_value(dsid_c, "DisplayFormat", itemtbl[it['@ItemOID']].DisplayFormat) end
-
         if it['@KeySequence'] ~= nil then -- Define-XML 2.x
           sas.put_value(dsid_c, "keySequence", tonumber(it['@KeySequence']))
         end
@@ -117,7 +113,6 @@
             if key == itemtbl[it['@ItemOID']].Name then sas.put_value(dsid_c, "keySequence", i) end
           end
         end
-        -- sas.put_value(dsid_c, "json_datatype", datatype_mapping[itemtbl[it['@ItemOID']].DataType])
         sas.update(dsid_c)
       end
 

@@ -6,6 +6,6 @@
 %add_formats(
   metadata = metaadam.metadata_columns,
   datalib = dataadam,
-  condition = %str(not missing(displayFormat) and json_datatype = "date" and targetDataType = "integer"),
+  condition = %str(not missing(displayFormat) and dataType = "date" and targetDataType = "integer"),
   format = "E8601DA."
 );

@@ -1,16 +1,17 @@
 %macro read_datasetjson(
   jsonpath=,
   datalib=,
-  dropseqvar=N,
-  savemetadata=N,
-  metadatalib=
+  dropseqvar=Y,
+  savemetadata=Y,
+  metadatalib=work
   ) / des = 'Read a Dataset-JSON file to a SAS dataset';
 
   %local _Missing
          _SaveOptions1
          _SaveOptions2
          _Random
-         _clinicalreferencedata_ _items_ _itemdata_ _itemgroupdata_ ItemGroupOID _ItemGroupName
+         metadata_study_columns metadata_tables_columns metadata_columns_columns
+         _items_ _itemdata_ _itemgroupdata_ ItemGroupOID _ItemGroupName
          dslabel dsname variables rename label length format
          _decimal_variables _iso8601_variables;
 
@@ -61,13 +62,17 @@
   options compress=Yes reuse=Yes;
 
   filename json&_Random "&jsonpath";
-  filename map&_Random "../maps/map&_Random._%scan(&jsonpath, -2, %str(.\/)).map";
+  filename mapmeta "../maps/map_meta.map";
+  filename map&_Random "%sysfunc(pathname(work))/map_%scan(&jsonpath, -2, %str(.\/)).map";
   libname out_&_Random "%sysfunc(pathname(work))/%scan(&jsonpath, -2, %str(.\/))";
 
   libname json&_Random json map=map&_Random automap=create fileref=json&_Random
           %if "%substr(%upcase(&savemetadata),1,1)" ne "Y" %then noalldata; ordinalcount=none;
   proc copy in=json&_Random out=out_&_Random;
   run;
+
+  %* Restore options;
+  options &_SaveOptions2;
 
   proc sql noprint;
     select datasetJSONVersion into :datasetJSONVersion separated by ' '
@@ -76,70 +81,17 @@
   
   %put &=datasetJSONVersion;
   
-  %* Restore options;
-  options &_SaveOptions2;
-
-  /* Find the names of the dataset that were created */
-
-  %let _clinicalreferencedata_=;
-  %if "%substr(%upcase(&datasetJSONVersion),1,3)" = "1.0" %then %do;
-    %if %sysfunc(exist(out_&_Random..clinicaldata))
-      %then %let _clinicalreferencedata_=out_&_Random..clinicaldata;
-      %else %if %sysfunc(exist(out_&_Random..referencedata))
-        %then %let _clinicalreferencedata_=out_&_Random..referencedata;
-        %else %do;
-          %put ERR%str(OR): [&sysmacroname] JSON file &jsonpath contains no "clinicalData" or "referenceData" key.;
-          %goto exit_macro;
-        %end;  
+  %* Rule: allowed versions *;
+  %if %substr(&datasetJSONVersion,1,3) ne %str(1.1) %then
+  %do;
+    %put ERR%str(OR): [&sysmacroname] Macro parameter datasetJSONVersion=&datasetJSONVersion. Allowed values: 1.1.x.;
+    %goto exit_macro;
   %end;
 
-  proc sql noprint;
-    create table members
-    as select upcase(memname) as name
-    from dictionary.tables
-    where upcase(libname)=upcase("OUT_&_Random") and memtype="DATA"
-    ;
-  quit;
-
-  %let _items=;
-  %let _itemdata=;
-  %let _itemgroupdata_=;
-  data _null_;
-    set members;
-    if index(upcase(name), '_ITEMS') then
-      call symputx('_items_', strip(name));
-    if index(upcase(name), '_ITEMDATA') then
-      call symputx('_itemdata_', strip(name));
-    if index(upcase(name), 'ITEMGROUPDATA_') then
-      call symputx('_itemgroupdata_', strip(name));
-  run;
-
-  %if "%substr(%upcase(&datasetJSONVersion),1,3)" = "1.1" %then %do;
-    %let _itemgroupdata_=root;  
-    %let _items_=columns;
-    %let _itemdata_=rows;
-  %end;  
-
-  %if %sysevalf(%superq(_itemgroupdata_)=, boolean)
-    %then %do;
-      %put ERR%str(OR): [&sysmacroname] JSON file &jsonpath contains no "itemGroupData" key.;
-      %goto exit_macro;      
-    %end;  
-
-  %if %sysevalf(%superq(_items_)=, boolean)
-    %then %do;
-      %put ERR%str(OR): [&sysmacroname] JSON file &jsonpath contains no "items" key.;
-      %goto exit_macro;      
-    %end;  
-
-  %if %sysevalf(%superq(_itemdata_)=, boolean)
-    %then %do;
-      %put ERR%str(OR): [&sysmacroname] JSON file &jsonpath contains no "itemData" key.;
-      %goto exit_macro;      
-    %end;  
-
-  proc delete data=work.members;
-  run;
+  /* Find the names of the dataset that were created */
+  %let _itemgroupdata_=root;  
+  %let _items_=columns;
+  %let _itemdata_=rows;
 
   proc sql noprint;
     select name into :variables separated by ' '
@@ -179,39 +131,45 @@
 %if "%substr(%upcase(&savemetadata),1,1)" eq "Y" %then %do;
 
   %let ItemGroupOID=;
-    %if "%substr(%upcase(&datasetJSONVersion),1,3)" = "1.0" %then %do;
-      proc sql noprint;
-        select P3 into :ItemGroupOID trimmed
-          from out_&_Random..alldata
-          where P2 = "itemGroupData" and P = 3;
-      quit;
-    %end;
-    %if "%substr(%upcase(&datasetJSONVersion),1,3)" = "1.1" %then %do;
-      proc sql noprint;
-        select ItemGroupOID into :ItemGroupOID trimmed
-          from out_&_Random..root;
-      quit;
-    %end;
+  proc sql noprint;
+    select ItemGroupOID into :ItemGroupOID trimmed
+      from out_&_Random..root;
+  quit;
     
   %if not %sysfunc(exist(&metadatalib..metadata_study)) %then %create_template(type=STUDY, out=&metadatalib..metadata_study);;
   %if not %sysfunc(exist(&metadatalib..metadata_tables)) %then %create_template(type=TABLES, out=&metadatalib..metadata_tables);;
   %if not %sysfunc(exist(&metadatalib..metadata_columns)) %then %create_template(type=COLUMNS, out=&metadatalib..metadata_columns);;
 
-  %if %sysfunc(exist(out_&_Random..root)) %then %do;
+  %let metadata_study_columns=;
+  proc sql noprint;
+    select name into :metadata_study_columns separated by ' '
+      from dictionary.columns
+    where upcase(libname)="%upcase(&metadatalib)" and
+         upcase(memname)="METADATA_STUDY"
+   ;
+  quit ;
+
+
+  %if %sysfunc(exist(out_&_Random..sourceSystem))
+  %then %do;
     data work._metadata_study;
-      merge out_&_Random..root &_clinicalreferencedata_;
+      merge out_&_Random..root out_&_Random..sourceSystem(rename=(name=sourceSystem version=sourceSystemVersion));
     run;
   %end;
   %else %do;
-    %if %sysfunc(exist(&_clinicalreferencedata_)) %then %do;
-      data work._metadata_study;
-        set &_clinicalreferencedata_;
-      run;
-    %end;
+    data work._metadata_study;
+      set out_&_Random..root;
+    run;
   %end;
-
-  data &metadatalib..metadata_study;
-    set &metadatalib..metadata_study work._metadata_study;
+    
+  data &metadatalib..metadata_study(keep=&metadata_study_columns);
+    set &metadatalib..metadata_study 
+        work._metadata_study(
+          rename=(
+            datasetJSONCreationDateTime = creationDateTime
+            dbLastModifiedDateTime = modifiedDateTime
+          )
+        );
   run;
 
   proc delete data=work._metadata_study;
@@ -231,8 +189,17 @@
     %end;
   %end;
 
-  data &metadatalib..metadata_tables;
-    set &metadatalib..metadata_tables out_&_Random..&_itemgroupdata_(in=inigd /* drop=records */);
+  %let metadata_tables_columns=;
+  proc sql noprint;
+    select name into :metadata_tables_columns separated by ' '
+      from dictionary.columns
+    where upcase(libname)="%upcase(&metadatalib)" and
+         upcase(memname)="METADATA_TABLES"
+   ;
+  quit ;
+
+  data &metadatalib..metadata_tables(keep=&metadata_tables_columns);
+    set &metadatalib..metadata_tables out_&_Random..&_itemgroupdata_(in=inigd);
     if inigd then do;
       oid = "&ItemGroupOID";
       call symputx('_ItemGroupName', name);
@@ -244,18 +211,10 @@
     order = _n_;
   run;
 
-  %if "%substr(%upcase(&datasetJSONVersion),1,3)" = "1.0" %then %do;
-    data &metadatalib..metadata_columns(%if %substr(%upcase(&DropSeqVar),1,1) eq Y %then where=(upcase(name) ne "ITEMGROUPDATASEQ"););
-      set &metadatalib..metadata_columns work.&_items_(rename=(type=json_datatype) in=init);
-      if init then dataset_name = "&_ItemGroupName";
-    run;
-  %end;
-  %if "%substr(%upcase(&datasetJSONVersion),1,3)" = "1.1" %then %do;
-    data &metadatalib..metadata_columns(%if %substr(%upcase(&DropSeqVar),1,1) eq Y %then where=(upcase(name) ne "ITEMGROUPDATASEQ"););
-      set &metadatalib..metadata_columns work.&_items_(rename=(datatype=json_datatype ItemOID=OID) in=init);
-      if init then dataset_name = "&_ItemGroupName";
-    run;
-  %end;
+  data &metadatalib..metadata_columns(%if %substr(%upcase(&DropSeqVar),1,1) eq Y %then where=(upcase(name) ne "ITEMGROUPDATASEQ"););
+    set &metadatalib..metadata_columns work.&_items_(rename=(ItemOID=OID) in=init);
+    if init then dataset_name = "&_ItemGroupName";
+  run;
 
   proc delete data=work.&_items_;
   run;
@@ -288,13 +247,12 @@
   proc sql noprint;
     select name into :_decimal_variables separated by ' '
       from &metadatalib..metadata_columns
-      where (json_datatype='decimal' and targetdatatype='decimal') and
+      where (datatype='decimal' and targetdatatype='decimal') and
             (upcase(dataset_name) = upcase("&dsname"));  
   quit;
  
   %if %sysevalf(%superq(_decimal_variables)=, boolean)=0 %then %do;
-
-    %put #### &=dsname &=_decimal_variables;
+    %put NOTE: [&sysmacroname] Dataset=&dsname, character variables converted to numeric: &_decimal_variables;
     %convert_char_to_num(ds=&datalib..&dsname, outds=&datalib..&dsname, varlist=&_decimal_variables);
 
     proc datasets library=&datalib noprint nolist nodetails;
@@ -308,12 +266,12 @@
   proc sql noprint;
     select name into :_iso8601_variables separated by ' '
       from &metadatalib..metadata_columns
-      where (json_datatype in ('datetime' 'date' 'time')) and (targetdatatype = 'integer') and
+      where (datatype in ('datetime' 'date' 'time')) and (targetdatatype = 'integer') and
             (upcase(dataset_name) = upcase("&dsname"));  
   quit;
   %if %sysevalf(%superq(_iso8601_variables)=, boolean)=0 %then %do;
 
-    %put #### &=dsname &=_iso8601_variables;
+    %put NOTE: [&sysmacroname] Dataset=&dsname, character ISO 8601 variables converted to numeric: &_iso8601_variables;
     %convert_iso_to_num(ds=&datalib..&dsname, outds=&datalib..&dsname, varlist=&_iso8601_variables);
 
     proc datasets library=&datalib noprint nolist nodetails;
@@ -381,9 +339,12 @@
 
   data _null_;
     set column_metadata;
-    if DataType="char" and not (type in ('string' 'datetime' 'date' 'time')) then put "WAR" "NING: [&sysmacroname] TYPE ISSUE: dataset=&dsname " OID= name= DataType= type=;
-    if DataType="num" and not (type in ('integer' 'double' 'float' 'decimal')) then put "WAR" "NING: [&sysmacroname] TYPE ISSUE: dataset=&dsname " OID= name= DataType= type=;
-    if DataType="char" and not(missing(length)) and (length lt sas_length) then put "WAR" "NING: [&sysmacroname] LENGTH ISSUE: dataset=&dsname " OID= name= length= sas_length=;
+    if DataType="char" and not (type in ('string' 'datetime' 'date' 'time')) 
+      then put "WAR" "NING: [&sysmacroname] TYPE ISSUE: dataset=&dsname " OID= name= DataType= type=;
+    if DataType="num" and not (type in ('integer' 'double' 'float' 'decimal' 'datetime' 'date' 'time')) 
+      then put "WAR" "NING: [&sysmacroname] TYPE ISSUE: dataset=&dsname " OID= name= DataType= type=;
+    if DataType="char" and not(missing(length)) and (length lt sas_length) 
+      then put "WAR" "NING: [&sysmacroname] LENGTH ISSUE: dataset=&dsname " OID= name= length= sas_length=;
   run;
 
   proc delete data=work.column_metadata;
@@ -392,6 +353,7 @@
   libname json&_Random clear;
   filename json&_Random clear;
   filename map&_Random clear;
+  filename mapmeta clear;
 
   proc datasets nolist lib=out_&_Random kill;
   quit;

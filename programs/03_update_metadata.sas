@@ -1,4 +1,3 @@
-%* update this location to your own location;
 %let project_folder=/_github/lexjansen/dataset-json-sas;
 %include "&project_folder/programs/config.sas";
 
@@ -27,15 +26,16 @@ run;
 data metaadam.metadata_columns;
   set metaadam.metadata_columns;
 
-  json_datatype = put(xml_datatype, $datatyp.);
-  if json_datatype = "string" then json_length = length;
+  dataType = put(xml_datatype, $datatyp.);
+  if dataType = "string" then json_length = length;
 
   /* Define-XML v2 does not support decimal, but it is supported by Dataset-JSON. */
   /* This update is just to show that it works in Dataset-JSON.                   */
-  if name in ('VISITNUM' 'PCHG' 'AVAL' 'BASE' 'CHG' 'PCHG' 'R2A1LO' 'R2A1HI' 'BR2A1LO' 'BR2A1HI' 'A1LO' 'A1HI' 'R2A1LO' 'R2A1HI' 'ALBTRVAL' 'LBSTRESN' 'HEIGHTBL' 'WEIGHTBL') 
-     and xml_datatype in ('float' 'integer')
+  if xml_datatype in ('float' 'integer') and
+     dataset_name in ('ADADAS' 'ADLBC' 'ADLBCPV' 'ADLBH' 'ADLBHPV' 'ADLBHY' 'ADNPIX' 'ADSL' 'ADVS') and
+     name in ('PCHG' 'AVAL' 'BASE' 'CHG' 'PCHG' 'R2A1LO' 'R2A1HI' 'BR2A1LO' 'BR2A1HI' 'A1LO' 'A1HI' 'R2A1LO' 'R2A1HI' 'ALBTRVAL' 'LBSTRESN' 'HEIGHTBL' 'WEIGHTBL') 
      then do;
-      json_datatype='decimal';
+      dataType='decimal';
       targetDataType='decimal';
     end;  
     
@@ -50,17 +50,17 @@ data metaadam.metadata_columns;
 */  
   if not missing(displayformat) then do;
     if substr(strip(reverse(upcase(name))), 1, 2) = "TD" then do;
-      json_datatype = "date";
+      dataType = "date";
       targetDataType = "integer";
       displayformat = "E8601DA.";
     end;
     if substr(strip(reverse(upcase(name))), 1, 3) = "MTD" then do;
-      json_datatype = "datetime";
+      dataType = "datetime";
       targetDataType = "integer";
       displayformat = "E8601DT.";
     end;
     if substr(strip(reverse(upcase(name))), 1, 2) = "MT" then do;
-      json_datatype = "time";
+      dataType = "time";
       targetDataType = "integer";
       displayformat = "E8601TM.";
     end;
@@ -73,13 +73,13 @@ run;
 data metasdtm.metadata_columns;
   set metasdtm.metadata_columns;
 
-  json_datatype = put(xml_datatype, $datatyp.);
-  if json_datatype = "string" then json_length = length;
+  dataType = put(xml_datatype, $datatyp.);
+  if dataType = "string" then json_length = length;
 
   /* Define-XML v2 does not support decimal, but it is supported by Dataset-JSON. */
   /* This update is just to show that it works in Dataset-JSON.                   */
-  if xml_datatype='float' then do;
-    json_datatype='decimal';
+  if xml_datatype='float' and name ne "VISITNUM" then do;
+    dataType='decimal';
     targetdatatype = "decimal";
   end;  
 /*
@@ -99,13 +99,13 @@ run;
 data metasend.metadata_columns;
   set metasend.metadata_columns;
 
-  json_datatype = put(xml_datatype, $datatyp.);
-  if json_datatype = "string" then json_length = length;
+  dataType = put(xml_datatype, $datatyp.);
+  if dataType = "string" then json_length = length;
 
   /* Define-XML v2 does not support decimal, but it is supported by Dataset-JSON. */
   /* This update is just to show that it works in Dataset-JSON.                   */
-  if xml_datatype='float' then do;
-    json_datatype='decimal';
+  if xml_datatype='float' and index(name, "STRESN") then do;
+    dataType='decimal';
     targetdatatype = "decimal";
   end;  
 /*

@@ -1,12 +1,10 @@
 %macro write_datasetjson(
   dataset=,
-  xptpath=,
   jsonpath=,
   usemetadata=N,
   metadatalib=,
-  datasetJSONVersion=1.0.0,
+  datasetJSONVersion=1.1.0,
   fileOID=,
-  asOfDateTime=,
   originator=,
   sourceSystem=,
   sourceSystemVersion=,
@@ -21,11 +19,10 @@
     _SaveOptions1
     _SaveOptions2
     _Missing
-    _delete_temp_dataset_sas
-    _delete_temp_dataset_xpt
+    _create_temp_dataset_sas
     dataset_new dataset_name dataset_label _records
     _studyOID _metaDataVersionOID
-    _datasetType _itemGroupOID _isReferenceData
+    _itemGroupOID _isReferenceData
     creationDateTime modifiedDateTime
     _decimal_variables
     _dataset_to_write;
@@ -39,7 +36,7 @@
   options dlcreatedir;
   options compress=Yes reuse=Yes;
 
-  %if %sysevalf(%superq(datasetJSONVersion)=, boolean) %then %let datasetJSONVersion = %str(1.0.0);
+  %if %sysevalf(%superq(datasetJSONVersion)=, boolean) %then %let datasetJSONVersion = %str(1.1.0);
 
   %let dataset_label=;
   %let _itemGroupOID=;
@@ -47,6 +44,7 @@
   %let _metaDataVersionOID=;
   %let creationDateTime=%sysfunc(datetime(), is8601dt.);
   %let modifiedDateTime=;
+  %let _create_temp_dataset_sas=0;
 
   %******************************************************************************;
   %* Parameter checks                                                           *;
@@ -54,6 +52,7 @@
 
   %* Check for missing parameters ;
   %let _Missing=;
+  %if %sysevalf(%superq(dataset)=, boolean) %then %let _Missing = &_Missing dataset;
   %if %sysevalf(%superq(jsonpath)=, boolean) %then %let _Missing = &_Missing jsonpath;
   %if %sysevalf(%superq(usemetadata)=, boolean) %then %let _Missing = &_Missing usemetadata;
 
@@ -70,10 +69,17 @@
     %goto exit_macro;
   %end;
 
-  %* Rule: allowed versions *;
-  %if (%substr(&datasetJSONVersion,1,3) ne %str(1.0)) and (%substr(&datasetJSONVersion,1,3) ne %str(1.1)) %then
+  %* Rule: when usemetadata eq Y then metadatalib can not be empty *;
+  %if "%substr(%upcase(&usemetadata),1,1)" eq "Y" and %sysevalf(%superq(metadatalib)=, boolean) %then
   %do;
-    %put ERR%str(OR): [&sysmacroname] Macro parameter datasetJSONVersion=&datasetJSONVersion. Allowed values: 1.0.x and 1.1.x.;
+    %put ERR%str(OR): [&sysmacroname] When usemetadata=Y, then parameter metadatalib can not be empty.;
+    %goto exit_macro;
+  %end;
+
+  %* Rule: allowed versions *;
+  %if %substr(&datasetJSONVersion,1,3) ne %str(1.1) %then
+  %do;
+    %put ERR%str(OR): [&sysmacroname] Macro parameter datasetJSONVersion=&datasetJSONVersion. Allowed values: 1.1.x.;
     %goto exit_macro;
   %end;
 
@@ -81,64 +87,32 @@
   %* End of parameter checks                                                    *;
   %******************************************************************************;
 
-  %let _delete_temp_dataset_sas=0;
-  %let _delete_temp_dataset_xpt=0;
+  /* Get modifiedDateTime */
+  proc sql noprint;
+    select put(modate, e8601dt.) into :modifiedDateTime 
+    from sashelp.vtable 
+    where memname = upcase("%scan(&dataset, 2, %str(.))") and 
+          libname = upcase("%scan(&dataset, 1, %str(.))") and memtype = "DATA";
+  quit;
+  
+  /* Create temp SAS dataset */
+  %let dataset_name=%scan(&dataset, -1, %str(.));
+  %let dataset_new=&dataset;
+  libname sas&_Random "%sysfunc(pathname(work))/sas&_Random";
+  proc copy in=%scan(&dataset, 1, %str(.)) out=sas&_Random memtype=data datecopy;
+    select &dataset_name;
+  run;
+  %let dataset_new=sas&_Random..&dataset_name;
+  
+  %let _create_temp_dataset_sas=1;
 
-  %if %sysevalf(%superq(dataset)=, boolean)=0
-    %then %do;
-      
-      proc sql noprint;
-        select put(modate, e8601dt.) into :modifiedDateTime 
-        from sashelp.vtable 
-        where memname = upcase("%scan(&dataset, 2, %str(.))") and 
-              libname = upcase("%scan(&dataset, 1, %str(.))") and memtype = "DATA";
-      quit;
-      
-      
-      %let dataset_name=%scan(&dataset, -1, %str(.));
-      %let dataset_new=&dataset;
-      libname sas&_Random "%sysfunc(pathname(work))/sas&_Random";
-      proc copy in=%scan(&dataset, 1, %str(.)) out=sas&_Random memtype=data datecopy;
-        select &dataset_name;
-      run;
-      %let dataset_new=sas&_Random..&dataset_name;
-      
-      %let _delete_temp_dataset_sas=1;
-    %end;
-    %else %do;
-      %let dataset_name=%scan(&xptpath, -2, %str(/\.));
-      %if %sysfunc(libname(xpti&_Random, &xptpath, xport)) ne 0
-        %then %put %sysfunc(sysmsg());
-      libname xpt&_Random "%sysfunc(pathname(work))/xpt&_Random";
-
-      proc copy in=xpti&_Random out=xpt&_Random memtype=data datecopy;
-      run;
-
-      %if %sysfunc(libname(xpti&_Random)) ne 0
-        %then %put %sysfunc(sysmsg());
-      %let dataset_new=xpt&_Random..&dataset_name;
-      %let _delete_temp_dataset_xpt=1;
-      
-      proc sql noprint;
-        select put(modate, e8601dt.) into :modifiedDateTime 
-        from sashelp.vtable 
-        where memname = upcase("%scan(&dataset_new, 2, %str(.))") and 
-              libname = upcase("%scan(&dataset_new, 1, %str(.))") and memtype = "DATA";
-      quit;
-      
-      
-    %end;
-
-  %put &=modifiedDateTime;  
-    
-
-  %if %cstutilcheckvarsexist(_cstDataSetName=&dataset_new, _cstVarList=usubjid) %then
-      %let _datasetType=clinicalData;
-    %else %do;
-      %let _datasetType=referenceData;
+  /* Derive _isReferenceData */
+  %if %cstutilcheckvarsexist(_cstDataSetName=&dataset_new, _cstVarList=usubjid)=0 %then
+    %do;
       %let _isReferenceData=Yes;
     %end;  
 
+  /* Get number of records */
   %let _records=%cstutilnobs(_cstDataSetName=&dataset_new);
 
   %if %substr(%upcase(&UseMetadata),1,1) eq Y %then %do;
@@ -157,6 +131,7 @@
     quit;
   %end;
 
+  /* Get StudyOID, metaDataVersionOID, itemGroupOID, and dataset label */
   %if %sysevalf(%superq(_studyOID)=, boolean) and %sysevalf(%superq(studyOId)=, boolean)=0 %then
     %let _studyOID=&studyOId;
 
@@ -170,27 +145,23 @@
 
   %if %sysevalf(%superq(dataset_label)=, boolean) %then %do;
     %let dataset_label=%sysfunc(lowcase(&dataset_name));
-    %if %sysevalf(%superq(xptpath)=, boolean) %then %put %str(WAR)NING: [&sysmacroname] Dataset &dataset has no dataset label. "&dataset_label" will be used as label.;
-                                              %else %put %str(WAR)NING: [&sysmacroname] Dataset &dataset_name (&xptpath) has no dataset label. "&dataset_label" will be used as label.;
+    %put %str(WAR)NING: [&sysmacroname] Dataset &dataset has no dataset label. "&dataset_label" will be used as label.;
   %end;
 
-  %put NOTE: DATASET=&dataset_name &=_records &=_datasetType &=_isReferenceData &=_itemGroupOID dslabel=%bquote(&dataset_label);
+  %put NOTE: DATASET=&dataset_name &=_records &=_isReferenceData &=_itemGroupOID dslabel=%bquote(&dataset_label);
 
+
+ 
   %if %substr(%upcase(&UseMetadata),1,1) eq Y %then %do;
     /* Get column metadata - oid, label, type, length, displayformat, keysequence  */
-    data work._column_metadata(keep=OID name label order type targetdatatype length displayFormat keySequence);
-      retain OID name label type length displayFormat keySequence;
+    data work._column_metadata(keep=OID name label order datatype targetdatatype length displayFormat keySequence);
+      retain OID name label datatype length displayFormat keySequence;
       length _label $ 32;
       set &metadatalib..metadata_columns(
-      
-        %if "%substr(&datasetJSONVersion,1,3)" eq "1.0" %then %do;
-          rename=(json_datatype=type)
-        %end;
-        %if "%substr(&datasetJSONVersion,1,3)" eq "1.1" %then %do;
-          rename=(json_datatype=type)
-        %end;
-        
-        where=(upcase(dataset_name) = %upcase("&dataset_name")));
+          where=(upcase(dataset_name) = %upcase("&dataset_name"))
+          drop=length
+          rename=(json_length=length)
+        );
         _label = "";
         if missing(oid) then putlog "WAR" "NING: [&sysmacroname] Missing oid for variable: " name ;
         if missing(name) then putlog "WAR" "NING: [&sysmacroname] Missing name for variable: " oid ;
@@ -199,7 +170,7 @@
           putlog "WAR" "NING: [&sysmacroname] Missing label for variable: " name +(-1) ", " oid= +(-1) ". " _label "will be used as label.";
           label = _label;
         end;
-        if missing(type) then putlog "WAR" "NING: [&sysmacroname] Missing type for variable: " name +(-1) ", " oid=;
+        if missing(datatype) then putlog "WAR" "NING: [&sysmacroname] Missing dataType for variable: " name +(-1) ", " oid=;
     run;
 
 
@@ -234,8 +205,8 @@
         OID = cats("IT", ".", upcase("&dataset_name"), ".", upcase(sas_name));
         name = sas_name;
         length = sas_length;
-        if sas_type=1 then type="float";
-                      else type="string";
+        if sas_type=1 then dataType="float";
+                      else dataType="string";
         label = propcase(name);
       end;
     run;
@@ -262,13 +233,33 @@
     run;
 
     data work.column_metadata(drop=sas_type varnum formatl formatd _label);
-      retain OID name label type length;
-      length OID $ 128 type _label $ 32;
+      retain OID name label dataType targetDataType length;
+      length OID $ 128 dataType targetDataType _label $ 32;
       set work.column_metadata_template work.column_metadata;
       _label = "";
+      targetDataType = "";
       OID = cats("IT", ".", upcase("&dataset_name"), ".", upcase(name));
-      if sas_type=1 then type="float";
-                    else type="string";
+      if sas_type=1 then do;
+        dataType="float";
+        length = .;
+      end;  
+      else do;
+        dataType="string";
+      end;  
+      /* datetime, date, and time variables will be transfered as ISO 8601 strings */              
+      if sas_type = 1 and (scan(upcase(displayFormat), 1, ".") = "E8601DA" or scan(upcase(displayFormat), 1, ".") = "DATE") then do;
+        dataType = "date";
+        targetDataType = "integer";
+      end;
+      if sas_type = 1 and (scan(upcase(displayFormat), 1, ".") = "E8601TM" or scan(upcase(displayFormat), 1, ".") = "TIME") then do;
+        dataType = "time";
+        targetDataType = "integer";
+      end;
+      if sas_type = 1 and (scan(upcase(displayFormat), 1, ".") = "E8601DT" or scan(upcase(displayFormat), 1, ".") = "DATETIME") then do;
+        dataType = "datetime";
+        targetDataType = "integer";
+      end;
+                    
       if formatl gt 0 then displayFormat=cats(displayFormat, put(formatl, best.), ".");
       if formatd gt 0 then displayFormat=cats(displayFormat, put(formatd, best.));
       %* put a dot on the end of format if we are still missing it;
@@ -278,7 +269,7 @@
         putlog "WAR" "NING: [&sysmacroname] Missing label for variable " name +(-1) ", " oid= +(-1) ". " _label "will be used as label.";
         label = _label;
       end;
-      if missing(type) then putlog "WAR" "NING: [&sysmacroname] Missing type for variable " name +(-1) ", "  oid=;
+      if missing(dataType) then putlog "WAR" "NING: [&sysmacroname] Missing type for variable " name +(-1) ", "  oid=;
     run;
 
   %end;
@@ -301,7 +292,7 @@
         like work.column_metadata;
       insert into itemgroupdataseq_metadata
         set OID="ITEMGROUPDATASEQ", name="ITEMGROUPDATASEQ", label="Record Identifier",
-          type="integer";
+          dataType="integer";
     quit;
 
     data work.column_metadata;
@@ -326,13 +317,14 @@
   proc sql noprint;
     select name into :_decimal_variables separated by ' '
       from work.column_metadata
-      where type='decimal' and targetdatatype='decimal';  
+      where dataType='decimal' and targetDataType='decimal';  
   quit;
  
   %if %sysevalf(%superq(_decimal_variables)=, boolean)=0 %then %do;
-    %put #### &=dataset_name &=_decimal_variables;
+    %put NOTE: [&sysmacroname] Dataset=&dataset_name, numeric variables converted to string: &_decimal_variables;
     %convert_num_to_char(ds=&_dataset_to_write, outds=&_dataset_to_write, varlist=&_decimal_variables);
   %end;  
+
 
   %******************************************************************************;
 
@@ -351,7 +343,7 @@
         metadataversionoid = "&_metaDataVersionOID",
         metaDataRef = "&metaDataRef"
     ;
-quit;
+  quit;
   
   %create_template(type=TABLES, out=work.table_metadata);
 
@@ -367,59 +359,33 @@ quit;
 
   filename json&_random "&jsonpath";
 
-  %if ("%substr(&datasetJSONVersion,1,3)" eq "1.0") %then %do;
-    data work.column_metadata;
-      set work.column_metadata(drop=targetDataType);
-    run;  
-    
-    %write_datasetjson_1_0(
-      outRef=json&_random,
-      technicalMetadata=work.study_metadata,
-      tableMetadata=work.table_metadata,
-      columnMetadata=work.column_metadata,
-      rowdata=&_dataset_to_write,
-      prettyNoPretty=&pretty
-    );
-  %end;
+  data work.column_metadata;
+    retain itemOID name label dataType targetDataType length displayFormat keySequence;
+    set work.column_metadata(rename=(oid=itemOID));
+  run;  
   
-  %if ("%substr(&datasetJSONVersion,1,3)" eq "1.1") %then %do;
-    data work.column_metadata;
-      set work.column_metadata(rename=(oid=itemOID type=dataType));
-    run;  
-    
-    %write_datasetjson_1_1(
-      outRef=json&_random,
-      technicalMetadata=work.study_metadata,
-      tableMetadata=work.table_metadata,
-      columnMetadata=work.column_metadata,
-      rowdata=&_dataset_to_write,
-      prettyNoPretty=&pretty
-    );
-  %end;
+  %write_datasetjson_1_1(
+    outRef=json&_random,
+    technicalMetadata=work.study_metadata,
+    tableMetadata=work.table_metadata,
+    columnMetadata=work.column_metadata,
+    rowdata=&_dataset_to_write,
+    prettyNoPretty=&pretty
+  );
   
   filename json&_random clear;
 
-  %if &_delete_temp_dataset_sas=1 %then %do;
-  proc delete data=sas&_Random..&dataset_name;
-  run;
+  %if &_create_temp_dataset_sas=1 %then %do;
+    proc delete data=sas&_Random..&dataset_name;
+    run;
 
-  %put %sysfunc(filename(fref,%sysfunc(pathname(sas&_Random))));
-  %put %sysfunc(fdelete(&fref));
-  libname sas&_Random clear;
+    %put %sysfunc(filename(fref,%sysfunc(pathname(sas&_Random))));
+    %put %sysfunc(fdelete(&fref));
+    libname sas&_Random clear;
 
-%end;
+  %end;
 
-%if &_delete_temp_dataset_xpt=1 %then %do;
-  proc delete data=xpt&_Random..&dataset_name;
-  run;
-
-  %put %sysfunc(filename(fref,%sysfunc(pathname(xpt&_Random))));
-  %put %sysfunc(fdelete(&fref));
-  libname xpt&_Random clear;
-
-%end;
-
-%if %sysfunc(exist(work.column_metadata)) %then %do;
+  %if %sysfunc(exist(work.column_metadata)) %then %do;
     proc delete data=work.column_metadata;
     run;
   %end;

@@ -4,15 +4,16 @@
     proc sql;
       create table &out
         (
-         fileoid char(128),
-         creationdatetime char(32),
-         modifieddatetime char(32),
+         fileOID char(128),
+         creationDateTime char(32),
+         modifiedDateTime char(32),
+         defineXMLVersion char(32),
          datasetJSONVersion char(32),
-         originator char(128),
-         sourcesystem char(128),
-         sourcesystemversion char(128),
-         studyoid char(128),
-         metadataversionoid char(128),
+         originator char(256),
+         sourceSystem char(256),
+         sourceSystemVersion char(256),
+         studyOID char(128),
+         metaDataVersionOID char(128),
          metaDataRef char(256)
         );
     quit;
@@ -23,14 +24,14 @@
       create table &out
         (
          oid char(128),
-         records num,
          name char(32),
          label char(256),
+         records num,
          domain char(32),
          repeating char(3),
-         isreferencedata char(3),
+         isReferenceData char(3),
          structure char(256),
-         domainkeys char(256)
+         domainKeys char(256)
         );
     quit;
   %end;
@@ -45,7 +46,7 @@
        label char(256),
        order num,
        xml_datatype char(32),
-       json_datatype char(32),
+       dataType char(32),
        targetDataType char(32),
        length num,
        json_length num,

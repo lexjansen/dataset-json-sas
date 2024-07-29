@@ -14,7 +14,7 @@
   _cstOptions=datecopy
   );
 /*
-proc contents data=dataadam._ALL_;
+proc contents data=dataadam._ALL_ varnum;
 run;
 */
 
@@ -26,7 +26,7 @@ run;
   _cstOptions=datecopy
   );
 /*
-proc contents data=datasdtm._ALL_;
+proc contents data=datasdtm._ALL_ varnum;
 run;
 */
 
@@ -38,7 +38,7 @@ run;
   _cstOptions=datecopy
   );
 /*
-proc contents data=datasend._ALL_;
+proc contents data=datasend._ALL_ varnum;
 run;
 */
 

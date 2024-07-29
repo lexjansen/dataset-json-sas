@@ -10,9 +10,9 @@
 
 /* Get the paths of the XPT files */
 %util_gettree(
-  dir=&project_folder/data/adam_xpt,
+  dir=%sysfunc(pathname(dataadam)),
   outds=work.dirtree_adam,
-  where=%str(ext="xpt" and dir=0)
+  where=%str(ext="sas7bdat" and dir=0)
 );
 
 %if %cstutilnobs(_cstDataSetName=work.dirtree_adam)=0 %then %do;
@@ -28,18 +28,16 @@ data _null_;
     fileoid=cats("&_fileOID", "/", "%sysfunc(date(), is8601da.)", "/", datasetname);
     code=cats('%nrstr(%write_datasetjson('
                       , 'dataset=dataadam.', datasetname, ','
-                      /* , 'xptpath=', fullpath,',' */
                       , 'jsonpath=', jsonpath, ','
                       , 'usemetadata=Y,'
                       , 'metadatalib=metaadam,'
                       , 'datasetJSONVersion=1.1.0,'
                       , "fileOID=", fileoid, ","
-                      , "asOfDateTime=2023-05-31T00:00:00, "
                       , "originator=CDISC ADaM MSG Team", ","
-                      , "sourceSystem=Sponsor System,"
-                      , "sourceSystemVersion=1.0,"
-                      , "studyOID=&_studyOID,"
-                      , "metaDataVersionOID=&_metaDataVersionOID,"
+                      , "sourceSystem=SAS on &SYSHOSTNAME,"
+                      , "sourceSystemVersion=&SYSVLONG4,"
+                      /* , "studyOID=&_studyOID," */
+                      /* , "metaDataVersionOID=&_metaDataVersionOID," */
                       , "metaDataRef=define.xml"
                     ,');)');
     call execute(code);
@@ -56,9 +54,9 @@ run;
 
 /* Get the paths of the XPT files */
 %util_gettree(
-  dir=&project_folder/data/sdtm_xpt,
+  dir=%sysfunc(pathname(datasdtm)),
   outds=work.dirtree_sdtm,
-  where=%str(ext="xpt" and dir=0)
+  where=%str(ext="sas7bdat" and dir=0)
 );
 
 %if %cstutilnobs(_cstDataSetName=work.dirtree_sdtm)=0 %then %do;
@@ -72,14 +70,12 @@ data _null_;
     jsonpath=cats("&project_folder/json_out/sdtm/", datasetname, ".json");
     fileoid=cats("&_fileOID", "/", "%sysfunc(date(), is8601da.)", "/", datasetname);
     code=cats('%nrstr(%write_datasetjson('
-                      /* , 'dataset=datasdtm.', name, ',' */
-                      , 'xptpath=', fullpath,','
+                      , 'dataset=datasdtm.', datasetname, ','
                       , 'jsonpath=', jsonpath, ','
                       , 'usemetadata=Y,'
                       , 'metadatalib=metasdtm,'
                       , 'datasetJSONVersion=1.1.0,'
                       , "fileOID=", fileoid, ","
-                      , "asOfDateTime=2023-05-31T00:00:00, "
                       , "originator=CDISC SDTM MSG Team,"
                       , "sourceSystem=Sponsor System,"
                       , "sourceSystemVersion=1.0,"
@@ -101,9 +97,9 @@ run;
 
 /* Get the paths of the XPT files */
 %util_gettree(
-  dir=&project_folder/data/send_xpt,
+  dir=%sysfunc(pathname(datasend)),
   outds=work.dirtree_send,
-  where=%str(ext="xpt" and dir=0)
+  where=%str(ext="sas7bdat" and dir=0)
 );
 
 %if %cstutilnobs(_cstDataSetName=work.dirtree_send)=0 %then %do;
@@ -117,14 +113,13 @@ data _null_;
     jsonpath=cats("&project_folder/json_out/send/", datasetname, ".json");
     fileoid=cats("&_fileOID", "/", "%sysfunc(date(), is8601da.)", "/", datasetname);
     code=cats('%nrstr(%write_datasetjson('
-                      /* , 'dataset=datasend.', name, ',' */
-                      , 'xptpath=', fullpath,','
+                      , 'dataset=datasend.', datasetname, ','
+                      /* , 'xptpath=', fullpath,',' */
                       , 'jsonpath=', jsonpath, ','
                       , 'usemetadata=Y,'
                       , 'metadatalib=metasend,'
                       , 'datasetJSONVersion=1.1.0,'
                       , "fileOID=", fileoid, ","
-                      , "asOfDateTime=2019-10-03T20:06:25, "
                       , "originator=CDISC SEND Team,"
                       , "sourceSystem=Visual Define-XML Editor,"
                       , "sourceSystemVersion=%str(1.0.0-beta.2),"
