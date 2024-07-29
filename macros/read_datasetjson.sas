@@ -119,8 +119,14 @@
   %let dslabel=;
   %let dsname=;
   proc sql noprint;
-    select label, name into :dslabel, :dsname trimmed
-      from out_&_Random..&_itemgroupdata_
+    %if %cstutilcheckvarsexist(_cstDataSetName=out_&_Random..&_itemgroupdata_, _cstVarList=label) %then %do;
+      select label, name into :dslabel trimmed, :dsname trimmed
+        from out_&_Random..&_itemgroupdata_
+    %end;
+    %else %do;
+      select name into :dsname trimmed
+        from out_&_Random..&_itemgroupdata_
+    %end;    
     ;
   quit;
 
@@ -252,7 +258,7 @@
   quit;
  
   %if %sysevalf(%superq(_decimal_variables)=, boolean)=0 %then %do;
-    %put NOTE: [&sysmacroname] Dataset=&dsname, character variables converted to numeric: &_decimal_variables;
+    %put NOTE: [&sysmacroname] Dataset=&datalib..%upcase(&dsname), character variables converted to numeric: &_decimal_variables;
     %convert_char_to_num(ds=&datalib..&dsname, outds=&datalib..&dsname, varlist=&_decimal_variables);
 
     proc datasets library=&datalib noprint nolist nodetails;
@@ -271,7 +277,7 @@
   quit;
   %if %sysevalf(%superq(_iso8601_variables)=, boolean)=0 %then %do;
 
-    %put NOTE: [&sysmacroname] Dataset=&dsname, character ISO 8601 variables converted to numeric: &_iso8601_variables;
+    %put NOTE: [&sysmacroname] Dataset=&datalib..%upcase(&dsname), character ISO 8601 variables converted to numeric: &_iso8601_variables;
     %convert_iso_to_num(ds=&datalib..&dsname, outds=&datalib..&dsname, varlist=&_iso8601_variables);
 
     proc datasets library=&datalib noprint nolist nodetails;

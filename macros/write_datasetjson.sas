@@ -124,7 +124,7 @@
       %end;
     /* Get dataset label and _itemGroupOID from the metadata */
       %if %sysfunc(exist(&metadatalib..metadata_tables)) %then %do;
-        select label, oid into :dataset_label, :_temGroupOID trimmed
+        select label, oid into :dataset_label trimmed, :_temGroupOID trimmed
           from &metadatalib..metadata_tables
             where upcase(name)="%upcase(&dataset_name)";
       %end;
@@ -144,8 +144,11 @@
     %let dataset_label=%cstutilgetattribute(_cstDataSetName=&dataset_new,_cstAttribute=LABEL);
 
   %if %sysevalf(%superq(dataset_label)=, boolean) %then %do;
+/*
     %let dataset_label=%sysfunc(lowcase(&dataset_name));
     %put %str(WAR)NING: [&sysmacroname] Dataset &dataset has no dataset label. "&dataset_label" will be used as label.;
+*/
+    %put %str(WAR)NING: [&sysmacroname] Dataset &dataset has no dataset label.;
   %end;
 
   %put NOTE: DATASET=&dataset_name &=_records &=_isReferenceData &=_itemGroupOID dslabel=%bquote(&dataset_label);
@@ -197,10 +200,10 @@
     data work.column_metadata(drop=sas_type sas_length sas_name order varnum);
       set work.column_metadata;
       if (sas_type=2) and (not missing(length)) and (length lt sas_length)
-        then putlog 'WAR' 'NING:' "&dataset_name.." name +(-1) ": metadata length is smaller than SAS length - "
+        then putlog 'WAR' 'NING:' "%upcase(&dataset_name)." name +(-1) ": metadata length is smaller than SAS length - "
                     length= +(-1) ", SAS length=" sas_length;
       if missing(name) then do;
-        putlog 'WAR' 'NING:' "&dataset_name.." sas_name
+        putlog 'WAR' 'NING:' "%upcase(&dataset_name)." sas_name
                 +(-1) ": variable is missing from metadata. SAS metadata will be used.";
         OID = cats("IT", ".", upcase("&dataset_name"), ".", upcase(sas_name));
         name = sas_name;
@@ -321,7 +324,7 @@
   quit;
  
   %if %sysevalf(%superq(_decimal_variables)=, boolean)=0 %then %do;
-    %put NOTE: [&sysmacroname] Dataset=&dataset_name, numeric variables converted to string: &_decimal_variables;
+    %put NOTE: [&sysmacroname] Dataset=%upcase(&dataset_name): numeric variables converted to string: &_decimal_variables;
     %convert_num_to_char(ds=&_dataset_to_write, outds=&_dataset_to_write, varlist=&_decimal_variables);
   %end;  
 
@@ -349,11 +352,11 @@
 
   proc sql;
   insert into work.table_metadata  
-    set oid = "&_itemGroupOID",
-        isReferenceData = "&_isReferenceData",
-        records = &_records,
-        name = "%upcase(&dataset_name)",
-        label = "%nrbquote(&dataset_label)"
+    set oid = "&_itemGroupOID"
+        , isReferenceData = "&_isReferenceData"
+        , records = &_records
+        , name = "%upcase(&dataset_name)"
+        %if %sysevalf(%superq(dataset_label)=, boolean)=0 %then , label = "%nrbquote(&dataset_label)";
     ;
   quit;  
 

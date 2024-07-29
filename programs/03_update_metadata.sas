@@ -81,7 +81,9 @@ data metasdtm.metadata_columns;
   if xml_datatype='float' and name ne "VISITNUM" then do;
     dataType='decimal';
     targetdatatype = "decimal";
-  end;  
+  end; 
+  
+  if name = "ARMCD" then label=""; 
 /*
   if missing(length) then do;
     if xml_datatype="date" then length=10;

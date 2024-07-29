@@ -114,17 +114,16 @@ data _null_;
     fileoid=cats("&_fileOID", "/", "%sysfunc(date(), is8601da.)", "/", datasetname);
     code=cats('%nrstr(%write_datasetjson('
                       , 'dataset=datasend.', datasetname, ','
-                      /* , 'xptpath=', fullpath,',' */
                       , 'jsonpath=', jsonpath, ','
-                      , 'usemetadata=Y,'
+                      , 'usemetadata=N,'
                       , 'metadatalib=metasend,'
                       , 'datasetJSONVersion=1.1.0,'
                       , "fileOID=", fileoid, ","
                       , "originator=CDISC SEND Team,"
                       , "sourceSystem=Visual Define-XML Editor,"
                       , "sourceSystemVersion=%str(1.0.0-beta.2),"
-                      /* , "studyOID=&_studyOID," */
-                      /* , "metaDataVersionOID=&_metaDataVersionOID," */
+                      , "studyOID=&_studyOID,"
+                      , "metaDataVersionOID=&_metaDataVersionOID,"
                       , "metaDataRef=define.xml"
                     ,');)');
     call execute(code);

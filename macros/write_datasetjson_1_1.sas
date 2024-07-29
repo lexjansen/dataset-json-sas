@@ -93,14 +93,17 @@
     %if %sysevalf(%superq(metaDataRef)=, boolean)=0 %then
       WRITE VALUES "metaDataRef" "&metaDataRef";
     ;
-    WRITE VALUES "itemGroupOID" "&itemGroupOID";
+    %if %sysevalf(%superq(itemGroupOID)=, boolean)=0 %then
+      WRITE VALUES "itemGroupOID" "&itemGroupOID";
+    ;  
     %if %sysevalf(%superq(isReferenceData)=, boolean)=0 %then %do;
       %include jsonproc;
     %end;  
     WRITE VALUES "records" &records;
     WRITE VALUES "name" "&datasetName";
-    WRITE VALUES "label" "%nrbquote(&datasetLabel)";
-
+    %if %sysevalf(%superq(datasetLabel)=, boolean)=0 %then
+      WRITE VALUES "label" "%nrbquote(&datasetLabel)";
+    ;
     WRITE VALUE "columns";
     %* Use macro to avoid creating null values for missing attributes;
     %* Instead do not create the attribute;
