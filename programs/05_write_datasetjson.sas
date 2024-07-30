@@ -115,7 +115,7 @@ data _null_;
     code=cats('%nrstr(%write_datasetjson('
                       , 'dataset=datasend.', datasetname, ','
                       , 'jsonpath=', jsonpath, ','
-                      , 'usemetadata=N,'
+                      , 'usemetadata=Y,'
                       , 'metadatalib=metasend,'
                       , 'datasetJSONVersion=1.1.0,'
                       , "fileOID=", fileoid, ","

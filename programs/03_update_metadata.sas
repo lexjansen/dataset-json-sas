@@ -21,7 +21,7 @@ proc format;
     float = "float"
     ;
 run;
-  
+
 /* Some manual ADaM data type updates */
 data metaadam.metadata_columns;
   set metaadam.metadata_columns;
@@ -33,12 +33,12 @@ data metaadam.metadata_columns;
   /* This update is just to show that it works in Dataset-JSON.                   */
   if xml_datatype in ('float' 'integer') and
      dataset_name in ('ADADAS' 'ADLBC' 'ADLBCPV' 'ADLBH' 'ADLBHPV' 'ADLBHY' 'ADNPIX' 'ADSL' 'ADVS') and
-     name in ('PCHG' 'AVAL' 'BASE' 'CHG' 'PCHG' 'R2A1LO' 'R2A1HI' 'BR2A1LO' 'BR2A1HI' 'A1LO' 'A1HI' 'R2A1LO' 'R2A1HI' 'ALBTRVAL' 'LBSTRESN' 'HEIGHTBL' 'WEIGHTBL') 
+     name in ('PCHG' 'AVAL' 'BASE' 'CHG' 'PCHG' 'R2A1LO' 'R2A1HI' 'BR2A1LO' 'BR2A1HI' 'A1LO' 'A1HI' 'R2A1LO' 'R2A1HI' 'ALBTRVAL' 'LBSTRESN' 'HEIGHTBL' 'WEIGHTBL')
      then do;
       dataType='decimal';
       targetDataType='decimal';
-    end;  
-    
+    end;
+
 /*
   if missing(length) then do;
     if xml_datatype="date" then length=10;
@@ -46,8 +46,8 @@ data metaadam.metadata_columns;
     if xml_datatype="partialDatetime" then length=19;
     if xml_datatype="durationDatetime" then length=19;
     if xml_datatype="datetime" then length=19;
-  end;    
-*/  
+  end;
+*/
   if not missing(displayformat) then do;
     if substr(strip(reverse(upcase(name))), 1, 2) = "TD" then do;
       dataType = "date";
@@ -64,7 +64,7 @@ data metaadam.metadata_columns;
       targetDataType = "integer";
       displayformat = "E8601TM.";
     end;
-  end;  
+  end;
 
 run;
 
@@ -81,9 +81,7 @@ data metasdtm.metadata_columns;
   if xml_datatype='float' and name ne "VISITNUM" then do;
     dataType='decimal';
     targetdatatype = "decimal";
-  end; 
-  
-  if name = "ARMCD" then label=""; 
+  end;
 /*
   if missing(length) then do;
     if xml_datatype="date" then length=10;
@@ -91,7 +89,7 @@ data metasdtm.metadata_columns;
     if xml_datatype="partialDatetime" then length=19;
     if xml_datatype="durationDatetime" then length=19;
     if xml_datatype="datetime" then length=19;
-  end;    
+  end;
 */
 
 run;
@@ -109,7 +107,7 @@ data metasend.metadata_columns;
   if xml_datatype='float' and index(name, "STRESN") then do;
     dataType='decimal';
     targetdatatype = "decimal";
-  end;  
+  end;
 /*
   if missing(length) then do;
     if xml_datatype="date" then length=10;
@@ -117,7 +115,7 @@ data metasend.metadata_columns;
     if xml_datatype="partialDatetime" then length=19;
     if xml_datatype="durationDatetime" then length=19;
     if xml_datatype="datetime" then length=19;
-  end;    
+  end;
 */
 
 run;
@@ -127,4 +125,4 @@ run;
 libname metaadam clear;
 libname metasdtm clear;
 libname metasend clear;
-*/  
+*/

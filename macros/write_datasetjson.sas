@@ -159,19 +159,15 @@
     /* Get column metadata - oid, label, type, length, displayformat, keysequence  */
     data work._column_metadata(keep=OID name label order datatype targetdatatype length displayFormat keySequence);
       retain OID name label datatype length displayFormat keySequence;
-      length _label $ 32;
       set &metadatalib..metadata_columns(
           where=(upcase(dataset_name) = %upcase("&dataset_name"))
           drop=length
           rename=(json_length=length)
         );
-        _label = "";
         if missing(oid) then putlog "WAR" "NING: [&sysmacroname] Missing oid for variable: " name ;
         if missing(name) then putlog "WAR" "NING: [&sysmacroname] Missing name for variable: " oid ;
         if missing(label) then do;
-          _label = lowcase(name);
-          putlog "WAR" "NING: [&sysmacroname] Missing label for variable: " name +(-1) ", " oid= +(-1) ". " _label "will be used as label.";
-          label = _label;
+          putlog "WAR" "NING: [&sysmacroname] Missing label for variable: " name +(-1) ", " oid= +(-1) ".";
         end;
         if missing(datatype) then putlog "WAR" "NING: [&sysmacroname] Missing dataType for variable: " name +(-1) ", " oid=;
     run;
