@@ -24,7 +24,6 @@ run;
 
 %write_datasetjson(
       dataset=work.class,
-      xptpath=&project_folder\test\class.xpt,
       jsonpath=&project_folder\test\class.json,
       usemetadata=N,
       pretty=PRETTY);

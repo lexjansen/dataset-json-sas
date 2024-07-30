@@ -4,25 +4,33 @@
 
 libname data "&project_folder/test";
 
+proc datasets lib=data nolist kill; 
+quit; 
+run;
+
 %read_datasetjson(
   jsonpath=&project_folder/test/ae_utf8.json, 
   datalib=data, 
   dropseqvar=Y,
+  savemetadata=Y,
   metadatalib=data
   );
 
 %write_datasetjson(
   dataset=data.ae, 
   jsonpath=&project_folder/test/ae_out.json, 
-  datasetJSONVersion=1.0.0,
-  usemetadata=Y, 
-  metadatalib=data
+  datasetJSONVersion=1.1.0,
+  usemetadata=N, 
+  metadatalib=data,
+  studyOID=LZZT,
+  metaDataVersionOID=CDISC.SDTMIG.3.1.2  
   );
 
 %read_datasetjson(
   jsonpath=&project_folder/test/ae_out.json, 
   datalib=work, 
   dropseqvar=Y,
+  savemetadata=Y,
   metadatalib=work
   );
 

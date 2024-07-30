@@ -24,7 +24,7 @@
     _studyOID _metaDataVersionOID
     _itemGroupOID _isReferenceData
     creationDateTime modifiedDateTime
-    _decimal_variables
+    _decimal_variables _iso8601_variables
     _dataset_to_write;
 
 
@@ -74,6 +74,14 @@
   %do;
     %put ERR%str(OR): [&sysmacroname] When usemetadata=Y, then parameter metadatalib can not be empty.;
     %goto exit_macro;
+  %end;
+
+
+  %if %sysevalf(%superq(metadatalib)=, boolean)=0 %then %do;
+    %if (%sysfunc(libref(&metadatalib)) ne 0 ) %then %do;
+        %put ERR%str(OR): [&sysmacroname] metadatalib library &metadatalib has not been assigned.;
+        %goto exit_macro;
+    %end;  
   %end;
 
   %* Rule: allowed versions *;
@@ -164,12 +172,12 @@
           drop=length
           rename=(json_length=length)
         );
-        if missing(oid) then putlog "WAR" "NING: [&sysmacroname] Missing oid for variable: " name ;
-        if missing(name) then putlog "WAR" "NING: [&sysmacroname] Missing name for variable: " oid ;
+        if missing(oid) then putlog "WAR" "NING: [&sysmacroname] Missing oid for variable: &dataset." name ;
+        if missing(name) then putlog "WAR" "NING: [&sysmacroname] Missing name for variable in dataset &dataset: " oid ;
         if missing(label) then do;
-          putlog "WAR" "NING: [&sysmacroname] Missing label for variable: " name +(-1) ", " oid= +(-1) ".";
+          putlog "WAR" "NING: [&sysmacroname] Missing label for variable: &dataset.." name +(-1) ", " oid= +(-1) ".";
         end;
-        if missing(datatype) then putlog "WAR" "NING: [&sysmacroname] Missing dataType for variable: " name +(-1) ", " oid=;
+        if missing(datatype) then putlog "WAR" "NING: [&sysmacroname] Missing dataType for variable: &dataset.." name +(-1) ", " oid=;
     run;
 
 
@@ -196,10 +204,10 @@
     data work.column_metadata(drop=sas_type sas_length sas_name order varnum);
       set work.column_metadata;
       if (sas_type=2) and (not missing(length)) and (length lt sas_length)
-        then putlog 'WAR' 'NING:' "%upcase(&dataset_name)." name +(-1) ": metadata length is smaller than SAS length - "
+        then putlog 'WAR' 'NING:' " [&sysmacroname] &dataset.." name +(-1) ": metadata length is smaller than SAS length - "
                     length= +(-1) ", SAS length=" sas_length;
       if missing(name) then do;
-        putlog 'WAR' 'NING:' "%upcase(&dataset_name)." sas_name
+        putlog 'WAR' 'NING:' "[&sysmacroname] &dataset.." sas_name
                 +(-1) ": variable is missing from metadata. SAS metadata will be used.";
         OID = cats("IT", ".", upcase("&dataset_name"), ".", upcase(sas_name));
         name = sas_name;
@@ -231,11 +239,10 @@
       by varnum;
     run;
 
-    data work.column_metadata(drop=sas_type varnum formatl formatd _label);
+    data work.column_metadata(drop=sas_type varnum formatl formatd);
       retain OID name label dataType targetDataType length;
-      length OID $ 128 dataType targetDataType _label $ 32;
+      length OID $ 128 dataType targetDataType $ 32;
       set work.column_metadata_template work.column_metadata;
-      _label = "";
       targetDataType = "";
       OID = cats("IT", ".", upcase("&dataset_name"), ".", upcase(name));
       if sas_type=1 then do;
@@ -264,11 +271,9 @@
       %* put a dot on the end of format if we are still missing it;
       if (not missing(displayFormat)) and index(displayFormat,'.')=0 then displayFormat=strip(displayFormat)||'.';
       if missing(label) then do;
-        _label = propcase(name);
-        putlog "WAR" "NING: [&sysmacroname] Missing label for variable " name +(-1) ", " oid= +(-1) ". " _label "will be used as label.";
-        label = _label;
+        putlog "WAR" "NING: [&sysmacroname] Missing label for variable &dataset.." name +(-1) ", " oid= +(-1) ".";
       end;
-      if missing(dataType) then putlog "WAR" "NING: [&sysmacroname] Missing type for variable " name +(-1) ", "  oid=;
+      if missing(dataType) then putlog "WAR" "NING: [&sysmacroname] Missing type for variable &dataset.." name +(-1) ", "  oid=;
     run;
 
   %end;
@@ -320,11 +325,20 @@
   quit;
  
   %if %sysevalf(%superq(_decimal_variables)=, boolean)=0 %then %do;
-    %put NOTE: [&sysmacroname] Dataset=%upcase(&dataset_name): numeric variables converted to string: &_decimal_variables;
+    %put NOTE: [&sysmacroname] &dataset: numeric variables converted to string: &_decimal_variables;
     %convert_num_to_char(ds=&_dataset_to_write, outds=&_dataset_to_write, varlist=&_decimal_variables);
   %end;  
 
-
+  %let _iso8601_variables=;
+  proc sql noprint;
+    select name into :_iso8601_variables separated by ' '
+      from work.column_metadata
+      where (datatype in ('datetime' 'date' 'time')) and (targetdatatype = 'integer');  
+  quit;
+  %if %sysevalf(%superq(_iso8601_variables)=, boolean)=0 %then %do;
+    %put NOTE: [&sysmacroname] &dataset: character ISO 8601 variables converted to numeric: &_iso8601_variables;
+  %end;    
+  
   %******************************************************************************;
 
   %create_template(type=STUDY, out=work.study_metadata);

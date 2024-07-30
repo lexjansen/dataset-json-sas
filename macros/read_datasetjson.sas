@@ -38,6 +38,20 @@
       %goto exit_macro;
     %end;
 
+  %if %sysevalf(%superq(datalib)=, boolean)=0 %then %do;
+    %if (%sysfunc(libref(&datalib)) ne 0 ) %then %do;
+        %put ERR%str(OR): [&sysmacroname] datalib library &datalib has not been assigned.;
+        %goto exit_macro;
+    %end;  
+  %end;
+
+  %if %sysevalf(%superq(metadatalib)=, boolean)=0 %then %do;
+    %if (%sysfunc(libref(&metadatalib)) ne 0 ) %then %do;
+        %put ERR%str(OR): [&sysmacroname] metadatalib library &metadatalib has not been assigned.;
+        %goto exit_macro;
+    %end;  
+  %end;
+
   %* Rule: dropseqvar has to be Y or N  *;
   %if "%substr(%upcase(&dropseqvar),1,1)" ne "Y" and "%substr(%upcase(&dropseqvar),1,1)" ne "N" %then
   %do;
@@ -84,7 +98,7 @@
   %* Rule: allowed versions *;
   %if %substr(&datasetJSONVersion,1,3) ne %str(1.1) %then
   %do;
-    %put ERR%str(OR): [&sysmacroname] Macro parameter datasetJSONVersion=&datasetJSONVersion. Allowed values: 1.1.x.;
+    %put ERR%str(OR): [&sysmacroname] Attribute datasetJSONVersion=&datasetJSONVersion. Allowed values: 1.1.x.;
     %goto exit_macro;
   %end;
 
@@ -103,12 +117,7 @@
       where not(missing(label));
     select catt(name, ' $', length) into :length separated by ' '
       from out_&_Random..&_items_
-    %if "%substr(%upcase(&datasetJSONVersion),1,3)" = "1.0" %then %do;
-      where type="string" and (not(missing(length)));
-    %end;
-    %if "%substr(%upcase(&datasetJSONVersion),1,3)" = "1.1" %then %do;
       where datatype="string" and (not(missing(length)));
-    %end;
   quit;
 
   %put &=variables;
@@ -134,98 +143,98 @@
     select &_itemdata_;
   run;
 
-%if "%substr(%upcase(&savemetadata),1,1)" eq "Y" %then %do;
+  %if "%substr(%upcase(&savemetadata),1,1)" eq "Y" %then %do;
 
-  %let ItemGroupOID=;
-  proc sql noprint;
-    select ItemGroupOID into :ItemGroupOID trimmed
-      from out_&_Random..root;
-  quit;
-    
-  %if not %sysfunc(exist(&metadatalib..metadata_study)) %then %create_template(type=STUDY, out=&metadatalib..metadata_study);;
-  %if not %sysfunc(exist(&metadatalib..metadata_tables)) %then %create_template(type=TABLES, out=&metadatalib..metadata_tables);;
-  %if not %sysfunc(exist(&metadatalib..metadata_columns)) %then %create_template(type=COLUMNS, out=&metadatalib..metadata_columns);;
+    %let ItemGroupOID=;
+    proc sql noprint;
+      select ItemGroupOID into :ItemGroupOID trimmed
+        from out_&_Random..root;
+    quit;
+      
+    %if not %sysfunc(exist(&metadatalib..metadata_study)) %then %create_template(type=STUDY, out=&metadatalib..metadata_study);;
+    %if not %sysfunc(exist(&metadatalib..metadata_tables)) %then %create_template(type=TABLES, out=&metadatalib..metadata_tables);;
+    %if not %sysfunc(exist(&metadatalib..metadata_columns)) %then %create_template(type=COLUMNS, out=&metadatalib..metadata_columns);;
 
-  %let metadata_study_columns=;
-  proc sql noprint;
-    select name into :metadata_study_columns separated by ' '
-      from dictionary.columns
-    where upcase(libname)="%upcase(&metadatalib)" and
-         upcase(memname)="METADATA_STUDY"
-   ;
-  quit ;
+    %let metadata_study_columns=;
+    proc sql noprint;
+      select name into :metadata_study_columns separated by ' '
+        from dictionary.columns
+      where upcase(libname)="%upcase(&metadatalib)" and
+           upcase(memname)="METADATA_STUDY"
+     ;
+    quit ;
 
 
-  %if %sysfunc(exist(out_&_Random..sourceSystem))
-  %then %do;
-    data work._metadata_study;
-      merge out_&_Random..root out_&_Random..sourceSystem(rename=(name=sourceSystem version=sourceSystemVersion));
-    run;
-  %end;
-  %else %do;
-    data work._metadata_study;
-      set out_&_Random..root;
-    run;
-  %end;
-    
-  data &metadatalib..metadata_study(keep=&metadata_study_columns);
-    set &metadatalib..metadata_study 
-        work._metadata_study(
-          rename=(
-            datasetJSONCreationDateTime = creationDateTime
-            dbLastModifiedDateTime = modifiedDateTime
-          )
-        );
-  run;
-
-  proc delete data=work._metadata_study;
-  run;
-
-  %if %cstutilcheckvarsexist(_cstDataSetName=out_&_Random..&_itemgroupdata_, _cstVarList=isReferenceData) 
-  %then %do;
-    %if %cstutilgetattribute(_cstDataSetName=out_&_Random..&_itemgroupdata_, _cstVarName=isReferenceData, _cstAttribute=VARTYPE) eq N 
+    %if %sysfunc(exist(out_&_Random..sourceSystem))
     %then %do;
-      data out_&_Random..&_itemgroupdata_;
-        length isReferenceData $3;
-        set out_&_Random..&_itemgroupdata_(rename=(isReferenceData = _isReferenceData));
-          if _isReferenceData = 1 then isReferenceData = "Yes";
-          if _isReferenceData = 0 then isReferenceData = "No";
-          drop _isReferenceData;
-      run;  
+      data work._metadata_study;
+        merge out_&_Random..root out_&_Random..sourceSystem(rename=(name=sourceSystem version=sourceSystemVersion));
+      run;
     %end;
+    %else %do;
+      data work._metadata_study;
+        set out_&_Random..root;
+      run;
+    %end;
+      
+    data &metadatalib..metadata_study(keep=&metadata_study_columns);
+      set &metadatalib..metadata_study 
+          work._metadata_study(
+            rename=(
+              datasetJSONCreationDateTime = creationDateTime
+              dbLastModifiedDateTime = modifiedDateTime
+            )
+          );
+    run;
+
+    proc delete data=work._metadata_study;
+    run;
+
+    %if %cstutilcheckvarsexist(_cstDataSetName=out_&_Random..&_itemgroupdata_, _cstVarList=isReferenceData) 
+    %then %do;
+      %if %cstutilgetattribute(_cstDataSetName=out_&_Random..&_itemgroupdata_, _cstVarName=isReferenceData, _cstAttribute=VARTYPE) eq N 
+      %then %do;
+        data out_&_Random..&_itemgroupdata_;
+          length isReferenceData $3;
+          set out_&_Random..&_itemgroupdata_(rename=(isReferenceData = _isReferenceData));
+            if _isReferenceData = 1 then isReferenceData = "Yes";
+            if _isReferenceData = 0 then isReferenceData = "No";
+            drop _isReferenceData;
+        run;  
+      %end;
+    %end;
+
+    %let metadata_tables_columns=;
+    proc sql noprint;
+      select name into :metadata_tables_columns separated by ' '
+        from dictionary.columns
+      where upcase(libname)="%upcase(&metadatalib)" and
+           upcase(memname)="METADATA_TABLES"
+     ;
+    quit ;
+
+    data &metadatalib..metadata_tables(keep=&metadata_tables_columns);
+      set &metadatalib..metadata_tables out_&_Random..&_itemgroupdata_(in=inigd);
+      if inigd then do;
+        oid = "&ItemGroupOID";
+        call symputx('_ItemGroupName', name);
+      end;
+    run;
+
+    data work.&_items_;
+      set out_&_Random..&_items_;
+      order = _n_;
+    run;
+
+    data &metadatalib..metadata_columns(%if %substr(%upcase(&DropSeqVar),1,1) eq Y %then where=(upcase(name) ne "ITEMGROUPDATASEQ"););
+      set &metadatalib..metadata_columns work.&_items_(rename=(ItemOID=OID) in=init);
+      if init then dataset_name = "&_ItemGroupName";
+    run;
+
+    proc delete data=work.&_items_;
+    run;
+
   %end;
-
-  %let metadata_tables_columns=;
-  proc sql noprint;
-    select name into :metadata_tables_columns separated by ' '
-      from dictionary.columns
-    where upcase(libname)="%upcase(&metadatalib)" and
-         upcase(memname)="METADATA_TABLES"
-   ;
-  quit ;
-
-  data &metadatalib..metadata_tables(keep=&metadata_tables_columns);
-    set &metadatalib..metadata_tables out_&_Random..&_itemgroupdata_(in=inigd);
-    if inigd then do;
-      oid = "&ItemGroupOID";
-      call symputx('_ItemGroupName', name);
-    end;
-  run;
-
-  data work.&_items_;
-    set out_&_Random..&_items_;
-    order = _n_;
-  run;
-
-  data &metadatalib..metadata_columns(%if %substr(%upcase(&DropSeqVar),1,1) eq Y %then where=(upcase(name) ne "ITEMGROUPDATASEQ"););
-    set &metadatalib..metadata_columns work.&_items_(rename=(ItemOID=OID) in=init);
-    if init then dataset_name = "&_ItemGroupName";
-  run;
-
-  proc delete data=work.&_items_;
-  run;
-
-%end;
 
   /* get formats from Dataset-JSON metadata, but only when the displayformat variable exists */
   %let format=;
@@ -324,14 +333,8 @@
       else cats("IT.", "%upcase(&dsname).", d.name)
     end as OID,
     d.name,
-    %if "%substr(%upcase(&datasetJSONVersion),1,3)" = "1.0" %then %do;
-      d.type as DataType,
-      i.type,
-    %end;
-    %if "%substr(%upcase(&datasetJSONVersion),1,3)" = "1.1" %then %do;
-      d.type as datatype,
-      i.datatype as type,
-    %end;
+    d.type as datatype,
+    i.datatype as type,
     d.length as sas_length,
     i.length,
     d.format
