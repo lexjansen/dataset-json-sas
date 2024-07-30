@@ -77,8 +77,8 @@ data _null_;
                       , 'datasetJSONVersion=1.1.0,'
                       , "fileOID=", fileoid, ","
                       , "originator=CDISC SDTM MSG Team,"
-                      , "sourceSystem=Sponsor System,"
-                      , "sourceSystemVersion=1.0,"
+                      , "sourceSystem=SAS on &SYSHOSTNAME,"
+                      , "sourceSystemVersion=&SYSVLONG4,"
                       /* , "studyOID=&_studyOID," */
                       /* , "metaDataVersionOID=&_metaDataVersionOID," */
                       , "metaDataRef=define.xml"
@@ -120,8 +120,8 @@ data _null_;
                       , 'datasetJSONVersion=1.1.0,'
                       , "fileOID=", fileoid, ","
                       , "originator=CDISC SEND Team,"
-                      , "sourceSystem=Visual Define-XML Editor,"
-                      , "sourceSystemVersion=%str(1.0.0-beta.2),"
+                      , "sourceSystem=SAS on &SYSHOSTNAME,"
+                      , "sourceSystemVersion=&SYSVLONG4,"
                       , "studyOID=&_studyOID,"
                       , "metaDataVersionOID=&_metaDataVersionOID,"
                       , "metaDataRef=define.xml"
