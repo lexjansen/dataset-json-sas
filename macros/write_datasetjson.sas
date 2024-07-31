@@ -24,6 +24,7 @@
     _studyOID _metaDataVersionOID
     _itemGroupOID _isReferenceData
     creationDateTime modifiedDateTime
+    releaseCreated hostCreated
     _decimal_variables _iso8601_variables
     _dataset_to_write;
 
@@ -44,6 +45,9 @@
   %let _metaDataVersionOID=;
   %let creationDateTime=%sysfunc(datetime(), is8601dt.);
   %let modifiedDateTime=;
+  %let releaseCreated=;
+  %let hostCreated=;
+  %let _records=;
   %let _create_temp_dataset_sas=0;
 
   %******************************************************************************;
@@ -76,12 +80,26 @@
     %goto exit_macro;
   %end;
 
-
   %if %sysevalf(%superq(metadatalib)=, boolean)=0 %then %do;
     %if (%sysfunc(libref(&metadatalib)) ne 0 ) %then %do;
-        %put ERR%str(OR): [&sysmacroname] metadatalib library &metadatalib has not been assigned.;
-        %goto exit_macro;
+      %put ERR%str(OR): [&sysmacroname] metadatalib library &metadatalib has not been assigned.;
+      %goto exit_macro;
     %end;  
+  %end;
+
+  %if "%substr(%upcase(&usemetadata),1,1)" eq "Y" %then %do;
+    %if not %sysfunc(exist(&metadatalib..metadata_study)) %then %do;
+      %put ERR%str(OR): [&sysmacroname] When usemetadata=Y, then &metadatalib..metadata_study must exist.;
+      %goto exit_macro;
+    %end;
+    %if not %sysfunc(exist(&metadatalib..metadata_tables)) %then %do;
+      %put ERR%str(OR): [&sysmacroname] When usemetadata=Y, then &metadatalib..metadata_tables must exist.;
+      %goto exit_macro;
+    %end;  
+    %if not %sysfunc(exist(&metadatalib..metadata_columns)) %then %do;
+      %put ERR%str(OR): [&sysmacroname] When usemetadata=Y, then &metadatalib..metadata_columns must exist.;
+      %goto exit_macro;
+    %end;
   %end;
 
   %* Rule: allowed versions *;
@@ -95,14 +113,41 @@
   %* End of parameter checks                                                    *;
   %******************************************************************************;
 
-  /* Get modifiedDateTime */
-  proc sql noprint;
-    select put(modate, e8601dt.) into :modifiedDateTime 
-    from sashelp.vtable 
-    where memname = upcase("%scan(&dataset, 2, %str(.))") and 
-          libname = upcase("%scan(&dataset, 1, %str(.))") and memtype = "DATA";
-  quit;
+  /* Get modifiedDateTime, releaseCreated, hostCreated, number of records */
+  ods listing close;
+  ods output Attributes=Attributes EngineHost=EngineHost Variables=Variables;
+    proc contents data=&dataset;
+    run;
+  ods output close;
+  ods listing;
+
+  data _null_;
+      set Attributes;
+      if Label1 = "Last Modified" then call symputx('modifiedDateTime', put(nValue1, E8601DT.));
+      if Label2 = "Observations" then call symputx('_records', nValue2);
+  run;
+
+  data _null_;
+      set EngineHost;
+      if Label1 = "Release Created" then call symputx('releaseCreated', cValue1);
+      if Label1 = "Host Created" then call symputx('hostCreated', cValue1);
+    run;
+
+  /* Derive _isReferenceData */
+  %if %cstutilcheckvarsexist(_cstDataSetName=&dataset, _cstVarList=usubjid)=0 %then
+    %do;
+      %let _isReferenceData=Yes;
+    %end;  
+
+  proc delete data=work.Attributes work.EngineHost;
+  run;
+
+  %if %sysevalf(%superq(sourceSystem)=, boolean) and 
+    %sysevalf(%superq(hostCreated)=, boolean)=0 %then %let sourceSystem = %str(SAS on &hostCreated);
+  %if %sysevalf(%superq(sourceSystemVersion)=, boolean) and 
+    %sysevalf(%superq(releaseCreated)=, boolean)=0 %then %let sourceSystemVersion = %str(&releaseCreated);
   
+
   /* Create temp SAS dataset */
   %let dataset_name=%scan(&dataset, -1, %str(.));
   %let dataset_new=&dataset;
@@ -113,15 +158,6 @@
   %let dataset_new=sas&_Random..&dataset_name;
   
   %let _create_temp_dataset_sas=1;
-
-  /* Derive _isReferenceData */
-  %if %cstutilcheckvarsexist(_cstDataSetName=&dataset_new, _cstVarList=usubjid)=0 %then
-    %do;
-      %let _isReferenceData=Yes;
-    %end;  
-
-  /* Get number of records */
-  %let _records=%cstutilnobs(_cstDataSetName=&dataset_new);
 
   %if %substr(%upcase(&UseMetadata),1,1) eq Y %then %do;
     /* Get StudyOID and metaDataVersionOID from the metadata */
@@ -152,10 +188,6 @@
     %let dataset_label=%cstutilgetattribute(_cstDataSetName=&dataset_new,_cstAttribute=LABEL);
 
   %if %sysevalf(%superq(dataset_label)=, boolean) %then %do;
-/*
-    %let dataset_label=%sysfunc(lowcase(&dataset_name));
-    %put %str(WAR)NING: [&sysmacroname] Dataset &dataset has no dataset label. "&dataset_label" will be used as label.;
-*/
     %put %str(WAR)NING: [&sysmacroname] Dataset &dataset has no dataset label.;
   %end;
 
@@ -178,6 +210,10 @@
           putlog "WAR" "NING: [&sysmacroname] Missing label for variable: &dataset.." name +(-1) ", " oid= +(-1) ".";
         end;
         if missing(datatype) then putlog "WAR" "NING: [&sysmacroname] Missing dataType for variable: &dataset.." name +(-1) ", " oid=;
+        
+        if dataType in ("date" "datetime" "time") and targetDataType = "integer" and missing(displayFormat) 
+          then putlog "WAR" "NING: [&sysmacroname] Missing displayFormat for variable: &dataset.." name +(-1) ", " oid= ", " dataType= ", " targetDataType=;
+        
     run;
 
 
@@ -253,15 +289,15 @@
         dataType="string";
       end;  
       /* datetime, date, and time variables will be transfered as ISO 8601 strings */              
-      if sas_type = 1 and (scan(upcase(displayFormat), 1, ".") = "E8601DA" or scan(upcase(displayFormat), 1, ".") = "DATE") then do;
+      if sas_type = 1 and (substr(upcase(strip(displayFormat)), 1, 7) = "E8601DA" or substr(upcase(strip(displayFormat)), 1, 4) = "DATE") then do;
         dataType = "date";
         targetDataType = "integer";
       end;
-      if sas_type = 1 and (scan(upcase(displayFormat), 1, ".") = "E8601TM" or scan(upcase(displayFormat), 1, ".") = "TIME") then do;
+      if sas_type = 1 and (substr(upcase(strip(displayFormat)), 1, 7) = "E8601TM" or substr(upcase(strip(displayFormat)), 1, 4) = "TIME") then do;
         dataType = "time";
         targetDataType = "integer";
       end;
-      if sas_type = 1 and (scan(upcase(displayFormat), 1, ".") = "E8601DT" or scan(upcase(displayFormat), 1, ".") = "DATETIME") then do;
+      if sas_type = 1 and (substr(upcase(strip(displayFormat)), 1, 7) = "E8601DT" or substr(upcase(strip(displayFormat)), 1, 8) = "DATETIME") then do;
         dataType = "datetime";
         targetDataType = "integer";
       end;
