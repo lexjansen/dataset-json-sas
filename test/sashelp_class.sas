@@ -7,10 +7,16 @@ data work.class(label="%cstutilgetattribute(_cstDataSetName=sashelp.class, _cstA
   label Name = "Name" Sex = "Sex" Age="Age" Height="Height";
   set sashelp.class;
   * ITEMGROUPDATASEQ = strip(put(_n_, best.));
+  bmi = weight / (height * height);
 run;
 
 data work.class;
+  label bmi = "Body Mass Index";
   set sashelp.class;
+  bmi = weight / (height * height);
+run;
+proc print data=work.class;
+  format bmi best32.28;
 run;
 
 
@@ -21,11 +27,17 @@ proc copy in=work out=xptfile;
 select class;
 run;
 */
+%write_datasetjson(
+      dataset=work.class,
+      jsonpath=&project_folder\test\class_bmi_num.json,
+      usemetadata=N,
+      pretty=PRETTY);
 
 %write_datasetjson(
       dataset=work.class,
       jsonpath=&project_folder\test\class.json,
       usemetadata=N,
+      decimalVariables=bmi,
       pretty=PRETTY);
 
 proc datasets library=work noprint nolist nodetails;
@@ -35,7 +47,21 @@ quit;
 %read_datasetjson(
   jsonpath=&project_folder\test\class.json,
   datalib=work,
-  dropseqvar=Y
+  dropseqvar=Y,
+  savemetadata=N
+);
+proc print data=work.class;
+  format bmi best32.28;
+run;
+  
+proc compare base=work.class_old compare=work.class;
+run;
+
+%read_datasetjson(
+  jsonpath=&project_folder\test\class_bmi_num.json,
+  datalib=work,
+  dropseqvar=Y,
+  savemetadata=N
 );
 
 proc compare base=work.class_old compare=work.class;
@@ -45,4 +71,7 @@ run;
       dataset=work.class,
       jsonpath=&project_folder\test\class_new.json,
       usemetadata=N);
+proc print data=work.class;
+  format bmi best32.28;
+run;
 

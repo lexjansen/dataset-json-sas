@@ -37,7 +37,7 @@
   %let _words = %sysfunc(countw(&_varlist, %str(' ')));
   %put NOTE: &=_words &=_varlist; 
 
-  %if %sysevalf(%superq(_variables)=, boolean) %then %do;
+  %if %sysevalf(%superq(_varlist)=, boolean) %then %do;
     %if %sysevalf(%superq(_outds)=, boolean)=0 %then %do;
       data &outds;
         set &ds;

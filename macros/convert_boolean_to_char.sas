@@ -36,7 +36,7 @@
   
   %put &=_variables;
   
-  %if %sysevalf(%superq(_variables)=, boolean) %then %do;
+  %if %sysevalf(%superq(_varlist)=, boolean) %then %do;
     %if %sysevalf(%superq(outds)=, boolean)=0 %then %do;
       data &outds;
         set &ds;

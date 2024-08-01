@@ -267,7 +267,7 @@
   quit;
  
   %if %sysevalf(%superq(_decimal_variables)=, boolean)=0 %then %do;
-    %put NOTE: [&sysmacroname] Dataset=&datalib..%upcase(&dsname), character variables converted to numeric: &_decimal_variables;
+    %put NOTE: [&sysmacroname] &datalib..&dsname: character variables converted to numeric: &_decimal_variables;
     %convert_char_to_num(ds=&datalib..&dsname, outds=&datalib..&dsname, varlist=&_decimal_variables);
 
     proc datasets library=&datalib noprint nolist nodetails;

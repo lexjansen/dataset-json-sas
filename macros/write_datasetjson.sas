@@ -3,6 +3,7 @@
   jsonpath=,
   usemetadata=N,
   metadatalib=,
+  decimalVariables=,
   datasetJSONVersion=1.1.0,
   fileOID=,
   originator=,
@@ -289,6 +290,7 @@
         dataType="string";
       end;  
       /* datetime, date, and time variables will be transfered as ISO 8601 strings */              
+if not (missing(displayFormat)) then do;
       if sas_type = 1 and (substr(upcase(strip(displayFormat)), 1, 7) = "E8601DA" or substr(upcase(strip(displayFormat)), 1, 4) = "DATE") then do;
         dataType = "date";
         targetDataType = "integer";
@@ -301,7 +303,8 @@
         dataType = "datetime";
         targetDataType = "integer";
       end;
-                    
+end;                    
+
       if formatl gt 0 then displayFormat=cats(displayFormat, put(formatl, best.), ".");
       if formatd gt 0 then displayFormat=cats(displayFormat, put(formatd, best.));
       %* put a dot on the end of format if we are still missing it;
@@ -353,13 +356,26 @@
   %end;
 
   %******************************************************************************;
-  %let _decimal_variables=;
-  proc sql noprint;
-    select name into :_decimal_variables separated by ' '
-      from work.column_metadata
-      where dataType='decimal' and targetDataType='decimal';  
-  quit;
- 
+  %let _decimal_variables=&decimalVariables;
+  %if %sysevalf(%superq(decimalVariables)=, boolean) %then %do;
+    proc sql noprint;
+      select name into :_decimal_variables separated by ' '
+        from work.column_metadata
+        where dataType='decimal' and targetDataType='decimal';  
+    quit;
+  %end;
+  %else %do;
+    data work.column_metadata;
+      set work.column_metadata;
+        %do _count=1 %to %sysfunc(countw(&decimalVariables, %str(' ')));
+          if upcase(name)=upcase("%scan(&decimalVariables, &_count)") then do; 
+            dataType="decimal"; 
+            targetDataType="decimal"; 
+          end;
+        %end;
+    run;  
+  %end;  
+   
   %if %sysevalf(%superq(_decimal_variables)=, boolean)=0 %then %do;
     %put NOTE: [&sysmacroname] &dataset: numeric variables converted to string: &_decimal_variables;
     %convert_num_to_char(ds=&_dataset_to_write, outds=&_dataset_to_write, varlist=&_decimal_variables);
