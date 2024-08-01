@@ -286,7 +286,7 @@
   quit;
   %if %sysevalf(%superq(_iso8601_variables)=, boolean)=0 %then %do;
 
-    %put NOTE: [&sysmacroname] Dataset=&datalib..%upcase(&dsname), character ISO 8601 variables converted to numeric: &_iso8601_variables;
+    %put NOTE: [&sysmacroname] &datalib..%upcase(&dsname), character ISO 8601 variables converted to numeric: &_iso8601_variables;
     %convert_iso_to_num(ds=&datalib..&dsname, outds=&datalib..&dsname, varlist=&_iso8601_variables);
 
     proc datasets library=&datalib noprint nolist nodetails;
@@ -349,11 +349,11 @@
   data _null_;
     set column_metadata;
     if DataType="char" and not (type in ('string' 'datetime' 'date' 'time')) 
-      then put "WAR" "NING: [&sysmacroname] TYPE ISSUE: dataset=&dsname " OID= name= DataType= type=;
+      then putlog "WAR" "NING: [&sysmacroname] TYPE ISSUE: dataset=datalib..&dsname " OID= name= DataType= type=;
     if DataType="num" and not (type in ('integer' 'double' 'float' 'decimal' 'datetime' 'date' 'time')) 
-      then put "WAR" "NING: [&sysmacroname] TYPE ISSUE: dataset=&dsname " OID= name= DataType= type=;
+      then putlog "WAR" "NING: [&sysmacroname] TYPE ISSUE: dataset=datalib..&dsname " OID= name= DataType= type=;
     if DataType="char" and not(missing(length)) and (length lt sas_length) 
-      then put "WAR" "NING: [&sysmacroname] LENGTH ISSUE: dataset=&dsname " OID= name= length= sas_length=;
+      then putlog "WAR" "NING: [&sysmacroname] LENGTH ISSUE: dataset=datalib..&dsname " OID= name= length= sas_length=;
   run;
 
   proc delete data=work.column_metadata;

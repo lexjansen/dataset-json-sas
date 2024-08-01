@@ -7,18 +7,23 @@ data work.class(label="%cstutilgetattribute(_cstDataSetName=sashelp.class, _cstA
   label Name = "Name" Sex = "Sex" Age="Age" Height="Height";
   set sashelp.class;
   * ITEMGROUPDATASEQ = strip(put(_n_, best.));
-  bmi = weight / (height * height);
+  bmi = weight * 703 / (height * height);
 run;
 
 data work.class;
-  label bmi = "Body Mass Index";
+  length bmi birthdate 8.;
+  format birthdate E8601DA. bmi 32.29;
+  label bmi = "Body Mass Index" birthdate = "Date of birth";
   set sashelp.class;
-  bmi = weight / (height * height);
+  bmi = weight * 703 / (height * height);
+  birthdate = today() - ((age +1) * 365) + rand("Integer", 1, 366);
 run;
+
+%put %cstutilgetattribute(_cstDataSetName=work.class, _cstVarName=birthdate, _cstAttribute=VARFMT);
+proc contents data=work.class varnum;
 proc print data=work.class;
   format bmi best32.28;
 run;
-
 
 /*
 %let _File=class.xpt;
@@ -38,6 +43,7 @@ run;
       jsonpath=&project_folder\test\class.json,
       usemetadata=N,
       decimalVariables=bmi,
+      iso8601Variables=birthdate,
       pretty=PRETTY);
 
 proc datasets library=work noprint nolist nodetails;
@@ -50,10 +56,11 @@ quit;
   dropseqvar=Y,
   savemetadata=N
 );
+
+proc contents data=work.class varnum;
 proc print data=work.class;
   format bmi best32.28;
 run;
-  
 proc compare base=work.class_old compare=work.class;
 run;
 
@@ -71,6 +78,8 @@ run;
       dataset=work.class,
       jsonpath=&project_folder\test\class_new.json,
       usemetadata=N);
+
+proc contents data=work.class varnum;
 proc print data=work.class;
   format bmi best32.28;
 run;

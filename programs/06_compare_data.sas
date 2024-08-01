@@ -61,7 +61,7 @@ data _null_;
                       'baselib=datasdtm, ',
                       'complib=outsdtm, ',
                       'dsname=', name, ', ',
-                      'compareoptions=%str(criterion=0.000000000001 method=absolute), ',
+                      'compareoptions=%str(criterion=0.00000000001 method=absolute), ',
                       'resultds=results.dataset_compare_results, ',
                       'detaillevel=2',
                   ');)');
@@ -91,7 +91,7 @@ data _null_;
                       'baselib=datasend, ',
                       'complib=outsend, ',
                       'dsname=', name, ', ',
-                      'compareoptions=%str(criterion=0.000000000001 method=absolute), ',
+                      'compareoptions=%str(criterion=0.00000000001 method=absolute), ',
                       'resultds=results.dataset_compare_results, ',
                       'detaillevel=2',
                   ');)');

@@ -4,6 +4,7 @@
   usemetadata=N,
   metadatalib=,
   decimalVariables=,
+  iso8601Variables=,
   datasetJSONVersion=1.1.0,
   fileOID=,
   originator=,
@@ -48,7 +49,6 @@
   %let modifiedDateTime=;
   %let releaseCreated=;
   %let hostCreated=;
-  %let _records=;
   %let _create_temp_dataset_sas=0;
 
   %******************************************************************************;
@@ -88,6 +88,7 @@
     %end;  
   %end;
 
+  %* Rule: when usemetadata eq Y then metadata datasets need to exist in the metadatalib library *;
   %if "%substr(%upcase(&usemetadata),1,1)" eq "Y" %then %do;
     %if not %sysfunc(exist(&metadatalib..metadata_study)) %then %do;
       %put ERR%str(OR): [&sysmacroname] When usemetadata=Y, then &metadatalib..metadata_study must exist.;
@@ -101,6 +102,14 @@
       %put ERR%str(OR): [&sysmacroname] When usemetadata=Y, then &metadatalib..metadata_columns must exist.;
       %goto exit_macro;
     %end;
+  %end;
+
+  %* Rule: when usemetadata eq Y then decimalVariables will not be used *;
+  %if "%substr(%upcase(&usemetadata),1,1)" eq "Y" %then %do;
+    %if %sysevalf(%superq(decimalVariables)=, boolean)=0
+        %then %put WAR%str(NING): [&sysmacroname] When macro parameter usemetadata=&usemetadata then parameter decimalVariables will not be used.;
+    %if %sysevalf(%superq(iso8601Variables)=, boolean)=0
+        %then %put WAR%str(NING): [&sysmacroname] When macro parameter usemetadata=&usemetadata then parameter iso8601Variables will not be used.;
   %end;
 
   %* Rule: allowed versions *;
@@ -125,7 +134,6 @@
   data _null_;
       set Attributes;
       if Label1 = "Last Modified" then call symputx('modifiedDateTime', put(nValue1, E8601DT.));
-      if Label2 = "Observations" then call symputx('_records', nValue2);
   run;
 
   data _null_;
@@ -133,6 +141,8 @@
       if Label1 = "Release Created" then call symputx('releaseCreated', cValue1);
       if Label1 = "Host Created" then call symputx('hostCreated', cValue1);
     run;
+
+  %let _records=%cstutilnobs(_cstDataSetName=&dataset);
 
   /* Derive _isReferenceData */
   %if %cstutilcheckvarsexist(_cstDataSetName=&dataset, _cstVarList=usubjid)=0 %then
@@ -261,7 +271,7 @@
     run;
 
   %end;
-  %else %do;
+  %else %do; %* UseMetadata ne Y;
     
     %create_template(type=COLUMNS, out=work.column_metadata_template);
     /* Get column metadata from the datasets - label, type, length, format and derive as much as we can */
@@ -289,21 +299,21 @@
       else do;
         dataType="string";
       end;  
-      /* datetime, date, and time variables will be transfered as ISO 8601 strings */              
-if not (missing(displayFormat)) then do;
-      if sas_type = 1 and (substr(upcase(strip(displayFormat)), 1, 7) = "E8601DA" or substr(upcase(strip(displayFormat)), 1, 4) = "DATE") then do;
-        dataType = "date";
-        targetDataType = "integer";
-      end;
-      if sas_type = 1 and (substr(upcase(strip(displayFormat)), 1, 7) = "E8601TM" or substr(upcase(strip(displayFormat)), 1, 4) = "TIME") then do;
-        dataType = "time";
-        targetDataType = "integer";
-      end;
-      if sas_type = 1 and (substr(upcase(strip(displayFormat)), 1, 7) = "E8601DT" or substr(upcase(strip(displayFormat)), 1, 8) = "DATETIME") then do;
-        dataType = "datetime";
-        targetDataType = "integer";
-      end;
-end;                    
+      /* Numeric datetime, date, and time variables will be transfered as ISO 8601 strings */              
+      if not (missing(displayFormat)) then do;
+        if sas_type = 1 and (find(displayFormat, "E8601DA", 'it') or find(displayFormat, "DATE", 'it')) then do;
+          dataType = "date";
+          targetDataType = "integer";
+        end;
+        if sas_type = 1 and (find(displayFormat, "E8601TM", 'it') or find(displayFormat, "TIME", 'it')) then do;
+          dataType = "time";
+          targetDataType = "integer";
+        end;
+        if sas_type = 1 and (find(displayFormat, "E8601DT", 'it') or find(displayFormat, "DATETIME", 'it')) then do;
+          dataType = "datetime";
+          targetDataType = "integer";
+        end;
+      end;                    
 
       if formatl gt 0 then displayFormat=cats(displayFormat, put(formatl, best.), ".");
       if formatd gt 0 then displayFormat=cats(displayFormat, put(formatd, best.));
@@ -355,9 +365,11 @@ end;
 
   %end;
 
-  %******************************************************************************;
-  %let _decimal_variables=&decimalVariables;
-  %if %sysevalf(%superq(decimalVariables)=, boolean) %then %do;
+  %************************************************************;
+  /* Convert numerical variables to decimal strings if needed */
+  %************************************************************;
+    %if "%substr(%upcase(&usemetadata),1,1)" eq "Y" %then %do;
+    %let _decimal_variables=;
     proc sql noprint;
       select name into :_decimal_variables separated by ' '
         from work.column_metadata
@@ -365,28 +377,49 @@ end;
     quit;
   %end;
   %else %do;
-    data work.column_metadata;
-      set work.column_metadata;
-        %do _count=1 %to %sysfunc(countw(&decimalVariables, %str(' ')));
-          if upcase(name)=upcase("%scan(&decimalVariables, &_count)") then do; 
-            dataType="decimal"; 
-            targetDataType="decimal"; 
-          end;
-        %end;
-    run;  
+    %if %sysevalf(%superq(decimalVariables)=, boolean)=0 %then %do;
+      data work.column_metadata;
+        set work.column_metadata;
+          %do _count=1 %to %sysfunc(countw(&decimalVariables, %str(' ')));
+            if upcase(name)=upcase("%scan(&decimalVariables, &_count)") then do; 
+              dataType="decimal"; 
+              targetDataType="decimal"; 
+            end;
+          %end;
+      run;  
+      %let _decimal_variables=&decimalVariables;
+    %end;
   %end;  
-   
   %if %sysevalf(%superq(_decimal_variables)=, boolean)=0 %then %do;
-    %put NOTE: [&sysmacroname] &dataset: numeric variables converted to string: &_decimal_variables;
+    %put NOTE: [&sysmacroname] &dataset: numeric variables converted to strings: &_decimal_variables;
     %convert_num_to_char(ds=&_dataset_to_write, outds=&_dataset_to_write, varlist=&_decimal_variables);
   %end;  
 
-  %let _iso8601_variables=;
-  proc sql noprint;
-    select name into :_iso8601_variables separated by ' '
-      from work.column_metadata
-      where (datatype in ('datetime' 'date' 'time')) and (targetdatatype = 'integer');  
-  quit;
+  %if "%substr(%upcase(&usemetadata),1,1)" eq "Y" %then %do;
+    %let _iso8601_variables=;
+    proc sql noprint;
+      select name into :_iso8601_variables separated by ' '
+        from work.column_metadata
+        where (datatype in ('datetime' 'date' 'time')) and (targetdatatype = 'integer');  
+    quit;
+  %end;
+  %else %do;
+    %if %sysevalf(%superq(iso8601Variables)=, boolean)=0 %then %do;
+      data work.column_metadata;
+        set work.column_metadata;
+          %do _count=1 %to %sysfunc(countw(&iso8601Variables, %str(' ')));
+            if upcase(name)=upcase("%scan(&iso8601Variables, &_count)") then do; 
+              if missing(displayFormat) then 
+                putlog "WAR" "NING: [&sysmacroname] &dataset.." name +(-1) ": variable has no format attached." name= dataType= targetDataType=;
+              else do; 
+                putlog name= dataType= targetDataType= displayFormat=; 
+              end;
+            end;
+          %end;
+      run;  
+      %let _iso8601_variables=&iso8601Variables;
+    %end;  
+  %end;
   %if %sysevalf(%superq(_iso8601_variables)=, boolean)=0 %then %do;
     %put NOTE: [&sysmacroname] &dataset: character ISO 8601 variables converted to numeric: &_iso8601_variables;
   %end;    

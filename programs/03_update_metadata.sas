@@ -30,24 +30,15 @@ data metaadam.metadata_columns;
   if dataType = "string" then json_length = length;
 
   /* Define-XML v2 does not support decimal, but it is supported by Dataset-JSON. */
-  /* This update is just to show that it works in Dataset-JSON.                   */
-  if xml_datatype in ('float' 'integer') and
-     dataset_name in ('ADADAS' 'ADLBC' 'ADLBCPV' 'ADLBH' 'ADLBHPV' 'ADLBHY' 'ADNPIX' 'ADSL' 'ADVS') and
-     name in ('PCHG' 'AVAL' 'BASE' 'CHG' 'PCHG' 'R2A1LO' 'R2A1HI' 'BR2A1LO' 'BR2A1HI' 'A1LO' 'A1HI' 'R2A1LO' 'R2A1HI' 'ALBTRVAL' 'LBSTRESN' 'HEIGHTBL' 'WEIGHTBL')
+  /* This update is just to show that it works in Dataset-JSON. */
+  
+  if dataset_name in ('ADLBC' 'ADLBH') and 
+     name in ('PCHG' 'AVAL' 'BASE' 'CHG' 'PCHG' 'A1LO' 'A1HI' 'R2A1LO' 'R2A1HI' 'BR2A1LO' 'BR2A1HI' 'ALBTRVAL' 'LBSTRESN')
      then do;
       dataType='decimal';
       targetDataType='decimal';
     end;
-
-/*
-  if missing(length) then do;
-    if xml_datatype="date" then length=10;
-    if xml_datatype="partialDate" then length=10;
-    if xml_datatype="partialDatetime" then length=19;
-    if xml_datatype="durationDatetime" then length=19;
-    if xml_datatype="datetime" then length=19;
-  end;
-*/
+  
   if not missing(displayformat) then do;
     if substr(strip(reverse(upcase(name))), 1, 2) = "TD" then do;
       dataType = "date";
@@ -68,6 +59,14 @@ data metaadam.metadata_columns;
 
 run;
 
+/*  Add ISO 801 formats to data */
+%add_formats(
+  metadata = metaadam.metadata_columns,
+  datalib = dataadam,
+  condition = %str(not missing(displayFormat) and dataType = "date" and targetDataType = "integer"),
+  format = "E8601DA."
+);
+
 
 /* Some manual SDTM data type updates */
 data metasdtm.metadata_columns;
@@ -78,20 +77,12 @@ data metasdtm.metadata_columns;
 
   /* Define-XML v2 does not support decimal, but it is supported by Dataset-JSON. */
   /* This update is just to show that it works in Dataset-JSON.                   */
-  if xml_datatype='float' and name ne "VISITNUM" then do;
+/*
+  if xml_datatype='float' and not (name in ("CMDOSE" "VISITNUM")) then do;
     dataType='decimal';
     targetdatatype = "decimal";
   end;
-/*
-  if missing(length) then do;
-    if xml_datatype="date" then length=10;
-    if xml_datatype="partialDate" then length=10;
-    if xml_datatype="partialDatetime" then length=19;
-    if xml_datatype="durationDatetime" then length=19;
-    if xml_datatype="datetime" then length=19;
-  end;
 */
-
 run;
 
 
@@ -104,20 +95,12 @@ data metasend.metadata_columns;
 
   /* Define-XML v2 does not support decimal, but it is supported by Dataset-JSON. */
   /* This update is just to show that it works in Dataset-JSON.                   */
+/*
   if xml_datatype='float' and index(name, "STRESN") then do;
     dataType='decimal';
     targetdatatype = "decimal";
   end;
-/*
-  if missing(length) then do;
-    if xml_datatype="date" then length=10;
-    if xml_datatype="partialDate" then length=10;
-    if xml_datatype="partialDatetime" then length=19;
-    if xml_datatype="durationDatetime" then length=19;
-    if xml_datatype="datetime" then length=19;
-  end;
 */
-
 run;
 
 
