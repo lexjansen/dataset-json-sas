@@ -366,7 +366,7 @@
   %end;
 
   %************************************************************;
-  /* Convert numerical variables to decimal strings if needed */
+  /* Convert numeric variables to decimal strings if needed */
   %************************************************************;
     %if "%substr(%upcase(&usemetadata),1,1)" eq "Y" %then %do;
     %let _decimal_variables=;
@@ -395,15 +395,18 @@
     %convert_num_to_char(ds=&_dataset_to_write, outds=&_dataset_to_write, varlist=&_decimal_variables);
   %end;  
 
-  %if "%substr(%upcase(&usemetadata),1,1)" eq "Y" %then %do;
+  %************************************************************;
+  /* Convert numeric ISO 8601 variables to strings if needed  */
+  %************************************************************;
+  %*if "%substr(%upcase(&usemetadata),1,1)" eq "Y" %then %do;
     %let _iso8601_variables=;
     proc sql noprint;
       select name into :_iso8601_variables separated by ' '
         from work.column_metadata
         where (datatype in ('datetime' 'date' 'time')) and (targetdatatype = 'integer');  
     quit;
-  %end;
-  %else %do;
+  %*end;
+  %*else %do;
     %if %sysevalf(%superq(iso8601Variables)=, boolean)=0 %then %do;
       data work.column_metadata;
         set work.column_metadata;
@@ -419,9 +422,9 @@
       run;  
       %let _iso8601_variables=&iso8601Variables;
     %end;  
-  %end;
+  %*end;
   %if %sysevalf(%superq(_iso8601_variables)=, boolean)=0 %then %do;
-    %put NOTE: [&sysmacroname] &dataset: character ISO 8601 variables converted to numeric: &_iso8601_variables;
+    %put NOTE: [&sysmacroname] &dataset: numeric ISO 8601 variables converted to strings: &_iso8601_variables;
   %end;    
   
   %******************************************************************************;

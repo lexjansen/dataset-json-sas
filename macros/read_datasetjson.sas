@@ -98,7 +98,7 @@
   %* Rule: allowed versions *;
   %if %substr(&datasetJSONVersion,1,3) ne %str(1.1) %then
   %do;
-    %put ERR%str(OR): [&sysmacroname] Attribute datasetJSONVersion=&datasetJSONVersion. Allowed values: 1.1.x.;
+    %put ERR%str(OR): [&sysmacroname] Attribute datasetJSONVersion=&datasetJSONVersion is invalid. Allowed values: 1.1.x.;
     %goto exit_macro;
   %end;
 
@@ -106,6 +106,11 @@
   %let _itemgroupdata_=root;  
   %let _items_=columns;
   %let _itemdata_=rows;
+
+  %if not %sysfunc(exist(out_&_Random..&_items_)) %then %do;
+    %put ERR%str(OR): [&sysmacroname] Attribute "columns" is missing.;
+    %goto exit_macro;
+  %end;
 
   proc sql noprint;
     select name into :variables separated by ' '
@@ -139,17 +144,17 @@
     ;
   quit;
 
-  proc copy in=out_&_Random out=&datalib;
-    select &_itemdata_;
-  run;
-
   %if "%substr(%upcase(&savemetadata),1,1)" eq "Y" %then %do;
 
+
     %let ItemGroupOID=;
-    proc sql noprint;
-      select ItemGroupOID into :ItemGroupOID trimmed
-        from out_&_Random..root;
-    quit;
+    %if %cstutilcheckvarsexist(_cstDataSetName=out_&_Random..&_itemgroupdata_, _cstVarList=ItemGroupOID) %then %do;
+      proc sql noprint;
+        select ItemGroupOID into :ItemGroupOID trimmed
+          from out_&_Random..&_itemgroupdata_;
+      quit;
+    %end;
+    %else %put ERR%str(OR): [&sysmacroname] Attribute "itemGroupOID" is missing.;
       
     %if not %sysfunc(exist(&metadatalib..metadata_study)) %then %create_template(type=STUDY, out=&metadatalib..metadata_study);;
     %if not %sysfunc(exist(&metadatalib..metadata_tables)) %then %create_template(type=TABLES, out=&metadatalib..metadata_tables);;
@@ -227,7 +232,7 @@
     run;
 
     data &metadatalib..metadata_columns(%if %substr(%upcase(&DropSeqVar),1,1) eq Y %then where=(upcase(name) ne "ITEMGROUPDATASEQ"););
-      set &metadatalib..metadata_columns work.&_items_(rename=(ItemOID=OID) in=init);
+      set &metadatalib..metadata_columns work.&_items_(rename=(itemOID=OID) in=init);
       if init then dataset_name = "&_ItemGroupName";
     run;
 
@@ -247,6 +252,15 @@
   %end;
   
   %put &=format;
+
+  %if not %sysfunc(exist(out_&_Random..&_itemdata_)) %then %do;
+    %put NOTE: [&sysmacroname] Attribute "rows" is missing.;
+    %goto exit_macro_no_rows;
+  %end;
+
+  proc copy in=out_&_Random out=&datalib;
+    select &_itemdata_;
+  run;
 
   proc datasets library=&datalib noprint nolist nodetails;
     %if %sysfunc(exist(&datalib..&dsname)) %then %do; delete &dsname; %end;
@@ -318,7 +332,7 @@
     );
     retain &variables;
     length &length;
-    /* %if %sysevalf(%superq(format)=, boolean)=0 %then format &format;; */
+    %if %sysevalf(%superq(format)=, boolean)=0 %then format &format;;
     set &datalib..&dsname;
   run;
 
@@ -359,6 +373,8 @@
   proc delete data=work.column_metadata;
   run;
 
+  %exit_macro_no_rows:
+  
   libname json&_Random clear;
   filename json&_Random clear;
   filename map&_Random clear;

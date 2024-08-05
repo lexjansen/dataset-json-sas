@@ -2,31 +2,65 @@
 %let project_folder=/_github/lexjansen/dataset-json-sas;
 %include "&project_folder/programs/config.sas";
 
+%let _SaveOptions = %sysfunc(getoption(dlcreatedir));
+options dlcreatedir;
 
-%* clinicalData and referenceData keys missing;
-%read_datasetjson(
-  jsonpath=&project_folder/testing/testfiles/read_datasetjson_01.json,
-  datalib=work,
-  dropseqvar=Y
-);
+libname metadata "&project_folder/testing/metadata";
+libname data "&project_folder/testing";
 
-%* items key missing;
-%read_datasetjson(
-  jsonpath=&project_folder/testing/testfiles/read_datasetjson_02.json,
-  datalib=work,
-  dropseqvar=Y
-);
+%macro testit(test, json_file, json_schema=&project_folder/schema/dataset.schema1-1-0.json);
 
-%* itemData key missing;
-%read_datasetjson(
-  jsonpath=&project_folder/testing/testfiles/read_datasetjson_03.json,
-  datalib=work,
-  dropseqvar=Y
-);
+  %put #### TEST &test;
+  
+  data _null_;
+    length result_code 8 result_character result_path $255 json_file json_schema $512;
+    json_schema = "&json_schema";
+    json_file = "&json_file";
+    call missing(result_code, result_character, result_path);
+    call validate_datasetjson(json_file, json_schema, result_code, result_character, result_path);
+    if result_code = 1 then putlog 'ERR' 'OR:' result_code= json_file= result_character= result_path=;
+  run;
 
-%* itemGroupData key missing;
-%read_datasetjson(
-  jsonpath=&project_folder/testing/testfiles/read_datasetjson_04.json,
-  datalib=work,
-  dropseqvar=Y
-);
+  %read_datasetjson(
+    jsonpath=&json_file,
+    datalib=data,
+    dropseqvar=Y,
+    savemetadata=Y,
+    metadatalib=metadata
+  );
+
+%mend testit;
+
+%* columns and rows missing;
+%testit(1 - Attribute columns missing and rows missing, 
+        &project_folder/testing/testfiles/datasetjson_01.json);
+
+%* columns missing;
+%testit(2 - Attribute columns missing, 
+        &project_folder/testing/testfiles/datasetjson_02.json);
+
+%* rows missing;
+%testit(3 - Attribute rows missing, 
+        &project_folder/testing/testfiles/datasetjson_03.json);
+
+proc datasets lib=work;
+quit;
+
+%* rows missing and itemGroupOID missing;
+%testit(4 - Attributes itemGroupOID and rows missing, 
+        &project_folder/testing/testfiles/datasetjson_04.json);
+
+%* itemGroupOID missing;
+%testit(5 - Attribute itemGroupOID missing, 
+        &project_folder/testing/testfiles/datasetjson_05.json);
+
+proc compare data=data.dm_test5 compare=datasdtm.dm;
+run;
+
+%* Restore options;
+options &_SaveOptions;
+ 
+/*
+libname metadata clear;
+libname data clear;
+*/  

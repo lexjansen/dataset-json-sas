@@ -60,7 +60,7 @@ data metaadam.metadata_columns;
 run;
 
 /*  Add ISO 801 formats to data */
-%add_formats(
+%*add_formats(
   metadata = metaadam.metadata_columns,
   datalib = dataadam,
   condition = %str(not missing(displayFormat) and dataType = "date" and targetDataType = "integer"),

@@ -1,0 +1,15 @@
+{
+  "datasetJSONCreationDateTime": "2023-06-28T15:38:43",
+  "datasetJSONVersion": "1.1.0",
+  "fileOID": "www.cdisc.org/StudyMSGv2/1/Define-XML_2.1.0/2023-06-28/dm",
+  "dbLastModifiedDateTime": "2023-05-31T00:00:00",
+  "originator": "CDISC SDTM MSG Team",
+  "sourceSystem": {
+    "name": "SAS on X64_10PRO",
+    "version": "9.0401M7"
+  },
+  "itemGroupOID": "IG.DM",
+  "records": 0,
+  "name": "DM",
+  "label": "Demographics"
+}

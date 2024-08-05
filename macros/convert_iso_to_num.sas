@@ -54,7 +54,7 @@
         &_variable = input(_&_variable, ?? anydtdte32.);
         if missing(&_variable) and not(missing(_&_variable))
           then putlog 'WAR' 'NING:' " [&sysmacroname] Conversion failed:" _n_= _&_variable= &_variable=;
-        format &_variable E8601DA.;
+        /* format &_variable E8601DA.; */
         drop _&_variable;
       %end;  
     run;
