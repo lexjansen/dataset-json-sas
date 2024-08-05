@@ -144,12 +144,6 @@
 
   %let _records=%cstutilnobs(_cstDataSetName=&dataset);
 
-  /* Derive _isReferenceData */
-  %if %cstutilcheckvarsexist(_cstDataSetName=&dataset, _cstVarList=usubjid)=0 %then
-    %do;
-      %let _isReferenceData=Yes;
-    %end;  
-
   proc delete data=work.Attributes work.EngineHost;
   run;
 
@@ -180,6 +174,9 @@
     /* Get dataset label and _itemGroupOID from the metadata */
       %if %sysfunc(exist(&metadatalib..metadata_tables)) %then %do;
         select label, oid into :dataset_label trimmed, :_temGroupOID trimmed
+          from &metadatalib..metadata_tables
+            where upcase(name)="%upcase(&dataset_name)";
+        select isReferenceData into :_isReferenceData trimmed
           from &metadatalib..metadata_tables
             where upcase(name)="%upcase(&dataset_name)";
       %end;
@@ -271,7 +268,7 @@
     run;
 
   %end;
-  %else %do; %* UseMetadata ne Y;
+  %else %do; %* UseMetadata ne N;
     
     %create_template(type=COLUMNS, out=work.column_metadata_template);
     /* Get column metadata from the datasets - label, type, length, format and derive as much as we can */
@@ -447,6 +444,15 @@
   quit;
   
   %create_template(type=TABLES, out=work.table_metadata);
+
+  /* Derive _isReferenceData */
+  %if %cstutilcheckvarsexist(_cstDataSetName=&dataset, _cstVarList=usubjid)=0 %then
+    %do;
+      %let _isReferenceData=Yes;
+    %end;  
+    %else %do;
+      %let _isReferenceData=No;
+    %end;  
 
   proc sql;
   insert into work.table_metadata  

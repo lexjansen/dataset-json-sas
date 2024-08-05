@@ -46,17 +46,31 @@
   %end;
   %else %do;
     data &outds;
-      retain &_variables;
-      length &_varlist 8;
+      retain &_variables _conversion_error_ _report_error_;
+      length &_varlist 8 _conversion_error_ _report_error_ 8;
     set &ds(rename=(%do _i = 1 %to &_words;%scan(&_varlist, &_i)=_%scan(&_varlist, &_i) %str ( )%end;));
+      if _n_ = 1 then do;
+        _conversion_error_ = 0;
+        _report_error_ = 1;
+      end;  
       %do _i = 1 %to &_words;
         %let _variable = %scan(&_varlist, &_i);
-        &_variable = input(_&_variable, ?? anydtdte32.);
+        _length_=length(_&_variable);
+        if _length_ = 10 then &_variable = input(_&_variable, ?? E8601DA10.);
+          else if _length_ >= 19 
+            then &_variable = input(_&_variable, ?? E8601DT24.3);
+            else &_variable = input(_&_variable, ?? E8601TM.);
         if missing(&_variable) and not(missing(_&_variable))
-          then putlog 'WAR' 'NING:' " [&sysmacroname] Conversion failed:" _n_= _&_variable= &_variable=;
-        /* format &_variable E8601DA.; */
+          then do;
+            _conversion_error_ = _conversion_error_ + 1;
+            if (_conversion_error_ > 50) then _report_error_ = 0;
+            if (_conversion_error_ <= 50) and (_report_error_ = 1) then
+              putlog 'WAR' 'NING:' " [&sysmacroname] &ds - ISO 8601 conversion failed:" _n_= _&_variable= &_variable=;
+            if _conversion_error_ = 50 then putlog 'WAR' 'NING:' " [&sysmacroname] &ds - No more then 50 conversion errors will be reported per dataset.";  
+          end;  
         drop _&_variable;
       %end;  
+      drop _length_ _conversion_error_ _report_error_;
     run;
   %end;
     

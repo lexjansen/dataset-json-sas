@@ -55,6 +55,8 @@
     set &tableMetadata;
     if (isReferenceData EQ "Yes")
       then put "write value ""isReferenceData"" true;";
+    if (isReferenceData EQ "No")
+      then put "write value ""isReferenceData"" false;";
   run;
 
   PROC JSON OUT=&outRef &prettyNoPretty NOSASTAGS SCAN TRIMBLANKS
