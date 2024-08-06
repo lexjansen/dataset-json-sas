@@ -27,7 +27,7 @@
     _itemGroupOID _isReferenceData
     creationDateTime modifiedDateTime
     releaseCreated hostCreated
-    _decimal_variables _iso8601_variables
+    _decimal_variables _iso8601_variables _format
     _dataset_to_write;
 
 
@@ -219,7 +219,7 @@
         end;
         if missing(datatype) then putlog "WAR" "NING: [&sysmacroname] Missing dataType for variable: &dataset.." name +(-1) ", " oid=;
         
-        if dataType in ("date" "datetime" "time") and targetDataType = "integer" and missing(displayFormat) 
+        if dataType in ("date", "datetime", "time") and targetDataType = "integer" and missing(displayFormat) 
           then putlog "WAR" "NING: [&sysmacroname] Missing displayFormat for variable: &dataset.." name +(-1) ", " oid= ", " dataType= ", " targetDataType=;
         
     run;
@@ -365,7 +365,11 @@
   %************************************************************;
   /* Convert numeric variables to decimal strings if needed */
   %************************************************************;
-    %if "%substr(%upcase(&usemetadata),1,1)" eq "Y" %then %do;
+  
+  
+  
+  
+  %if "%substr(%upcase(&usemetadata),1,1)" eq "Y" %then %do;
     %let _decimal_variables=;
     proc sql noprint;
       select name into :_decimal_variables separated by ' '
@@ -400,7 +404,7 @@
     proc sql noprint;
       select name into :_iso8601_variables separated by ' '
         from work.column_metadata
-        where (datatype in ('datetime' 'date' 'time')) and (targetdatatype = 'integer');  
+        where (datatype in ('datetime', 'date', 'time')) and (targetdatatype = 'integer');  
     quit;
   %*end;
   %*else %do;
@@ -423,6 +427,41 @@
   %if %sysevalf(%superq(_iso8601_variables)=, boolean)=0 %then %do;
     %put NOTE: [&sysmacroname] &dataset: numeric ISO 8601 variables converted to strings: &_iso8601_variables;
   %end;    
+  
+  /* Attach the right formats */
+  
+  data work.column_metadata_formats;
+    length dataset_name $32;
+     set work.column_metadata(where=((datatype in ('datetime', 'date', 'time')) and (targetdatatype = 'integer')));
+     dataset_name = "column_data";
+     if dataType = "date" and find(displayFormat, "E8601DA", 'it')=0 then displayFormat = "E8601DA.";
+     if dataType = "datetime" and find(displayFormat, "E8601DT", 'it')=0 then displayFormat = "E8601DT.";
+     if dataType = "time" and find(displayFormat, "E8601TM", 'it')=0 then displayFormat = "E8601TM.";
+  run;
+
+  /*
+  %let _format=;
+  proc sql noprint;
+    select catx(' ', name, strip(displayFormat)) into :_format separated by ' '
+        from work.column_metadata_formats
+        where not(missing(displayformat));
+  quit;
+  
+  %if %sysevalf(%superq(_format)=, boolean)=0 %then %do;
+    proc datasets library=work nolist memtype=data;
+      modify column_data;
+        format &_format;
+    quit;    
+    run;
+  %end;  
+  */
+    
+  %add_formats_to_datasets(
+    metadata=work.column_metadata_formats, 
+    datalib=work, 
+    condition = %str(not missing(displayFormat)), 
+    format=displayFormat
+    );
   
   %******************************************************************************;
 

@@ -31,7 +31,6 @@ data _null_;
                       , 'jsonpath=', jsonpath, ','
                       , 'usemetadata=Y,'
                       , 'metadatalib=metaadam,'
-                      , 'datasetJSONVersion=1.1.0,'
                       , "fileOID=", fileoid, ","
                       , "originator=CDISC ADaM MSG Team", ","
                       , "sourceSystem=,"
@@ -74,7 +73,6 @@ data _null_;
                       , 'jsonpath=', jsonpath, ','
                       , 'usemetadata=Y,'
                       , 'metadatalib=metasdtm,'
-                      , 'datasetJSONVersion=1.1.0,'
                       , "fileOID=", fileoid, ","
                       , "originator=CDISC SDTM MSG Team,"
                       , "sourceSystem=,"
@@ -117,13 +115,12 @@ data _null_;
                       , 'jsonpath=', jsonpath, ','
                       , 'usemetadata=Y,'
                       , 'metadatalib=metasend,'
-                      , 'datasetJSONVersion=1.1.0,'
                       , "fileOID=", fileoid, ","
                       , "originator=CDISC SEND Team,"
                       , "sourceSystem=,"
                       , "sourceSystemVersion=," 
-                      , "studyOID=&_studyOID,"
-                      , "metaDataVersionOID=&_metaDataVersionOID,"
+                      /* , "studyOID=&_studyOID," */
+                      /* , "metaDataVersionOID=&_metaDataVersionOID," */
                       , "metaDataRef=define.xml"
                     ,');)');
     call execute(code);

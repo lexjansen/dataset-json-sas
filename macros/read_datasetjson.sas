@@ -112,6 +112,23 @@
     %goto exit_macro;
   %end;
 
+  %let _itemGroupName=;
+  proc sql noprint;
+    select name into :_itemGroupName separated by ' '
+      from out_&_Random..root;
+  quit;
+
+  %if %sysevalf(%superq(_itemGroupName)=, boolean) %then %do;
+      %put ERR%str(OR): [&sysmacroname] No dataset name attribute has been defined in the Dataset-JSON file.;
+      %goto exit_macro;
+  %end;
+
+  data out_&_Random..&_items_;
+    set out_&_Random..&_items_;
+    dataset_name = "&_ItemGroupName";
+  run;
+    
+
   proc sql noprint;
     select name into :variables separated by ' '
       from out_&_Random..&_items_;
@@ -239,7 +256,8 @@
     proc delete data=work.&_items_;
     run;
 
-  %end;
+  %end; /* savemetadata eq "Y" */
+  
 
   /* get formats from Dataset-JSON metadata, but only when the displayformat variable exists */
   %let format=;
@@ -273,13 +291,16 @@
 
   %******************************************************************************;
   %let _decimal_variables=;
-  proc sql noprint;
-    select name into :_decimal_variables separated by ' '
-      from &metadatalib..metadata_columns
-      where (datatype='decimal' and targetdatatype='decimal') and
-            (upcase(dataset_name) = upcase("&dsname"));  
-  quit;
- 
+  %if %cstutilcheckvarsexist(_cstDataSetName=out_&_Random..&_items_, _cstVarList=targetdatatype) %then %do;
+    proc sql noprint;
+      select name into :_decimal_variables separated by ' '
+        /* from &metadatalib..metadata_columns */
+        from out_&_Random..&_items_
+        where (datatype='decimal' and targetdatatype='decimal') and
+              (upcase(dataset_name) = upcase("&dsname"));  
+    quit;
+  %end;
+
   %if %sysevalf(%superq(_decimal_variables)=, boolean)=0 %then %do;
     %put NOTE: [&sysmacroname] &datalib..&dsname: character variables converted to numeric: &_decimal_variables;
     %convert_char_to_num(ds=&datalib..&dsname, outds=&datalib..&dsname, varlist=&_decimal_variables);
@@ -292,12 +313,16 @@
   %end;  
 
   %let _iso8601_variables=;
-  proc sql noprint;
-    select name into :_iso8601_variables separated by ' '
-      from &metadatalib..metadata_columns
-      where (datatype in ('datetime' 'date' 'time')) and (targetdatatype = 'integer') and
-            (upcase(dataset_name) = upcase("&dsname"));  
-  quit;
+  %if %cstutilcheckvarsexist(_cstDataSetName=out_&_Random..&_items_, _cstVarList=targetdatatype) %then %do;
+    proc sql noprint;
+      select name into :_iso8601_variables separated by ' '
+        /* from &metadatalib..metadata_columns */
+        from out_&_Random..&_items_
+        where (datatype in ('datetime' 'date' 'time')) and (targetdatatype = 'integer') and
+              (upcase(dataset_name) = upcase("&dsname"));  
+    quit;
+  %end;
+
   %if %sysevalf(%superq(_iso8601_variables)=, boolean)=0 %then %do;
 
     %put NOTE: [&sysmacroname] &datalib..%upcase(&dsname), character ISO 8601 variables converted to numeric: &_iso8601_variables;

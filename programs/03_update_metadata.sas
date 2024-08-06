@@ -32,8 +32,8 @@ data metaadam.metadata_columns;
   /* Define-XML v2 does not support decimal, but it is supported by Dataset-JSON. */
   /* This update is just to show that it works in Dataset-JSON. */
   
-  if dataset_name in ('ADLBC' 'ADLBH') and 
-     name in ('PCHG' 'AVAL' 'BASE' 'CHG' 'PCHG' 'A1LO' 'A1HI' 'R2A1LO' 'R2A1HI' 'BR2A1LO' 'BR2A1HI' 'ALBTRVAL' 'LBSTRESN')
+  if dataset_name in ('ADLBC', 'ADLBH') and 
+     name in ('PCHG', 'AVAL', 'BASE', 'CHG', 'PCHG', 'A1LO', 'A1HI', 'R2A1LO', 'R2A1HI', 'BR2A1LO', 'BR2A1HI', 'ALBTRVAL', 'LBSTRESN')
      then do;
       dataType='decimal';
       targetDataType='decimal';
@@ -43,29 +43,18 @@ data metaadam.metadata_columns;
     if substr(strip(reverse(upcase(name))), 1, 2) = "TD" then do;
       dataType = "date";
       targetDataType = "integer";
-      displayformat = "E8601DA.";
     end;
     if substr(strip(reverse(upcase(name))), 1, 3) = "MTD" then do;
       dataType = "datetime";
       targetDataType = "integer";
-      displayformat = "E8601DT.";
     end;
     if substr(strip(reverse(upcase(name))), 1, 2) = "MT" then do;
       dataType = "time";
       targetDataType = "integer";
-      displayformat = "E8601TM.";
     end;
   end;
 
 run;
-
-/*  Add ISO 801 formats to data */
-%*add_formats(
-  metadata = metaadam.metadata_columns,
-  datalib = dataadam,
-  condition = %str(not missing(displayFormat) and dataType = "date" and targetDataType = "integer"),
-  format = "E8601DA."
-);
 
 
 /* Some manual SDTM data type updates */
@@ -75,14 +64,6 @@ data metasdtm.metadata_columns;
   dataType = put(xml_datatype, $datatyp.);
   if dataType = "string" then json_length = length;
 
-  /* Define-XML v2 does not support decimal, but it is supported by Dataset-JSON. */
-  /* This update is just to show that it works in Dataset-JSON.                   */
-/*
-  if xml_datatype='float' and not (name in ("CMDOSE" "VISITNUM")) then do;
-    dataType='decimal';
-    targetdatatype = "decimal";
-  end;
-*/
 run;
 
 
@@ -93,14 +74,6 @@ data metasend.metadata_columns;
   dataType = put(xml_datatype, $datatyp.);
   if dataType = "string" then json_length = length;
 
-  /* Define-XML v2 does not support decimal, but it is supported by Dataset-JSON. */
-  /* This update is just to show that it works in Dataset-JSON.                   */
-/*
-  if xml_datatype='float' and index(name, "STRESN") then do;
-    dataType='decimal';
-    targetdatatype = "decimal";
-  end;
-*/
 run;
 
 
