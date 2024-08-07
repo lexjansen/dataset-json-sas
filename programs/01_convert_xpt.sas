@@ -11,10 +11,10 @@
   _cstSourceFolder=&project_folder/data/adam_xpt,
   _cstOutputLibrary=dataadam,
   _cstExtension=XPT,
-  _cstOptions=
+  _cstOptions=datecopy
   );
 /*
-proc contents data=dataadam._ALL_;
+proc contents data=dataadam._ALL_ varnum;
 run;
 */
 
@@ -23,10 +23,10 @@ run;
   _cstSourceFolder=&project_folder/data/sdtm_xpt,
   _cstOutputLibrary=datasdtm,
   _cstExtension=XPT,
-  _cstOptions=
+  _cstOptions=datecopy
   );
 /*
-proc contents data=datasdtm._ALL_;
+proc contents data=datasdtm._ALL_ varnum;
 run;
 */
 
@@ -35,10 +35,10 @@ run;
   _cstSourceFolder=&project_folder/data/send_xpt,
   _cstOutputLibrary=datasend,
   _cstExtension=XPT,
-  _cstOptions=
+  _cstOptions=datecopy
   );
 /*
-proc contents data=datasend._ALL_;
+proc contents data=datasend._ALL_ varnum;
 run;
 */
 

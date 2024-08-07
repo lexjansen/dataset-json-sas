@@ -3,13 +3,15 @@
 __pycache__/
 develop/
 json_out/*/*.json
+json_out-1-1/*/*.json
 venv/
 work/
 ~$*.*
 *.zip
 *.log
 *.lst
-*.html
+programs/*.html
 *.sas7b*
 *.egp
 programs/*.cmd
+maps/*.map

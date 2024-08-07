@@ -1,15 +1,16 @@
 # Dataset-JSON SAS Implementation
 
-This repository shows a SAS implementation for converting Dataset-JSON files to and from SAS datasets following the [CDISC Dataset-JSON specification](https://www.cdisc.org/dataset-json).
+This repository shows a SAS implementation for converting Dataset-JSON files to and from SAS datasets following the [CDISC Dataset-JSON v1.1 specification](https://wiki.cdisc.org/display/DSJSON1DOT1/Dataset-JSON+1.1).
 Test programs are in the **programs** folder.
 It is recommended to run the test programs in the following order:
 
 - 01_convert_xpt.sas
 - 02_create_metadata_from_definexml.sas
-- 03_write_datasetjson.sas
-- 04_read_datasetjson.sas
-- 05_compare_data.sas
-- 06_validate_datasetjson.sas
+- 03_update_metadata.sas
+- 04_write_datasetjson.sas
+- 05_read_datasetjson.sas
+- 06_compare_data.sas
+- 07_validate_datasetjson.sas
 
 The purpose of the test programs is to demonstrate the macros. The user at a minimum has to update the macro variable that points to the location of the repository clone:
 

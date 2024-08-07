@@ -1,4 +1,4 @@
-options sasautos = (%qsysfunc(compress(%qsysfunc(getoption(SASAUTOS)),%str(%()%str(%)))) "&project_folder/macros");
+options sasautos = ("&project_folder/macros" %qsysfunc(compress(%qsysfunc(getoption(SASAUTOS)),%str(%()%str(%)))));
 options ls=max;
 filename luapath ("&project_folder/lua");
 
@@ -34,3 +34,5 @@ options set=MAS_M2PATH="%sysget(SASROOT)/tkmas/sasmisc/mas2py.py";
 %include "&project_folder/macros/validate_datasetjson.sas";
 
 options cmplib=&fcmplib..datasetjson_funcs;
+
+options mprint nomlogic nosymbolgen;

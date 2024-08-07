@@ -1,0 +1,2877 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+<?xml-stylesheet type="text/xsl" href="define1-0-0.xsl"?>
+<!-- ******************************************************************************* -->
+<!-- File: define.xml                                                                -->
+<!-- Date: 02/02/2005                                                                -->
+<!-- Author: Clinical Data Interchange Standards Consortium (CDISC) define.xml team  -->
+<!-- Description: This is an example define.xml document which implements the Case   --> 
+<!--   Report Tabulation Data Definition Specification Version 1.0.0 and has a       -->
+<!--   corresponding style sheet reference.                                          -->
+<!-- Release Notes:                                                                  -->
+<!--  1. If the define.xml includes a style sheet reference and is available in the  -->
+<!--      same folder as the define.xml file, a browser application will format the  -->
+<!--      output to mirror the data definition document layout as described within   -->
+<!--      define.xml specification.                                                  -->
+<!--  2. The resulting HTML presentation and the availability and usability of       -->
+<!--      functions will vary depending upon which browser application used.  The    -->
+<!--      style sheet release notes provides additional information, see             -->
+<!--      http://www.cdisc.org/models/def/v1.0/define1-0-0.xsl.                      -->
+<!-- ******************************************************************************* -->
+<ODM
+  xmlns="http://www.cdisc.org/ns/odm/v1.2"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xmlns:xlink="http://www.w3.org/1999/xlink" 
+  xmlns:def="http://www.cdisc.org/ns/def/v1.0"
+  xsi:schemaLocation="http://www.cdisc.org/ns/odm/v1.2 define1-0-0.xsd"  
+  FileOID="Study1234" 
+  ODMVersion="1.2" 
+  FileType="Snapshot" 
+  CreationDateTime="2004-07-28T12:34:13-06:00">
+<Study OID="1234">
+  <GlobalVariables>
+    <StudyName>1234</StudyName>
+    <StudyDescription>1234 Data Definition</StudyDescription>
+    <ProtocolName>1234</ProtocolName>
+  </GlobalVariables>
+  <MetaDataVersion OID="CDISC.SDTM.3.1.0"
+    Name="Study 1234, Data Definitions"
+    Description="Study 1234, Data Definitions"
+    def:DefineVersion="1.0.0"
+    def:StandardName="CDISC SDTM"
+    def:StandardVersion="3.1.0">
+    <def:AnnotatedCRF>
+      <def:DocumentRef leafID="blankcrf"/>
+    </def:AnnotatedCRF>
+    <def:leaf ID="blankcrf" xlink:href="blankcrf.pdf">
+      <def:title>Annotated Case Report Form</def:title>
+    </def:leaf>
+    <def:SupplementalDoc>
+	<def:DocumentRef leafID="SupplementalDataDefinitions"/>
+    </def:SupplementalDoc>
+    <def:leaf ID="SupplementalDataDefinitions"
+	 xlink:href="supplementaldatadefinitions.pdf">
+	<def:title>Supplemental Data Definitions Document</def:title>
+    </def:leaf>
+    <def:ComputationMethod OID="COMPMETHOD.MEANBP">Sum all mean blood pressure readings for visits 0, 1, and 2 and divide by the total number of readings</def:ComputationMethod>
+    <def:ValueListDef OID="ValueList.SC.SCTESTCD">
+      <ItemRef ItemOID="SC.SCTESTCD.ALLERGY" OrderNumber="1" Mandatory="No"/>
+      <ItemRef ItemOID="SC.SCTESTCD.EDLEVLN" OrderNumber="2" Mandatory="No"/>
+      <ItemRef ItemOID="SC.SCTESTCD.EXCLSN" OrderNumber="3" Mandatory="No"/>
+      <ItemRef ItemOID="SC.SCTESTCD.RACEOTH" OrderNumber="4" Mandatory="No"/>
+    </def:ValueListDef>
+    <def:ValueListDef OID="ValueList.SU.SUTRT">
+      <ItemRef ItemOID="SU.SUTRT.ALCBEERA" OrderNumber="5" Mandatory="No"/>
+      <ItemRef ItemOID="SU.SUTRT.ALCHIST2" OrderNumber="6" Mandatory="No"/>
+      <ItemRef ItemOID="SU.SUTRT.ALCOTHA" OrderNumber="7" Mandatory="No"/>
+      <ItemRef ItemOID="SU.SUTRT.ALCWINEA" OrderNumber="8" Mandatory="No"/>
+      <ItemRef ItemOID="SU.SUTRT.SMKCLASS" OrderNumber="9" Mandatory="No"/>
+    </def:ValueListDef>
+    <def:ValueListDef OID="ValueList.VS.VSTESTCD">
+      <ItemRef ItemOID="VS.VSTESTCD.FRAME" OrderNumber="10" Mandatory="No"/>
+      <ItemRef ItemOID="VS.VSTESTCD.HTRAW" OrderNumber="11" Mandatory="No"/>
+      <ItemRef ItemOID="VS.VSTESTCD.WTRAW" OrderNumber="12" Mandatory="No"/>
+      <ItemRef ItemOID="VS.VSTESTCD.MEANBP" OrderNumber="13" Mandatory="No"/>
+    </def:ValueListDef>
+    <!-- ************************************************************** -->
+    <!-- ItemGroupDef (domain) information Section                      -->
+    <!-- ************************************************************** -->
+    <ItemGroupDef OID="DM"
+      Name="DM"
+      Repeating="No"
+      IsReferenceData="No"
+      Purpose="Tabulation"
+      def:Label="Demographics"
+      def:Structure="One record per event per subject"
+      def:DomainKeys="STUDYID, USUBJID"
+      def:Class="Special Purpose"
+      def:ArchiveLocationID="Location.DM">
+      <!-- ************************************************************ -->
+      <!-- Each variable is listed here for this ItemGroupDef (domain)  -->
+      <!-- ************************************************************ -->
+      <ItemRef ItemOID="STUDYID"
+        OrderNumber="1"
+        Mandatory="Yes"
+        Role="Identifier"/>
+      <ItemRef ItemOID="DOMAIN"
+        OrderNumber="2"
+        Mandatory="Yes"
+        Role="Identifier"/>
+      <ItemRef ItemOID="USUBJID"
+        OrderNumber="3"
+        Mandatory="Yes"
+        Role="Identifier"/>
+      <ItemRef ItemOID="SUBJID"
+        OrderNumber="4"
+        Mandatory="Yes"
+        Role="Topic"/>
+      <ItemRef ItemOID="DM.RFSTDTC"
+        OrderNumber="5"
+        Mandatory="Yes"
+        Role="Timing"/>
+      <ItemRef ItemOID="DM.RFENDTC"
+        OrderNumber="6"
+        Mandatory="Yes"
+        Role="Timing"/>
+      <ItemRef ItemOID="DM.SITEID"
+        OrderNumber="7"
+        Mandatory="Yes"
+        Role="Record Qualifier"/>
+      <ItemRef ItemOID="DM.INVID"
+        OrderNumber="8"
+        Mandatory="Yes"
+        Role="Record Qualifier"/>
+      <ItemRef ItemOID="DM.BRTHDTC"
+        OrderNumber="10"
+        Mandatory="Yes"
+        Role="Result Qualifier"/>
+      <ItemRef ItemOID="DM.AGE"
+        OrderNumber="11"
+        Mandatory="Yes"
+        Role="Result Qualifier"/>
+      <ItemRef ItemOID="DM.AGEU"
+        OrderNumber="12"
+        Mandatory="Yes"
+        Role="Variable Qualifier"/>
+      <ItemRef ItemOID="DM.SEX"
+        OrderNumber="13"
+        Mandatory="Yes"
+        Role="Result Qualifier"/>
+      <ItemRef ItemOID="DM.RACE"
+        OrderNumber="14"
+        Mandatory="Yes"
+        Role="Result Qualifier"/>
+      <ItemRef ItemOID="DM.ARMCD"
+        OrderNumber="16"
+        Mandatory="Yes"
+        Role="Result Qualifier"/>
+      <ItemRef ItemOID="DM.ARM"
+        OrderNumber="17"
+        Mandatory="Yes"
+        Role="Synonym Qualifier"/>
+      <ItemRef ItemOID="DM.COUNTRY"
+        OrderNumber="18"
+        Mandatory="Yes"
+        Role="Result Qualifier"/>
+      <ItemRef ItemOID="DM.DMDTC"
+        OrderNumber="19"
+        Mandatory="Yes"
+        Role="Timing"/>
+      <ItemRef ItemOID="DM.DMDY"
+        OrderNumber="20"
+        Mandatory="Yes"
+        Role="Timing"/>
+      <!-- ************************************************************** -->
+      <!-- def:leaf details for hypertext linking the dataset             -->
+      <!-- ************************************************************** -->
+      <def:leaf ID="Location.DM" xlink:href="dm.xpt">
+        <def:title>crt/datasets/1234/dm.xpt </def:title>
+      </def:leaf>
+    </ItemGroupDef>
+    <ItemGroupDef OID="TE"
+      Name="TE"
+      Repeating="No"
+      IsReferenceData="Yes"
+      Purpose="Tabulation"
+      def:Label="Trial Elements"
+      def:Structure="One Record Per Element"
+      def:DomainKeys="STUDYID, ELEMENT"
+      def:Class="Trial Design"
+      def:ArchiveLocationID="Location.TE">
+      <!-- ************************************************************ -->
+      <!-- Each variable is listed here for this ItemGroupDef (domain)  -->
+      <!-- ************************************************************ -->
+      <ItemRef ItemOID="STUDYID"
+        OrderNumber="1"
+        Mandatory="Yes"
+        Role="Identifier"/>
+      <ItemRef ItemOID="DOMAIN"
+        OrderNumber="2"
+        Mandatory="Yes"
+        Role="Identifier"/>
+      <ItemRef ItemOID="TE.ETCD"
+        OrderNumber="3"
+        Mandatory="Yes"
+        Role="Record Qualifier"/>
+      <ItemRef ItemOID="TE.ELEMENT"
+        OrderNumber="4"
+        Mandatory="Yes"
+        Role="Topic"/>
+      <ItemRef ItemOID="TE.TESTRL"
+        OrderNumber="5"
+        Mandatory="Yes"
+        Role="Rule"/>
+      <ItemRef ItemOID="TE.TEENRL"
+        OrderNumber="6"
+        Mandatory="Yes"
+        Role="Rule"/>
+      <ItemRef ItemOID="TE.TEDUR"
+        OrderNumber="7"
+        Mandatory="Yes"
+        Role="Timing"/>
+      <!-- ************************************************************** -->
+      <!-- def:leaf details for hypertext linking the dataset             -->
+      <!-- ************************************************************** -->
+      <def:leaf ID="Location.TE" xlink:href="te.xpt">
+        <def:title>crt/datasets/1234/te.xpt </def:title>
+      </def:leaf>
+    </ItemGroupDef>
+    <ItemGroupDef OID="TA"
+      Name="TA"
+      Repeating="No"
+      IsReferenceData="Yes"
+      Purpose="Tabulation"
+      def:Label="Trial Arms"
+      def:Structure="One Record per Element for each Arm"
+      def:DomainKeys="STUDYID, ARM"
+      def:Class="Trial Design"
+      def:ArchiveLocationID="Location.TA">
+      <!-- ************************************************************ -->
+      <!-- Each variable is listed here for this ItemGroupDef (domain)  -->
+      <!-- ************************************************************ -->
+      <ItemRef ItemOID="STUDYID"
+        OrderNumber="1"
+        Mandatory="Yes"
+        Role="Identifier"/>
+      <ItemRef ItemOID="DOMAIN"
+        OrderNumber="2"
+        Mandatory="Yes"
+        Role="Identifier"/>
+      <ItemRef ItemOID="TA.ARMCD"
+        OrderNumber="3"
+        Mandatory="Yes"
+        Role="Topic"/>
+      <ItemRef ItemOID="TA.ARM"
+        OrderNumber="4"
+        Mandatory="Yes"
+        Role="Synonym Qualifier"/>
+      <ItemRef ItemOID="TA.TAETORD"
+        OrderNumber="5"
+        Mandatory="Yes"
+        Role="Identifier"/>
+      <ItemRef ItemOID="TA.ETCD"
+        OrderNumber="6"
+        Mandatory="Yes"
+        Role="Record Qualifier"/>
+      <ItemRef ItemOID="TA.ELEMENT"
+        OrderNumber="7"
+        Mandatory="Yes"
+        Role="Synonym Qualifier"/>
+      <ItemRef ItemOID="TA.TABRANCH"
+        OrderNumber="8"
+        Mandatory="Yes"
+        Role="Rule"/>
+      <ItemRef ItemOID="TA.TATRANS"
+        OrderNumber="9"
+        Mandatory="Yes"
+        Role="Rule"/>
+      <!-- ************************************************************** -->
+      <!-- def:leaf details for hypertext linking the dataset             -->
+      <!-- ************************************************************** -->
+      <def:leaf ID="Location.TA" xlink:href="ta.xpt">
+        <def:title>crt/datasets/1234/ta.xpt </def:title>
+      </def:leaf>
+    </ItemGroupDef>
+    <ItemGroupDef OID="TV"
+      Name="TV"
+      Repeating="No"
+      IsReferenceData="Yes"
+      Purpose="Tabulation"
+      def:Label="Trial Visits"
+      def:Structure="One Record per Visit per Arm"
+      def:DomainKeys="STUDYID, VISIT"
+      def:Class="Trial Design"
+      def:ArchiveLocationID="Location.TV">
+      <!-- ************************************************************ -->
+      <!-- Each variable is listed here for this ItemGroupDef (domain)  -->
+      <!-- ************************************************************ -->
+      <ItemRef ItemOID="STUDYID"
+        OrderNumber="1"
+        Mandatory="Yes"
+        Role="Identifier"/>
+      <ItemRef ItemOID="DOMAIN"
+        OrderNumber="2"
+        Mandatory="Yes"
+        Role="Identifier"/>
+      <ItemRef ItemOID="TV.VISIT"
+        OrderNumber="3"
+        Mandatory="Yes"
+        Role="Topic"/>
+      <ItemRef ItemOID="TV.VISITNUM"
+        OrderNumber="4"
+        Mandatory="Yes"
+        Role="Identifier"/>
+      <ItemRef ItemOID="TV.ARMCD"
+        OrderNumber="6"
+        Mandatory="Yes"
+        Role="Record Qualifier"/>
+      <ItemRef ItemOID="TV.ARM"
+        OrderNumber="7"
+        Mandatory="Yes"
+        Role="Synonym Qualifier"/>
+      <ItemRef ItemOID="TV.TVSTRL"
+        OrderNumber="8"
+        Mandatory="Yes"
+        Role="Rule"/>
+      <ItemRef ItemOID="TV.TVENRL"
+        OrderNumber="9"
+        Mandatory="Yes"
+        Role="Rule"/>
+      <!-- ************************************************************** -->
+      <!-- def:leaf details for hypertext linking the dataset             -->
+      <!-- ************************************************************** -->
+      <def:leaf ID="Location.TV" xlink:href="tv.xpt">
+        <def:title>crt/datasets/1234/tv.xpt </def:title>
+      </def:leaf>
+    </ItemGroupDef>
+    <ItemGroupDef OID="SE"
+      Name="SE"
+      Repeating="No"
+      IsReferenceData="Yes"
+      Purpose="Tabulation"
+      def:Label="Subject Elements"
+      def:Structure="One Record Per Subject Element"
+      def:DomainKeys="STUDYID, ELEMENT"
+      def:Class="Study Design"
+      def:ArchiveLocationID="Location.SE">
+      <!-- ************************************************************ -->
+      <!-- Each variable is listed here for this ItemGroupDef (domain)  -->
+      <!-- ************************************************************ -->
+      <ItemRef ItemOID="STUDYID"
+        OrderNumber="1"
+        Mandatory="Yes"
+        Role="Identifier"/>
+      <ItemRef ItemOID="DOMAIN"
+        OrderNumber="2"
+        Mandatory="Yes"
+        Role="Identifier"/>
+      <ItemRef ItemOID="USUBJID"
+        OrderNumber="3"
+        Mandatory="Yes"
+        Role="Identifier"/>
+      <ItemRef ItemOID="SE.ETCD"
+        OrderNumber="4"
+        Mandatory="Yes"
+        Role="Topic"/>
+      <ItemRef ItemOID="SE.ELEMENT"
+        OrderNumber="5"
+        Mandatory="Yes"
+        Role="Synonym Qualifier"/>
+      <ItemRef ItemOID="SE.SESTDTC"
+        OrderNumber="6"
+        Mandatory="Yes"
+        Role="Timing"/>
+      <ItemRef ItemOID="SE.SEENDTC"
+        OrderNumber="7"
+        Mandatory="Yes"
+        Role="Timing"/>
+      <!-- ************************************************************** -->
+      <!-- def:leaf details for hypertext linking the dataset             -->
+      <!-- ************************************************************** -->
+      <def:leaf ID="Location.SE" xlink:href="se.xpt">
+        <def:title>crt/datasets/1234/se.xpt </def:title>
+      </def:leaf>
+    </ItemGroupDef>
+    <ItemGroupDef OID="SV"
+      Name="SV"
+      Repeating="Yes"
+      IsReferenceData="No"
+      Purpose="Tabulation"
+      def:Label="Subject Visits"
+      def:Structure="One Record Per Subject Visit"
+      def:DomainKeys="STUDYID, VISIT"
+      def:Class="Study Design"
+      def:ArchiveLocationID="Location.SV">
+      <!-- ************************************************************ -->
+      <!-- Each variable is listed here for this ItemGroupDef (domain)  -->
+      <!-- ************************************************************ -->
+      <ItemRef ItemOID="STUDYID"
+        OrderNumber="1"
+        Mandatory="Yes"
+        Role="Identifier"/>
+      <ItemRef ItemOID="DOMAIN"
+        OrderNumber="2"
+        Mandatory="Yes"
+        Role="Identifier"/>
+      <ItemRef ItemOID="USUBJID"
+        OrderNumber="3"
+        Mandatory="Yes"
+        Role="Identifier"/>
+      <ItemRef ItemOID="SV.VISIT"
+        OrderNumber="4"
+        Mandatory="Yes"
+        Role="Timing"/>
+      <ItemRef ItemOID="SV.VISITNUM"
+        OrderNumber="5"
+        Mandatory="Yes"
+        Role="Topic"/>
+      <ItemRef ItemOID="SV.SVSTDTC"
+        OrderNumber="7"
+        Mandatory="Yes"
+        Role="Timing"/>
+      <ItemRef ItemOID="SV.SVENDTC"
+        OrderNumber="8"
+        Mandatory="Yes"
+        Role="Timing"/>
+      <!-- ************************************************************** -->
+      <!-- def:leaf details for hypertext linking the dataset             -->
+      <!-- ************************************************************** -->
+      <def:leaf ID="Location.SV" xlink:href="sv.xpt">
+        <def:title>crt/datasets/1234/sv.xpt </def:title>
+      </def:leaf>
+    </ItemGroupDef>
+    <ItemGroupDef OID="EX"
+      Name="EX"
+      Repeating="Yes"
+      IsReferenceData="No"
+      Purpose="Tabulation"
+      def:Label="Exposure"
+      def:Structure="One record per constant dosing interval per subject"
+      def:DomainKeys="USUBJID, EXTRT, EXSEQ"
+      def:Class="Interventions"
+      def:ArchiveLocationID="Location.EX">
+      <!-- ************************************************************ -->
+      <!-- Each variable is listed here for this ItemGroupDef (domain)  -->
+      <!-- ************************************************************ -->
+      <ItemRef ItemOID="STUDYID"
+        OrderNumber="10"
+        Mandatory="Yes"
+        Role="Identifier"/>
+      <ItemRef ItemOID="DOMAIN"
+        OrderNumber="20"
+        Mandatory="Yes"
+        Role="Identifier"/>
+      <ItemRef ItemOID="USUBJID"
+        OrderNumber="30"
+        Mandatory="Yes"
+        Role="Identifier"/>
+      <ItemRef ItemOID="EX.EXSEQ"
+        OrderNumber="40"
+        Mandatory="Yes"
+        Role="Identifier"/>
+      <ItemRef ItemOID="EX.EXTRT"
+        OrderNumber="70"
+        Mandatory="Yes"
+        Role="Topic"/>
+      <ItemRef ItemOID="EX.EXCAT"
+        OrderNumber="80"
+        Mandatory="Yes"
+        Role="Grouping Qualifier"/>
+      <ItemRef ItemOID="EX.EXDOSE"
+        OrderNumber="100"
+        Mandatory="Yes"
+        Role="Result Qualifier"/>
+      <ItemRef ItemOID="EX.EXDOSTXT"
+        OrderNumber="110"
+        Mandatory="Yes"
+        Role="Result Qualifier"/>
+      <ItemRef ItemOID="EX.EXDOSU"
+        OrderNumber="120"
+        Mandatory="Yes"
+        Role="Variable Qualifier"/>
+      <ItemRef ItemOID="EX.EXDOSTOT"
+        OrderNumber="150"
+        Mandatory="Yes"
+        Role="Result Qualifier"/>
+      <ItemRef ItemOID="EX.EXROUTE"
+        OrderNumber="170"
+        Mandatory="Yes"
+        Role="Result Qualifier"/>
+      <ItemRef ItemOID="EX.EXSTDTC"
+        OrderNumber="210"
+        Mandatory="Yes"
+        Role="Timing"/>
+      <ItemRef ItemOID="EX.EXENDTC"
+        OrderNumber="220"
+        Mandatory="Yes"
+        Role="Timing"/>
+      <!-- ************************************************************** -->
+      <!-- def:leaf details for hypertext linking the dataset             -->
+      <!-- ************************************************************** -->
+      <def:leaf ID="Location.EX" xlink:href="ex.xpt">
+        <def:title>crt/datasets/1234/ex.xpt </def:title>
+      </def:leaf>
+    </ItemGroupDef>
+    <ItemGroupDef OID="CM"
+      Name="CM"
+      Repeating="Yes"
+      IsReferenceData="No"
+      Purpose="Tabulation"
+      def:Label="Concomitant Medications"
+      def:Structure="One record per event per subject"
+      def:DomainKeys="USUBJID, CMTRT, CMSEQ"
+      def:Class="Interventions"
+      def:ArchiveLocationID="Location.CM">
+      <!-- ************************************************************ -->
+      <!-- Each variable is listed here for this ItemGroupDef (domain)  -->
+      <!-- ************************************************************ -->
+      <ItemRef ItemOID="STUDYID"
+        OrderNumber="10"
+        Mandatory="Yes"
+        Role="Identifier"/>
+      <ItemRef ItemOID="DOMAIN"
+        OrderNumber="20"
+        Mandatory="Yes"
+        Role="Identifier"/>
+      <ItemRef ItemOID="USUBJID"
+        OrderNumber="30"
+        Mandatory="Yes"
+        Role="Identifier"/>
+      <ItemRef ItemOID="CM.CMSEQ"
+        OrderNumber="40"
+        Mandatory="Yes"
+        Role="Identifier"/>
+      <ItemRef ItemOID="CM.CMTRT"
+        OrderNumber="70"
+        Mandatory="Yes"
+        Role="Topic"/>
+      <ItemRef ItemOID="CM.CMDECOD"
+        OrderNumber="90"
+        Mandatory="Yes"
+        Role="Synonym Qualifier"/>
+      <ItemRef ItemOID="CM.CMCAT"
+        OrderNumber="100"
+        Mandatory="Yes"
+        Role="Grouping Qualifier"/>
+      <ItemRef ItemOID="CM.CMSCAT"
+        OrderNumber="110"
+        Mandatory="Yes"
+        Role="Grouping Qualifier"/>
+      <ItemRef ItemOID="CM.CMDOSU"
+        OrderNumber="200"
+        Mandatory="Yes"
+        Role="Variable Qualifier"/>
+      <ItemRef ItemOID="CM.CMDOSTOT"
+        OrderNumber="230"
+        Mandatory="Yes"
+        Role="Result Qualifier"/>
+      <ItemRef ItemOID="CM.CMSTDTC"
+        OrderNumber="260"
+        Mandatory="Yes"
+        Role="Timing"/>
+      <ItemRef ItemOID="CM.CMENDTC"
+        OrderNumber="270"
+        Mandatory="Yes"
+        Role="Timing"/>
+      <ItemRef ItemOID="CM.CMSTDY"
+        OrderNumber="280"
+        Mandatory="Yes"
+        Role="Timing"/>
+      <ItemRef ItemOID="CM.CMENDY"
+        OrderNumber="290"
+        Mandatory="Yes"
+        Role="Timing"/>
+      <!-- ************************************************************** -->
+      <!-- def:leaf details for hypertext linking the dataset             -->
+      <!-- ************************************************************** -->
+      <def:leaf ID="Location.CM" xlink:href="cm.xpt">
+        <def:title>crt/datasets/1234/cm.xpt </def:title>
+      </def:leaf>
+    </ItemGroupDef>
+    <ItemGroupDef OID="SU"
+      Name="SU"
+      Repeating="Yes"
+      IsReferenceData="No"
+      Purpose="Tabulation"
+      def:Label="Substance Use"
+      def:Structure="One record per substance use type per subject"
+      def:DomainKeys="USUBJID, SUTRT, SUSEQ"
+      def:Class="Interventions"
+      def:ArchiveLocationID="Location.SU">
+      <!-- ************************************************************ -->
+      <!-- Each variable is listed here for this ItemGroupDef (domain)  -->
+      <!-- ************************************************************ -->
+      <ItemRef ItemOID="STUDYID"
+        OrderNumber="10"
+        Mandatory="Yes"
+        Role="Identifier"/>
+      <ItemRef ItemOID="DOMAIN"
+        OrderNumber="20"
+        Mandatory="Yes"
+        Role="Identifier"/>
+      <ItemRef ItemOID="USUBJID"
+        OrderNumber="30"
+        Mandatory="Yes"
+        Role="Identifier"/>
+      <ItemRef ItemOID="SU.SUSEQ"
+        OrderNumber="40"
+        Mandatory="Yes"
+        Role="Identifier"/>
+      <ItemRef ItemOID="SU.SUGRPID"
+        OrderNumber="50"
+        Mandatory="Yes"
+        Role="Identifier"/>
+      <ItemRef ItemOID="SU.SUTRT"
+        OrderNumber="70"
+        Mandatory="Yes"
+        Role="Topic"/>
+      <ItemRef ItemOID="SU.SUDECOD"
+        OrderNumber="90"
+        Mandatory="Yes"
+        Role="Synonym Qualifier"/>
+      <ItemRef ItemOID="SU.SUCAT"
+        OrderNumber="100"
+        Mandatory="Yes"
+        Role="Grouping Qualifier"/>
+      <ItemRef ItemOID="SU.SUSCAT"
+        OrderNumber="110"
+        Mandatory="Yes"
+        Role="Grouping Qualifier"/>
+      <ItemRef ItemOID="SU.SUOCCUR"
+        OrderNumber="120"
+        Mandatory="Yes"
+        Role="Result Qualifier"/>
+      <ItemRef ItemOID="SU.SUSTAT"
+        OrderNumber="130"
+        Mandatory="Yes"
+        Role="Result Qualifier"/>
+      <ItemRef ItemOID="SU.SUDOSE"
+        OrderNumber="170"
+        Mandatory="Yes"
+        Role="Result Qualifier"/>
+      <ItemRef ItemOID="SU.SUDOSTXT"
+        OrderNumber="180"
+        Mandatory="Yes"
+        Role="Result Qualifier"/>
+      <ItemRef ItemOID="SU.SUDOSU"
+        OrderNumber="190"
+        Mandatory="Yes"
+        Role="Variable Qualifier"/>
+      <ItemRef ItemOID="SU.SUDOSFRQ"
+        OrderNumber="210"
+        Mandatory="Yes"
+        Role="Result Qualifier"/>
+      <ItemRef ItemOID="SU.SUROUTE"
+        OrderNumber="230"
+        Mandatory="Yes"
+        Role="Result Qualifier"/>
+      <ItemRef ItemOID="SU.VISITNUM"
+        OrderNumber="240"
+        Mandatory="Yes"
+        Role="Timing"/>
+      <!-- ************************************************************** -->
+      <!-- def:leaf details for hypertext linking the dataset             -->
+      <!-- ************************************************************** -->
+      <def:leaf ID="Location.SU" xlink:href="su.xpt">
+        <def:title>crt/datasets/1234/su.xpt </def:title>
+      </def:leaf>
+    </ItemGroupDef>
+    <ItemGroupDef OID="AE"
+      Name="AE"
+      Repeating="Yes"
+      IsReferenceData="No"
+      Purpose="Tabulation"
+      def:Label="Adverse Events"
+      def:Structure="One record per event per subject"
+      def:DomainKeys="USUBJID, AETERM, AESEQ"
+      def:Class="Events"
+      def:ArchiveLocationID="Location.AE">
+      <!-- ************************************************************ -->
+      <!-- Each variable is listed here for this ItemGroupDef (domain)  -->
+      <!-- ************************************************************ -->
+      <ItemRef ItemOID="STUDYID"
+        OrderNumber="10"
+        Mandatory="Yes"
+        Role="Identifier"/>
+      <ItemRef ItemOID="DOMAIN"
+        OrderNumber="20"
+        Mandatory="Yes"
+        Role="Identifier"/>
+      <ItemRef ItemOID="USUBJID"
+        OrderNumber="30"
+        Mandatory="Yes"
+        Role="Identifier"/>
+      <ItemRef ItemOID="AE.AESEQ"
+        OrderNumber="40"
+        Mandatory="Yes"
+        Role="Identifier"/>
+      <ItemRef ItemOID="AE.AESPID"
+        OrderNumber="70"
+        Mandatory="Yes"
+        Role="Identifier"/>
+      <ItemRef ItemOID="AE.AETERM"
+        OrderNumber="80"
+        Mandatory="Yes"
+        Role="Topic"/>
+      <ItemRef ItemOID="AE.AEDECOD"
+        OrderNumber="100"
+        Mandatory="Yes"
+        Role="Synonym Qualifier"/>
+      <ItemRef ItemOID="AE.AEBODSYS"
+        OrderNumber="140"
+        Mandatory="Yes"
+        Role="Result Qualifier"/>
+      <ItemRef ItemOID="AE.AESEV"
+        OrderNumber="160"
+        Mandatory="Yes"
+        Role="Record Qualifier"/>
+      <ItemRef ItemOID="AE.AESER"
+        OrderNumber="170"
+        Mandatory="Yes"
+        Role="Record Qualifier"/>
+      <ItemRef ItemOID="AE.AEACN"
+        OrderNumber="180"
+        Mandatory="Yes"
+        Role="Record Qualifier"/>
+      <ItemRef ItemOID="AE.AEACNOTH"
+        OrderNumber="190"
+        Mandatory="Yes"
+        Role="Record Qualifier"/>
+      <ItemRef ItemOID="AE.AEREL"
+        OrderNumber="200"
+        Mandatory="Yes"
+        Role="Result Qualifier"/>
+      <ItemRef ItemOID="AE.AERELNST"
+        OrderNumber="210"
+        Mandatory="Yes"
+        Role="Result Qualifier"/>
+      <ItemRef ItemOID="AE.AEOUT"
+        OrderNumber="230"
+        Mandatory="Yes"
+        Role="Result Qualifier"/>
+      <ItemRef ItemOID="AE.AESTDTC"
+        OrderNumber="340"
+        Mandatory="Yes"
+        Role="Timing"/>
+      <ItemRef ItemOID="AE.AEENDTC"
+        OrderNumber="350"
+        Mandatory="Yes"
+        Role="Timing"/>
+      <ItemRef ItemOID="AE.AESTDY"
+        OrderNumber="360"
+        Mandatory="Yes"
+        Role="Timing"/>
+      <ItemRef ItemOID="AE.AEENDY"
+        OrderNumber="370"
+        Mandatory="Yes"
+        Role="Timing"/>
+      <!-- ************************************************************** -->
+      <!-- def:leaf details for hypertext linking the dataset             -->
+      <!-- ************************************************************** -->
+      <def:leaf ID="Location.AE" xlink:href="ae.xpt">
+        <def:title>crt/datasets/1234/ae.xpt </def:title>
+      </def:leaf>
+    </ItemGroupDef>
+    <ItemGroupDef OID="DS"
+      Name="DS"
+      Repeating="Yes"
+      IsReferenceData="No"
+      Purpose="Tabulation"
+      def:Label="Disposition"
+      def:Structure="One record per disposition status or protocol milestone per subject"
+      def:DomainKeys="USUBJID, DSTERM, DSSEQ"
+      def:Class="Events"
+      def:ArchiveLocationID="Location.DS">
+      <!-- ************************************************************ -->
+      <!-- Each variable is listed here for this ItemGroupDef (domain)  -->
+      <!-- ************************************************************ -->
+      <ItemRef ItemOID="STUDYID"
+        OrderNumber="10"
+        Mandatory="Yes"
+        Role="Identifier"/>
+      <ItemRef ItemOID="DOMAIN"
+        OrderNumber="20"
+        Mandatory="Yes"
+        Role="Identifier"/>
+      <ItemRef ItemOID="USUBJID"
+        OrderNumber="30"
+        Mandatory="Yes"
+        Role="Identifier"/>
+      <ItemRef ItemOID="DS.DSSEQ"
+        OrderNumber="40"
+        Mandatory="Yes"
+        Role="Identifier"/>
+      <ItemRef ItemOID="DS.DSREFID"
+        OrderNumber="60"
+        Mandatory="Yes"
+        Role="Identifier"/>
+      <ItemRef ItemOID="DS.DSTERM"
+        OrderNumber="80"
+        Mandatory="Yes"
+        Role="Topic"/>
+      <ItemRef ItemOID="DS.DSDECOD"
+        OrderNumber="90"
+        Mandatory="Yes"
+        Role="Synonym Qualifier"/>
+      <ItemRef ItemOID="DS.DSCAT"
+        OrderNumber="100"
+        Mandatory="Yes"
+        Role="Grouping Qualifier"/>
+      <ItemRef ItemOID="DS.EPOCH"
+        OrderNumber="150"
+        Mandatory="Yes"
+        Role="Timing"/>
+      <ItemRef ItemOID="DS.DSDTC"
+        OrderNumber="160"
+        Mandatory="Yes"
+        Role="Timing"/>
+      <ItemRef ItemOID="DS.DSSTDTC"
+        OrderNumber="170"
+        Mandatory="Yes"
+        Role="Timing"/>
+      <!-- ************************************************************** -->
+      <!-- def:leaf details for hypertext linking the dataset             -->
+      <!-- ************************************************************** -->
+      <def:leaf ID="Location.DS" xlink:href="ds.xpt">
+        <def:title>crt/datasets/1234/ds.xpt </def:title>
+      </def:leaf>
+    </ItemGroupDef>
+    <ItemGroupDef OID="MH"
+      Name="MH"
+      Repeating="Yes"
+      IsReferenceData="No"
+      Purpose="Tabulation"
+      def:Label="Medical History"
+      def:Structure="One record per event per subject"
+      def:DomainKeys="USUBJID, MHTERM, MHSEQ"
+      def:Class="Events"
+      def:ArchiveLocationID="Location.MH">
+      <!-- ************************************************************ -->
+      <!-- Each variable is listed here for this ItemGroupDef (domain)  -->
+      <!-- ************************************************************ -->
+      <ItemRef ItemOID="STUDYID"
+        OrderNumber="10"
+        Mandatory="Yes"
+        Role="Identifier"/>
+      <ItemRef ItemOID="DOMAIN"
+        OrderNumber="20"
+        Mandatory="Yes"
+        Role="Identifier"/>
+      <ItemRef ItemOID="USUBJID"
+        OrderNumber="30"
+        Mandatory="Yes"
+        Role="Identifier"/>
+      <ItemRef ItemOID="MH.MHSEQ"
+        OrderNumber="40"
+        Mandatory="Yes"
+        Role="Identifier"/>
+      <ItemRef ItemOID="MH.MHGRPID"
+        OrderNumber="50"
+        Mandatory="Yes"
+        Role="Identifier"/>
+      <ItemRef ItemOID="MH.MHSPID"
+        OrderNumber="70"
+        Mandatory="Yes"
+        Role="Identifier"/>
+      <ItemRef ItemOID="MH.MHTERM"
+        OrderNumber="80"
+        Mandatory="Yes"
+        Role="Topic"/>
+      <ItemRef ItemOID="MH.MHDECOD"
+        OrderNumber="100"
+        Mandatory="Yes"
+        Role="Synonym Qualifier"/>
+      <ItemRef ItemOID="MH.MHCAT"
+        OrderNumber="110"
+        Mandatory="Yes"
+        Role="Grouping Qualifier"/>
+      <ItemRef ItemOID="MH.MHSTAT"
+        OrderNumber="140"
+        Mandatory="Yes"
+        Role="Result Qualifier"/>
+      <ItemRef ItemOID="MH.MHBODSYS"
+        OrderNumber="160"
+        Mandatory="Yes"
+        Role="Result Qualifier"/>
+      <ItemRef ItemOID="MH.VISITNUM"
+        OrderNumber="170"
+        Mandatory="Yes"
+        Role="Timing"/>
+      <ItemRef ItemOID="MH.MHDTC"
+        OrderNumber="200"
+        Mandatory="Yes"
+        Role="Timing"/>
+      <ItemRef ItemOID="MH.MHSTDTC"
+        OrderNumber="210"
+        Mandatory="Yes"
+        Role="Timing"/>
+      <ItemRef ItemOID="MH.MHENRF"
+        OrderNumber="240"
+        Mandatory="Yes"
+        Role="Timing"/>
+      <!-- ************************************************************** -->
+      <!-- def:leaf details for hypertext linking the dataset             -->
+      <!-- ************************************************************** -->
+      <def:leaf ID="Location.MH" xlink:href="mh.xpt">
+        <def:title>crt/datasets/1234/mh.xpt </def:title>
+      </def:leaf>
+    </ItemGroupDef>
+    <ItemGroupDef OID="EG"
+      Name="EG"
+      Repeating="Yes"
+      IsReferenceData="No"
+      Purpose="Tabulation"
+      def:Label="ECG Test Results"
+      def:Structure="One record per event per subject"
+      def:DomainKeys="USUBJID, EGTESTCD, EGSEQ"
+      def:Class="Findings"
+      def:ArchiveLocationID="Location.EG">
+      <!-- ************************************************************ -->
+      <!-- Each variable is listed here for this ItemGroupDef (domain)  -->
+      <!-- ************************************************************ -->
+      <ItemRef ItemOID="STUDYID"
+        OrderNumber="10"
+        Mandatory="Yes"
+        Role="Identifier"/>
+      <ItemRef ItemOID="DOMAIN"
+        OrderNumber="20"
+        Mandatory="Yes"
+        Role="Identifier"/>
+      <ItemRef ItemOID="USUBJID"
+        OrderNumber="30"
+        Mandatory="Yes"
+        Role="Identifier"/>
+      <ItemRef ItemOID="EG.EGSEQ"
+        OrderNumber="40"
+        Mandatory="Yes"
+        Role="Identifier"/>
+      <ItemRef ItemOID="EG.EGSPID"
+        OrderNumber="70"
+        Mandatory="Yes"
+        Role="Identifier"/>
+      <ItemRef ItemOID="EG.EGTESTCD"
+        OrderNumber="80"
+        Mandatory="Yes"
+        Role="Topic"/>
+      <ItemRef ItemOID="EG.EGTEST"
+        OrderNumber="90"
+        Mandatory="Yes"
+        Role="Synonym Qualifier"/>
+      <ItemRef ItemOID="EG.EGCAT"
+        OrderNumber="100"
+        Mandatory="Yes"
+        Role="Grouping Qualifier"/>
+      <ItemRef ItemOID="EG.EGPOS"
+        OrderNumber="120"
+        Mandatory="Yes"
+        Role="Record Qualifier"/>
+      <ItemRef ItemOID="EG.EGORRES"
+        OrderNumber="130"
+        Mandatory="Yes"
+        Role="Result Qualifier"/>
+      <ItemRef ItemOID="EG.EGORRESU"
+        OrderNumber="140"
+        Mandatory="Yes"
+        Role="Variable Qualifier"/>
+      <ItemRef ItemOID="EG.EGSTRESC"
+        OrderNumber="160"
+        Mandatory="Yes"
+        Role="Result Qualifier"/>
+      <ItemRef ItemOID="EG.EGSTRESN"
+        OrderNumber="170"
+        Mandatory="Yes"
+        Role="Result Qualifier"/>
+      <ItemRef ItemOID="EG.EGSTRESU"
+        OrderNumber="180"
+        Mandatory="Yes"
+        Role="Variable Qualifier"/>
+      <ItemRef ItemOID="EG.EGBLFL"
+        OrderNumber="250"
+        Mandatory="Yes"
+        Role="Record Qualifier"/>
+      <ItemRef ItemOID="EG.EGEVAL"
+        OrderNumber="270"
+        Mandatory="Yes"
+        Role="Record Qualifier"/>
+      <ItemRef ItemOID="EG.VISITNUM"
+        OrderNumber="280"
+        Mandatory="Yes"
+        Role="Timing"/>
+      <ItemRef ItemOID="EG.VISIT"
+        OrderNumber="290"
+        Mandatory="Yes"
+        Role="Timing"/>
+      <ItemRef ItemOID="EG.EGDTC"
+        OrderNumber="310"
+        Mandatory="Yes"
+        Role="Timing"/>
+      <ItemRef ItemOID="EG.EGDY"
+        OrderNumber="320"
+        Mandatory="Yes"
+        Role="Timing"/>
+      <!-- ************************************************************** -->
+      <!-- def:leaf details for hypertext linking the dataset             -->
+      <!-- ************************************************************** -->
+      <def:leaf ID="Location.EG" xlink:href="eg.xpt">
+        <def:title>crt/datasets/1234/eg.xpt </def:title>
+      </def:leaf>
+    </ItemGroupDef>
+    <ItemGroupDef OID="IE"
+      Name="IE"
+      Repeating="Yes"
+      IsReferenceData="No"
+      Purpose="Tabulation"
+      def:Label="Inclusion/Exclusion Exceptions"
+      def:Structure="One record per event per subject"
+      def:DomainKeys="USUBJID, IETEST, IESEQ"
+      def:Class="Findings"
+      def:ArchiveLocationID="Location.IE">
+      <!-- ************************************************************ -->
+      <!-- Each variable is listed here for this ItemGroupDef (domain)  -->
+      <!-- ************************************************************ -->
+      <ItemRef ItemOID="STUDYID"
+        OrderNumber="10"
+        Mandatory="Yes"
+        Role="Identifier"/>
+      <ItemRef ItemOID="DOMAIN"
+        OrderNumber="20"
+        Mandatory="Yes"
+        Role="Identifier"/>
+      <ItemRef ItemOID="USUBJID"
+        OrderNumber="30"
+        Mandatory="Yes"
+        Role="Identifier"/>
+      <ItemRef ItemOID="IE.IESEQ"
+        OrderNumber="40"
+        Mandatory="Yes"
+        Role="Identifier"/>
+      <ItemRef ItemOID="IE.IETESTCD"
+        OrderNumber="60"
+        Mandatory="Yes"
+        Role="Topic"/>
+      <ItemRef ItemOID="IE.IETEST"
+        OrderNumber="70"
+        Mandatory="Yes"
+        Role="Synonym Qualifier"/>
+      <ItemRef ItemOID="IE.IECAT"
+        OrderNumber="80"
+        Mandatory="Yes"
+        Role="Grouping Qualifier"/>
+      <ItemRef ItemOID="IE.IEORRES"
+        OrderNumber="100"
+        Mandatory="Yes"
+        Role="Result Qualifier"/>
+      <ItemRef ItemOID="IE.IESTRESC"
+        OrderNumber="110"
+        Mandatory="Yes"
+        Role="Result Qualifier"/>
+      <ItemRef ItemOID="IE.VISITNUM"
+        OrderNumber="120"
+        Mandatory="Yes"
+        Role="Timing"/>
+      <ItemRef ItemOID="IE.VISIT"
+        OrderNumber="130"
+        Mandatory="Yes"
+        Role="Timing"/>
+      <ItemRef ItemOID="IE.IEDTC"
+        OrderNumber="150"
+        Mandatory="Yes"
+        Role="Timing"/>
+      <!-- ************************************************************** -->
+      <!-- def:leaf details for hypertext linking the dataset             -->
+      <!-- ************************************************************** -->
+      <def:leaf ID="Location.IE" xlink:href="ie.xpt">
+        <def:title>crt/datasets/1234/ie.xpt </def:title>
+      </def:leaf>
+    </ItemGroupDef>
+    <ItemGroupDef OID="LB"
+      Name="LB"
+      Repeating="Yes"
+      IsReferenceData="No"
+      Purpose="Tabulation"
+      def:Label="Laboratory Tests"
+      def:Structure="One record per lab test per subject"
+      def:DomainKeys="USUBJID, LBTESTCD, VISITNUM, TPTNUM, LBSEQ"
+      def:Class="Findings"
+      def:ArchiveLocationID="Location.LB">
+      <!-- ************************************************************ -->
+      <!-- Each variable is listed here for this ItemGroupDef (domain)  -->
+      <!-- ************************************************************ -->
+      <ItemRef ItemOID="STUDYID"
+        OrderNumber="10"
+        Mandatory="Yes"
+        Role="Identifier"/>
+      <ItemRef ItemOID="DOMAIN"
+        OrderNumber="20"
+        Mandatory="Yes"
+        Role="Identifier"/>
+      <ItemRef ItemOID="USUBJID"
+        OrderNumber="30"
+        Mandatory="Yes"
+        Role="Identifier"/>
+      <ItemRef ItemOID="LB.LBSEQ"
+        OrderNumber="40"
+        Mandatory="Yes"
+        Role="Identifier"/>
+      <ItemRef ItemOID="LB.LBSPID"
+        OrderNumber="70"
+        Mandatory="Yes"
+        Role="Identifier"/>
+      <ItemRef ItemOID="LB.LBTESTCD"
+        OrderNumber="80"
+        Mandatory="Yes"
+        Role="Topic"/>
+      <ItemRef ItemOID="LB.LBTEST"
+        OrderNumber="90"
+        Mandatory="Yes"
+        Role="Synonym Qualifier"/>
+      <ItemRef ItemOID="LB.LBCAT"
+        OrderNumber="100"
+        Mandatory="Yes"
+        Role="Grouping Qualifier"/>
+      <ItemRef ItemOID="LB.LBORRES"
+        OrderNumber="120"
+        Mandatory="Yes"
+        Role="Result Qualifier"/>
+      <ItemRef ItemOID="LB.LBORRESU"
+        OrderNumber="130"
+        Mandatory="Yes"
+        Role="Variable Qualifier"/>
+      <ItemRef ItemOID="LB.LBORNRLO"
+        OrderNumber="140"
+        Mandatory="Yes"
+        Role="Variable Qualifier"/>
+      <ItemRef ItemOID="LB.LBORNRHI"
+        OrderNumber="150"
+        Mandatory="Yes"
+        Role="Variable Qualifier"/>
+      <ItemRef ItemOID="LB.LBSTRESC"
+        OrderNumber="160"
+        Mandatory="Yes"
+        Role="Result Qualifier"/>
+      <ItemRef ItemOID="LB.LBSTRESN"
+        OrderNumber="180"
+        Mandatory="Yes"
+        Role="Result Qualifier"/>
+      <ItemRef ItemOID="LB.LBSTRESU"
+        OrderNumber="190"
+        Mandatory="Yes"
+        Role="Variable Qualifier"/>
+      <ItemRef ItemOID="LB.LBSTNRLO"
+        OrderNumber="200"
+        Mandatory="Yes"
+        Role="Variable Qualifier"/>
+      <ItemRef ItemOID="LB.LBSTNRHI"
+        OrderNumber="210"
+        Mandatory="Yes"
+        Role="Variable Qualifier"/>
+      <ItemRef ItemOID="LB.LBNRIND"
+        OrderNumber="220"
+        Mandatory="Yes"
+        Role="Variable Qualifier"/>
+      <ItemRef ItemOID="LB.LBBLFL"
+        OrderNumber="300"
+        Mandatory="Yes"
+        Role="Record Qualifier"/>
+      <ItemRef ItemOID="LB.VISITNUM"
+        OrderNumber="350"
+        Mandatory="Yes"
+        Role="Timing"/>
+      <ItemRef ItemOID="LB.VISIT"
+        OrderNumber="360"
+        Mandatory="Yes"
+        Role="Timing"/>
+      <ItemRef ItemOID="LB.LBDTC"
+        OrderNumber="380"
+        Mandatory="Yes"
+        Role="Timing"/>
+      <ItemRef ItemOID="LB.LBDY"
+        OrderNumber="390"
+        Mandatory="Yes"
+        Role="Timing"/>
+      <!-- ************************************************************** -->
+      <!-- def:leaf details for hypertext linking the dataset             -->
+      <!-- ************************************************************** -->
+      <def:leaf ID="Location.LB" xlink:href="lb.xpt">
+        <def:title>crt/datasets/1234/lb.xpt </def:title>
+      </def:leaf>
+    </ItemGroupDef>
+    <ItemGroupDef OID="PE"
+      Name="PE"
+      Repeating="Yes"
+      IsReferenceData="No"
+      Purpose="Tabulation"
+      def:Label="Physical Examination"
+      def:Structure="One record per event per subject"
+      def:DomainKeys="USUBJID, PETEST, PESEQ"
+      def:Class="Findings"
+      def:ArchiveLocationID="Location.PE">
+      <!-- ************************************************************ -->
+      <!-- Each variable is listed here for this ItemGroupDef (domain)  -->
+      <!-- ************************************************************ -->
+      <ItemRef ItemOID="STUDYID"
+        OrderNumber="10"
+        Mandatory="Yes"
+        Role="Identifier"/>
+      <ItemRef ItemOID="DOMAIN"
+        OrderNumber="20"
+        Mandatory="Yes"
+        Role="Identifier"/>
+      <ItemRef ItemOID="USUBJID"
+        OrderNumber="30"
+        Mandatory="Yes"
+        Role="Identifier"/>
+      <ItemRef ItemOID="PE.PESEQ"
+        OrderNumber="40"
+        Mandatory="Yes"
+        Role="Identifier"/>
+      <ItemRef ItemOID="PE.PETESTCD"
+        OrderNumber="70"
+        Mandatory="Yes"
+        Role="Topic"/>
+      <ItemRef ItemOID="PE.PETEST"
+        OrderNumber="80"
+        Mandatory="Yes"
+        Role="Synonym Qualifier"/>
+      <ItemRef ItemOID="PE.PEBODSYS"
+        OrderNumber="130"
+        Mandatory="Yes"
+        Role="Result Qualifier"/>
+      <ItemRef ItemOID="PE.PEORRES"
+        OrderNumber="140"
+        Mandatory="Yes"
+        Role="Result Qualifier"/>
+      <ItemRef ItemOID="PE.PESTRESC"
+        OrderNumber="160"
+        Mandatory="Yes"
+        Role="Result Qualifier"/>
+      <ItemRef ItemOID="PE.PESTAT"
+        OrderNumber="190"
+        Mandatory="Yes"
+        Role="Result Qualifier"/>
+      <ItemRef ItemOID="PE.VISITNUM"
+        OrderNumber="230"
+        Mandatory="Yes"
+        Role="Timing"/>
+      <ItemRef ItemOID="PE.VISIT"
+        OrderNumber="240"
+        Mandatory="Yes"
+        Role="Timing"/>
+      <ItemRef ItemOID="PE.PEDTC"
+        OrderNumber="260"
+        Mandatory="Yes"
+        Role="Timing"/>
+      <ItemRef ItemOID="PE.PEDY"
+        OrderNumber="270"
+        Mandatory="Yes"
+        Role="Timing"/>
+      <!-- ************************************************************** -->
+      <!-- def:leaf details for hypertext linking the dataset             -->
+      <!-- ************************************************************** -->
+      <def:leaf ID="Location.PE" xlink:href="pe.xpt">
+        <def:title>crt/datasets/1234/pe.xpt </def:title>
+      </def:leaf>
+    </ItemGroupDef>
+    <ItemGroupDef OID="SC"
+      Name="SC"
+      Repeating="Yes"
+      IsReferenceData="No"
+      Purpose="Tabulation"
+      def:Label="Subject Characteristics"
+      def:Structure="One record per subject characteristic"
+      def:DomainKeys="USUBJID, SCTESTCD"
+      def:Class="Findings"
+      def:ArchiveLocationID="Location.SC">
+      <!-- ************************************************************ -->
+      <!-- Each variable is listed here for this ItemGroupDef (domain)  -->
+      <!-- ************************************************************ -->
+      <ItemRef ItemOID="STUDYID"
+        OrderNumber="10"
+        Mandatory="Yes"
+        Role="Identifier"/>
+      <ItemRef ItemOID="DOMAIN"
+        OrderNumber="20"
+        Mandatory="Yes"
+        Role="Identifier"/>
+      <ItemRef ItemOID="USUBJID"
+        OrderNumber="30"
+        Mandatory="Yes"
+        Role="Identifier"/>
+      <ItemRef ItemOID="SC.SCSEQ"
+        OrderNumber="40"
+        Mandatory="Yes"
+        Role="Identifier"/>
+      <ItemRef ItemOID="SC.SCTESTCD"
+        OrderNumber="70"
+        Mandatory="Yes"
+        Role="Topic"/>
+      <ItemRef ItemOID="SC.SCTEST"
+        OrderNumber="80"
+        Mandatory="Yes"
+        Role="Synonym Qualifier"/>
+      <ItemRef ItemOID="SC.SCCAT"
+        OrderNumber="90"
+        Mandatory="Yes"
+        Role="Grouping Qualifier"/>
+      <ItemRef ItemOID="SC.SCORRES"
+        OrderNumber="110"
+        Mandatory="Yes"
+        Role="Result Qualifier"/>
+      <ItemRef ItemOID="SC.SCSTRESC"
+        OrderNumber="130"
+        Mandatory="Yes"
+        Role="Result Qualifier"/>
+      <ItemRef ItemOID="SC.SCSTRESN"
+        OrderNumber="140"
+        Mandatory="Yes"
+        Role="Result Qualifier"/>
+      <ItemRef ItemOID="SC.SCSTRESU"
+        OrderNumber="150"
+        Mandatory="Yes"
+        Role="Variable Qualifier"/>
+      <ItemRef ItemOID="SC.SCDTC"
+        OrderNumber="180"
+        Mandatory="Yes"
+        Role="Timing"/>
+      <!-- ************************************************************** -->
+      <!-- def:leaf details for hypertext linking the dataset             -->
+      <!-- ************************************************************** -->
+      <def:leaf ID="Location.SC" xlink:href="sc.xpt">
+        <def:title>crt/datasets/1234/sc.xpt </def:title>
+      </def:leaf>
+    </ItemGroupDef>
+    <ItemGroupDef OID="VS"
+      Name="VS"
+      Repeating="Yes"
+      IsReferenceData="No"
+      Purpose="Tabulation"
+      def:Label="Vital Signs"
+      def:Structure="One record per subject per vital sign"
+      def:DomainKeys="USUBJID, VSTESTCD"
+      def:Class="Findings"
+      def:ArchiveLocationID="Location.VS">
+      <!-- ************************************************************ -->
+      <!-- Each variable is listed here for this ItemGroupDef (domain)  -->
+      <!-- ************************************************************ -->
+      <ItemRef ItemOID="STUDYID"
+        OrderNumber="10"
+        Mandatory="Yes"
+        Role="Identifier"/>
+      <ItemRef ItemOID="DOMAIN"
+        OrderNumber="20"
+        Mandatory="Yes"
+        Role="Identifier"/>
+      <ItemRef ItemOID="USUBJID"
+        OrderNumber="30"
+        Mandatory="Yes"
+        Role="Identifier"/>
+      <ItemRef ItemOID="VS.VSSEQ"
+        OrderNumber="40"
+        Mandatory="Yes"
+        Role="Identifier"/>
+      <ItemRef ItemOID="VS.VSTESTCD"
+        OrderNumber="70"
+        Mandatory="Yes"
+        Role="Topic"/>
+      <ItemRef ItemOID="VS.VSTEST"
+        OrderNumber="80"
+        Mandatory="Yes"
+        Role="Synonym Qualifier"/>
+      <ItemRef ItemOID="VS.VSPOS"
+        OrderNumber="110"
+        Mandatory="Yes"
+        Role="Record Qualifier"/>
+      <ItemRef ItemOID="VS.VSORRES"
+        OrderNumber="120"
+        Mandatory="Yes"
+        Role="Result Qualifier"/>
+      <ItemRef ItemOID="VS.VSORRESU"
+        OrderNumber="130"
+        Mandatory="Yes"
+        Role="Variable Qualifier"/>
+      <ItemRef ItemOID="VS.VSSTRESC"
+        OrderNumber="140"
+        Mandatory="Yes"
+        Role="Result Qualifier"/>
+      <ItemRef ItemOID="VS.VSSTRESN"
+        OrderNumber="150"
+        Mandatory="Yes"
+        Role="Result Qualifier"/>
+      <ItemRef ItemOID="VS.VSSTRESU"
+        OrderNumber="160"
+        Mandatory="Yes"
+        Role="Variable Qualifier"/>
+      <ItemRef ItemOID="VS.VSSTAT"
+        OrderNumber="170"
+        Mandatory="Yes"
+        Role="Result Qualifier"/>
+      <ItemRef ItemOID="VS.VSLOC"
+        OrderNumber="200"
+        Mandatory="Yes"
+        Role="Record Qualifier"/>
+      <ItemRef ItemOID="VS.VISITNUM"
+        OrderNumber="230"
+        Mandatory="Yes"
+        Role="Timing"/>
+      <ItemRef ItemOID="VS.VISIT"
+        OrderNumber="240"
+        Mandatory="Yes"
+        Role="Timing"/>
+      <ItemRef ItemOID="VS.VSDTC"
+        OrderNumber="260"
+        Mandatory="Yes"
+        Role="Timing"/>
+      <ItemRef ItemOID="VS.VSDY"
+        OrderNumber="270"
+        Mandatory="Yes"
+        Role="Timing"/>
+      <!-- ************************************************************** -->
+      <!-- def:leaf details for hypertext linking the dataset             -->
+      <!-- ************************************************************** -->
+      <def:leaf ID="Location.VS" xlink:href="vs.xpt">
+        <def:title>crt/datasets/1234/vs.xpt </def:title>
+      </def:leaf>
+    </ItemGroupDef>
+    <ItemGroupDef OID="CO"
+      Name="CO"
+      Repeating="Yes"
+      IsReferenceData="No"
+      Purpose="Tabulation"
+      def:Label="Comments"
+      def:Structure="One record per comment per subject"
+      def:DomainKeys="STUDYID, COSEQ"
+      def:Class="Special Purpose"
+      def:ArchiveLocationID="Location.CO">
+      <!-- ************************************************************ -->
+      <!-- Each variable is listed here for this ItemGroupDef (domain)  -->
+      <!-- ************************************************************ -->
+      <ItemRef ItemOID="STUDYID"
+        OrderNumber="1"
+        Mandatory="Yes"
+        Role="Identifier"/>
+      <ItemRef ItemOID="DOMAIN"
+        OrderNumber="2"
+        Mandatory="Yes"
+        Role="Identifier"/>
+      <ItemRef ItemOID="RDOMAIN"
+        OrderNumber="3"
+        Mandatory="Yes"
+        Role="Identifier"/>
+      <ItemRef ItemOID="USUBJID"
+        OrderNumber="4"
+        Mandatory="Yes"
+        Role="Identifier"/>
+      <ItemRef ItemOID="CO.COSEQ"
+        OrderNumber="5"
+        Mandatory="Yes"
+        Role="Identifier"/>
+      <ItemRef ItemOID="CO.IDVAR"
+        OrderNumber="6"
+        Mandatory="Yes"
+        Role="Identifier"/>
+      <ItemRef ItemOID="CO.IDVARVAL"
+        OrderNumber="7"
+        Mandatory="Yes"
+        Role="Identifier"/>
+      <ItemRef ItemOID="CO.COREF"
+        OrderNumber="8"
+        Mandatory="Yes"
+        Role="Record Qualifier"/>
+      <ItemRef ItemOID="CO.CODTC"
+        OrderNumber="9"
+        Mandatory="Yes"
+        Role="Timing"/>
+      <ItemRef ItemOID="CO.COVAL"
+        OrderNumber="10"
+        Mandatory="Yes"
+        Role="Result Qualifier"/>
+      <ItemRef ItemOID="CO.COEVAL"
+        OrderNumber="11"
+        Mandatory="Yes"
+        Role="Record Qualifier"/>
+      <!-- ************************************************************** -->
+      <!-- def:leaf details for hypertext linking the dataset             -->
+      <!-- ************************************************************** -->
+      <def:leaf ID="Location.CO" xlink:href="co.xpt">
+        <def:title>crt/datasets/1234/co.xpt </def:title>
+      </def:leaf>
+    </ItemGroupDef>
+    <!-- ************************************************************ -->
+    <!-- The details of each variable is here for all domains         -->
+    <!-- ************************************************************ -->
+    <ItemDef OID="AE.AEACN"
+      Name="AEACN"
+      DataType="text"
+      Length="26"       Origin="CRF Page 19"       Comment="Adverse Events CRF Page 16"
+      def:Label="ACTION TAKEN WITH STUDY TREATMENT">
+    </ItemDef>
+    <ItemDef OID="AE.AEACNOTH"
+      Name="AEACNOTH"
+      DataType="text"
+      Length="200"       Origin="CRF Page"       Comment="Adverse Events CRF Page 16"
+      def:Label="OTHER ACTION TAKEN">
+    </ItemDef>
+    <ItemDef OID="AE.AEBODSYS"
+      Name="AEBODSYS"
+      DataType="text"
+      Length="50"       Origin="DERIVED"       Comment="Body system text"
+      def:Label="BODY SYSTEM OR ORGAN CLASS">
+    </ItemDef>
+    <ItemDef OID="AE.AEDECOD"
+      Name="AEDECOD"
+      DataType="text"
+      Length="50"       Origin="DERIVED"       Comment="Preferred text (COSTART dictionary)"
+      def:Label="DICTIONARY-DERIVED TERM">
+    </ItemDef>
+    <ItemDef OID="AE.AEENDTC"
+      Name="AEENDTC"
+      DataType="date"
+      Length="26"       Origin="CRF Page"       Comment="Adverse Events CRF Page 16"
+      def:Label="END DATE/TIME OF ADVERSE EVENT">
+    </ItemDef>
+    <ItemDef OID="AE.AEENDY"
+      Name="AEENDY"
+      DataType="integer"
+      Length="8"       Origin="DERIVED"       Comment="Event to day - relative to study baseline/first active day."
+      def:Label="STUDY DAY OF END OF EVENT">
+    </ItemDef>
+    <ItemDef OID="AE.AEOUT"
+      Name="AEOUT"
+      DataType="text"
+      Length="13"       Origin="CRF Page"       Comment="Adverse Events CRF Page 16"
+      def:Label="OUTCOME OF ADVERSE EVENT">
+    </ItemDef>
+    <ItemDef OID="AE.AEREL"
+      Name="AEREL"
+      DataType="text"
+      Length="200"       Origin="CRF Page"       Comment="Adverse Events CRF Page 16"
+      def:Label="CAUSALITY">
+    </ItemDef>
+    <ItemDef OID="AE.AERELNST"
+      Name="AERELNST"
+      DataType="text"
+      Length="200"       Origin="CRF Page"       Comment="Adverse Events CRF Page 16"
+      def:Label="RELATIONSHIP TO NON-STUDY TREATMENT">
+    </ItemDef>
+    <ItemDef OID="AE.AESEQ"
+      Name="AESEQ"
+      DataType="integer"
+      Length="8"       Origin="CRF Page"       Comment="SEQUENCE NUMBER"
+      def:Label="SEQUENCE NUMBER">
+    </ItemDef>
+    <ItemDef OID="AE.AESER"
+      Name="AESER"
+      DataType="text"
+      Length="1"       Origin="CRF Page"       Comment="Adverse Events CRF Page 16"
+      def:Label="SERIOUS EVENT">
+    </ItemDef>
+    <ItemDef OID="AE.AESEV"
+      Name="AESEV"
+      DataType="text"
+      Length="8"       Origin="CRF Page"       Comment="Adverse Events CRF Page 16"
+      def:Label="SEVERITY/INTENSITY">
+    </ItemDef>
+    <ItemDef OID="AE.AESPID"
+      Name="AESPID"
+      DataType="text"
+      Length="8"       Origin="DERIVED"       Comment="SPONSOR ID"
+      def:Label="SPONSOR ID">
+    </ItemDef>
+    <ItemDef OID="AE.AESTDTC"
+      Name="AESTDTC"
+      DataType="date"
+      Length="26"       Origin="CRF Page"       Comment="Adverse Events CRF Page 16"
+      def:Label="START DATE/TIME OF ADVERSE EVENT">
+    </ItemDef>
+    <ItemDef OID="AE.AESTDY"
+      Name="AESTDY"
+      DataType="integer"
+      Length="8"       Origin="DERIVED"       Comment="Event from day - relative to study baseline/first active day"
+      def:Label="STUDY DAY OF START OF EVENT">
+    </ItemDef>
+    <ItemDef OID="AE.AETERM"
+      Name="AETERM"
+      DataType="text"
+      Length="100"       Origin="CRF Page"       Comment="Adverse Events CRF Page 16"
+      def:Label="REPORTED TERM FOR THE ADVERSE EVENT">
+    </ItemDef>
+    <ItemDef OID="DOMAIN"
+      Name="DOMAIN"
+      DataType="text"
+      Length="2"       Origin="CRF Page"       Comment="DOMAIN ABBREVIATION"
+      def:Label="DOMAIN ABBREVIATION">
+    </ItemDef>
+    <ItemDef OID="STUDYID"
+      Name="STUDYID"
+      DataType="text"
+      Length="8"       Origin="CRF Page"       Comment="Demographics CRF Page 4"
+      def:Label="STUDY IDENTIFIER">
+    </ItemDef>
+    <ItemDef OID="SUBJID"
+      Name="SUBJID"
+      DataType="text"
+      Length="60"       Origin="CRF Page"       Comment="Demographics CRF Page 4"
+      def:Label="SUBJECT IDENTIFIER">
+    </ItemDef>
+    <ItemDef OID="USUBJID"
+      Name="USUBJID"
+      DataType="text"
+      Length="60"       Origin="CRF Page"       Comment="Demographics CRF Page 4"
+      def:Label="UNIQUE SUBJECT IDENTIFIER">
+    </ItemDef>
+    <ItemDef OID="CM.CMCAT"
+      Name="CMCAT"
+      DataType="text"
+      Length="14"       Origin="CRF Page"       Comment="CATEGORY FOR MEDICATION"
+      def:Label="CATEGORY FOR MEDICATION">
+    </ItemDef>
+    <ItemDef OID="CM.CMDECOD"
+      Name="CMDECOD"
+      DataType="text"
+      Length="50"       Origin="DERIVED"       Comment="STANDARDIZED MEDICATION NAME"
+      def:Label="STANDARDIZED MEDICATION NAME">
+    </ItemDef>
+    <ItemDef OID="CM.CMDOSTOT"
+      Name="CMDOSTOT"
+      DataType="integer"
+      Length="8"       Origin="DERIVED"       Comment="TOTAL DAILY DOSE USING CMDOSU"
+      def:Label="TOTAL DAILY DOSE USING CMDOSU">
+    </ItemDef>
+    <ItemDef OID="CM.CMDOSU"
+      Name="CMDOSU"
+      DataType="text"
+      Length="34"       Origin="DERIVED"       Comment="DOSE UNITS"
+      def:Label="DOSE UNITS">
+    </ItemDef>
+    <ItemDef OID="CM.CMENDTC"
+      Name="CMENDTC"
+      DataType="date"
+      Length="29"       Origin="CRF Page"       Comment="Concomitant Medication CRF Page 10, Concomitant Medication CRF Page 35"
+      def:Label="END DATE/TIME OF MEDICATION">
+    </ItemDef>
+    <ItemDef OID="CM.CMENDY"
+      Name="CMENDY"
+      DataType="integer"
+      Length="8"       Origin="DERIVED"       Comment="Study day of end of medication"
+      def:Label="STUDY DAY OF END OF MEDICATION">
+    </ItemDef>
+    <ItemDef OID="CM.CMSCAT"
+      Name="CMSCAT"
+      DataType="text"
+      Length="50"       Origin="DERIVED"       Comment="SUBCATEGORY FOR MEDICATION"
+      def:Label="SUBCATEGORY FOR MEDICATION">
+    </ItemDef>
+    <ItemDef OID="CM.CMSEQ"
+      Name="CMSEQ"
+      DataType="integer"
+      Length="8"       Origin="CRF Page"       Comment="SEQUENCE NUMBER"
+      def:Label="SEQUENCE NUMBER">
+    </ItemDef>
+    <ItemDef OID="CM.CMSTDTC"
+      Name="CMSTDTC"
+      DataType="date"
+      Length="29"       Origin="CRF Page"       Comment="Concomitant Medication CRF Page 10, Concomitant Medication CRF Page 35"
+      def:Label="START DATE/TIME OF MEDICATION">
+    </ItemDef>
+    <ItemDef OID="CM.CMSTDY"
+      Name="CMSTDY"
+      DataType="integer"
+      Length="8"       Origin="DERIVED"       Comment="Study day of start of medication"
+      def:Label="STUDY DAY OF START OF MEDICATION">
+    </ItemDef>
+    <ItemDef OID="CM.CMTRT"
+      Name="CMTRT"
+      DataType="text"
+      Length="200"       Origin="CRF Page"       Comment="Concomitant Medication CRF Page 10, Concomitant Medication CRF Page 35"
+      def:Label="REPORTED NAME OF DRUG, MED, OR THERAPY">
+    </ItemDef>
+    <ItemDef OID="CO.CODTC"
+      Name="CODTC"
+      DataType="text"
+      Length="19"       Origin="DERIVED"       Comment="Date/Time of Comment"
+      def:Label="DATE/TIME OF COMMENT">
+    </ItemDef>
+    <ItemDef OID="CO.COEVAL"
+      Name="COEVAL"
+      DataType="text"
+      Length="1"       Origin="CRF Page"       Comment="EVALUATOR, USED TO DESCRIBE THE ORIGINATOR OF THE COMMENT"
+      def:Label="EVALUATOR">
+    </ItemDef>
+    <ItemDef OID="CO.COREF"
+      Name="COREF"
+      DataType="text"
+      Length="1"       Origin="CRF Page"       Comment="COMMENT REFERENCE"
+      def:Label="COMMENT REFERENCE">
+    </ItemDef>
+    <ItemDef OID="CO.COSEQ"
+      Name="COSEQ"
+      DataType="integer"
+      Length="8"       Origin="CRF Page"       Comment="SEQUENCE NUMBER"
+      def:Label="SEQUENCE NUMBER">
+    </ItemDef>
+    <ItemDef OID="CO.COVAL"
+      Name="COVAL"
+      DataType="text"
+      Length="200"       Origin="CRF Page"       Comment="Comment"
+      def:Label="COMMENT">
+    </ItemDef>
+    <ItemDef OID="CO.IDVAR"
+      Name="IDVAR"
+      DataType="text"
+      Length="8"       Origin="CRF Page"       Comment="IDENTIFIER VARIABLE"
+      def:Label="IDENTIFIER VARIABLE NAME">
+    </ItemDef>
+    <ItemDef OID="CO.IDVARVAL"
+      Name="IDVARVAL"
+      DataType="text"
+      Length="8"       Origin="CRF Page"       Comment="IDENTIFIER VARIABLE VALUE"
+      def:Label="IDENTIFIER VARIABLE VALUE">
+    </ItemDef>
+    <ItemDef OID="RDOMAIN"
+      Name="RDOMAIN"
+      DataType="text"
+      Length="2"       Origin="CRF Page"       Comment="RELATED DOMAIN ABBREVIATION"
+      def:Label="RELATED DOMAIN ABBREVIATION">
+    </ItemDef>
+    <ItemDef OID="DM.AGE"
+      Name="AGE"
+      DataType="integer"
+      Length="8"       Origin="DERIVED"       Comment="AGE IN AGEU AT REFERENCE DATE/TIME"
+      def:Label="AGE IN AGEU AT REFERENCE DATE/TIME">
+    </ItemDef>
+    <ItemDef OID="DM.AGEU"
+      Name="AGEU"
+      DataType="text"
+      Length="13"       Origin="DERIVED"       Comment="AGE UNITS"
+      def:Label="AGE UNITS">
+    </ItemDef>
+    <ItemDef OID="DM.ARM"
+      Name="ARM"
+      DataType="text"
+      Length="80"       Origin="DERIVED"       Comment="DESCRIPTION OF PLANNED ARM"
+      def:Label="DESCRIPTION OF ARM">
+    </ItemDef>
+    <ItemDef OID="DM.ARMCD"
+      Name="ARMCD"
+      DataType="text"
+      Length="80"       Origin="DERIVED"       Comment="PLANNED ARM CODE"
+      def:Label="ARM CODE">
+    </ItemDef>
+    <ItemDef OID="DM.BRTHDTC"
+      Name="BRTHDTC"
+      DataType="date"
+      Length="26"       Origin="CRF Page"       Comment="Demographics CRF Page 4"
+      def:Label="DATE/TIME OF BIRTH">
+    </ItemDef>
+    <ItemDef OID="DM.COUNTRY"
+      Name="COUNTRY"
+      DataType="text"
+      Length="80"       Origin="CRF Page"       Comment="COUNTRY"
+      def:Label="COUNTRY">
+    </ItemDef>
+    <ItemDef OID="DM.DMDTC"
+      Name="DMDTC"
+      DataType="date"
+      Length="26"       Origin="CRF Page"       Comment="Demographics CRF Page 4"
+      def:Label="DATE/TIME OF COLLECTION">
+    </ItemDef>
+    <ItemDef OID="DM.DMDY"
+      Name="DMDY"
+      DataType="integer"
+      Length="8"       Origin="DERIVED"       Comment="STUDY DAY OF COLLECTION"
+      def:Label="STUDY DAY OF COLLECTION">
+    </ItemDef>
+    <ItemDef OID="DM.INVID"
+      Name="INVID"
+      DataType="text"
+      Length="20"       Origin="CRF Page"       Comment="Demographics CRF Page 4"
+      def:Label="INVESTIGATOR IDENTIFIER">
+    </ItemDef>
+    <ItemDef OID="DM.RACE"
+      Name="RACE"
+      DataType="text"
+      Length="8"       Origin="CRF Page"       Comment="Demographics CRF Page 4"
+      def:Label="RACE">
+    </ItemDef>
+    <ItemDef OID="DM.RFENDTC"
+      Name="RFENDTC"
+      DataType="date"
+      Length="26"       Origin="CRF Page"       Comment="SUBJECT REFERENCE START DATE/TIME"
+      def:Label="SUBJECT REFERENCE END DATE/TIME">
+    </ItemDef>
+    <ItemDef OID="DM.RFSTDTC"
+      Name="RFSTDTC"
+      DataType="date"
+      Length="26"       Origin="CRF Page"       Comment="SUBJECT REFERENCE END DATE/TIME"
+      def:Label="SUBJECT REFERENCE START DATE/TIME">
+    </ItemDef>
+    <ItemDef OID="DM.SEX"
+      Name="SEX"
+      DataType="text"
+      Length="80"       Origin="CRF Page"       Comment="Demographics CRF Page 4"
+      def:Label="SEX">
+    </ItemDef>
+    <ItemDef OID="DM.SITEID"
+      Name="SITEID"
+      DataType="text"
+      Length="161"       Origin="CRF Page"       Comment="Demographics CRF Page 4"
+      def:Label="STUDY SITE IDENTIFIER">
+    </ItemDef>
+    <ItemDef OID="DS.DSCAT"
+      Name="DSCAT"
+      DataType="text"
+      Length="20"       Origin="CRF Page"       Comment="CATEGORY OF DISPOSITION EVENT"
+      def:Label="CATEGORY FOR DISPOSITION EVENT">
+    </ItemDef>
+    <ItemDef OID="DS.DSDECOD"
+      Name="DSDECOD"
+      DataType="text"
+      Length="200"       Origin="CRF Page"       Comment="Disposition CRF Page 37"
+      def:Label="CONTROLLED TERMINOLOGY FOR DSTERM">
+    </ItemDef>
+    <ItemDef OID="DS.DSDTC"
+      Name="DSDTC"
+      DataType="date"
+      Length="26"       Origin="CRF Page"       Comment="Disposition CRF Page 4, Disposition CRF Page 37"
+      def:Label="DATE/TIME OF COLLECTION">
+    </ItemDef>
+    <ItemDef OID="DS.DSREFID"
+      Name="DSREFID"
+      DataType="text"
+      Length="8"       Origin="DERIVED"       Comment="REFERENCE ID"
+      def:Label="REFERENCE ID">
+    </ItemDef>
+    <ItemDef OID="DS.DSSEQ"
+      Name="DSSEQ"
+      DataType="integer"
+      Length="8"       Origin="CRF Page"       Comment="SEQUENCE NUMBER"
+      def:Label="SEQUENCE NUMBER">
+    </ItemDef>
+    <ItemDef OID="DS.DSSTDTC"
+      Name="DSSTDTC"
+      DataType="date"
+      Length="26"       Origin="CRF Page"       Comment="Disposition CRF Page 37"
+      def:Label="START DATE/TIME OF DISPOSITION EVENT">
+    </ItemDef>
+    <ItemDef OID="DS.DSTERM"
+      Name="DSTERM"
+      DataType="text"
+      Length="200"       Origin="CRF Page"       Comment="Disposition CRF Page 4, Disposition CRF Page 37"
+      def:Label="REPORTED TERM FOR THE DISPOSITION EVENT">
+    </ItemDef>
+    <ItemDef OID="DS.EPOCH"
+      Name="EPOCH"
+      DataType="text"
+      Length="30"       Origin="DERIVED"       Comment="TRIAL EPOCH"
+      def:Label="TRIAL EPOCH">
+    </ItemDef>
+    <ItemDef OID="EG.EGBLFL"
+      Name="EGBLFL"
+      DataType="text"
+      Length="1"       Origin="CRF Page"       Comment="BASELINE FLAG"
+      def:Label="BASELINE FLAG">
+    </ItemDef>
+    <ItemDef OID="EG.EGCAT"
+      Name="EGCAT"
+      DataType="text"
+      Length="11"       Origin="CRF Page"       Comment="CATEGORY FOR ECG"
+      def:Label="CATEGORY FOR ECG">
+    </ItemDef>
+    <ItemDef OID="EG.EGDTC"
+      Name="EGDTC"
+      DataType="date"
+      Length="26"       Origin="CRF Page"       Comment="ECG Test Results Page 14"
+      def:Label="DATE/TIME OF ECG">
+    </ItemDef>
+    <ItemDef OID="EG.EGDY"
+      Name="EGDY"
+      DataType="integer"
+      Length="8"       Origin="DERIVED"       Comment="STUDY DAY OF ECG"
+      def:Label="STUDY DAY OF ECG">
+    </ItemDef>
+    <ItemDef OID="EG.EGEVAL"
+      Name="EGEVAL"
+      DataType="text"
+      Length="1"       Origin="CRF Page"       Comment="EVALUATOR"
+      def:Label="EVALUATOR">
+    </ItemDef>
+    <ItemDef OID="EG.EGORRES"
+      Name="EGORRES"
+      DataType="text"
+      Length="25"       Origin="CRF Page"       Comment="RESULT OR FINDING IN ORIGINAL UNITS"
+      def:Label="RESULT OR FINDING IN ORIGINAL UNITS">
+    </ItemDef>
+    <ItemDef OID="EG.EGORRESU"
+      Name="EGORRESU"
+      DataType="text"
+      Length="25"       Origin="CRF Page"       Comment="ORIGINAL UNITS"
+      def:Label="ORIGINAL UNITS">
+    </ItemDef>
+    <ItemDef OID="EG.EGPOS"
+      Name="EGPOS"
+      DataType="text"
+      Length="6"       Origin="CRF Page"       Comment="ECG POSITION OF SUBJECT"
+      def:Label="ECG POSITION OF SUBJECT">
+    </ItemDef>
+    <ItemDef OID="EG.EGSEQ"
+      Name="EGSEQ"
+      DataType="integer"
+      Length="8"       Origin="CRF Page"       Comment="SEQUENCE NUMBER"
+      def:Label="SEQUENCE NUMBER">
+    </ItemDef>
+    <ItemDef OID="EG.EGSPID"
+      Name="EGSPID"
+      DataType="text"
+      Length="8"       Origin="DERIVED"       Comment="SPONSOR ID"
+      def:Label="SPONSOR ID">
+    </ItemDef>
+    <ItemDef OID="EG.EGSTRESC"
+      Name="EGSTRESC"
+      DataType="text"
+      Length="20"       Origin="CRF Page"       Comment="CHARACTER RESULT/FINDING IN STD FORMAT"
+      def:Label="CHARACTER RESULT/FINDING IN STD FORMAT">
+    </ItemDef>
+    <ItemDef OID="EG.EGSTRESN"
+      Name="EGSTRESN"
+      DataType="integer"
+      Length="8"       Origin="CRF Page"       Comment="NUMERIC RESULT/FINDING IN STANDARD UNITS"
+      def:Label="NUMERIC RESULT/FINDING IN STANDARD UNITS">
+    </ItemDef>
+    <ItemDef OID="EG.EGSTRESU"
+      Name="EGSTRESU"
+      DataType="text"
+      Length="25"       Origin="CRF Page"       Comment="Default units."
+      def:Label="STANDARD UNITS">
+    </ItemDef>
+    <ItemDef OID="EG.EGTEST"
+      Name="EGTEST"
+      DataType="text"
+      Length="40"       Origin="CRF Page"       Comment="ECG TEST OR EXAMINATION NAME"
+      def:Label="ECG TEST OR EXAMINATION NAME">
+    </ItemDef>
+    <ItemDef OID="EG.EGTESTCD"
+      Name="EGTESTCD"
+      DataType="text"
+      Length="8"       Origin="CRF Page"       Comment="ECG TEST OR EXAMINATION SHORT NAME"
+      def:Label="ECG TEST OR EXAMINATION SHORT NAME">
+    </ItemDef>
+    <ItemDef OID="EG.VISIT"
+      Name="VISIT"
+      DataType="text"
+      Length="20"       Origin="CRF Page"       Comment="VISIT NAME"
+      def:Label="VISIT NAME">
+    </ItemDef>
+    <ItemDef OID="EG.VISITNUM"
+      Name="VISITNUM"
+      DataType="integer"
+      Length="8"       Origin="DERIVED"       Comment="Clinical encounter number."
+      def:Label="VISIT NUMBER">
+    </ItemDef>
+    <ItemDef OID="EX.EXCAT"
+      Name="EXCAT"
+      DataType="text"
+      Length="30"       Origin="CRF Page"       Comment="CATEGORY FOR TREATMENT"
+      def:Label="CATEGORY FOR TREATMENT">
+    </ItemDef>
+    <ItemDef OID="EX.EXDOSE"
+      Name="EXDOSE"
+      DataType="float"
+      Length="8"       SignificantDigits="3"       Origin="CRF Page"       Comment="DOSE PER ADMINISTRATION"
+      def:Label="DOSE PER ADMINISTRATION">
+    </ItemDef>
+    <ItemDef OID="EX.EXDOSTOT"
+      Name="EXDOSTOT"
+      DataType="float"
+      Length="8"       SignificantDigits="3"       Origin="CRF Page"       Comment="TOTAL DAILY DOSE USING EXDOSU"
+      def:Label="TOTAL DAILY DOSE USING EXDOSU">
+    </ItemDef>
+    <ItemDef OID="EX.EXDOSTXT"
+      Name="EXDOSTXT"
+      DataType="text"
+      Length="80"       Origin="CRF Page"       Comment="DOSE DESCRIPTION"
+      def:Label="DOSE DESCRIPTION">
+    </ItemDef>
+    <ItemDef OID="EX.EXDOSU"
+      Name="EXDOSU"
+      DataType="text"
+      Length="2"       Origin="CRF Page"       Comment="DOSE UNITS"
+      def:Label="DOSE UNITS">
+    </ItemDef>
+    <ItemDef OID="EX.EXENDTC"
+      Name="EXENDTC"
+      DataType="date"
+      Length="26"       Origin="CRF Page"       Comment="Exposure CRF Page 11"
+      def:Label="END DATE/TIME OF TREATMENT">
+    </ItemDef>
+    <ItemDef OID="EX.EXROUTE"
+      Name="EXROUTE"
+      DataType="text"
+      Length="80"       Origin="CRF Page"       Comment="ROUTE OF ADMINISTRATION"
+      def:Label="ROUTE OF ADMINISTRATION">
+    </ItemDef>
+    <ItemDef OID="EX.EXSEQ"
+      Name="EXSEQ"
+      DataType="integer"
+      Length="8"       Origin="DERIVED"       Comment="SEQUENCE NUMBER"
+      def:Label="SEQUENCE NUMBER">
+    </ItemDef>
+    <ItemDef OID="EX.EXSTDTC"
+      Name="EXSTDTC"
+      DataType="date"
+      Length="26"       Origin="CRF Page"       Comment="Exposure CRF Page 11"
+      def:Label="START DATE/TIME OF TREATMENT">
+    </ItemDef>
+    <ItemDef OID="EX.EXTRT"
+      Name="EXTRT"
+      DataType="text"
+      Length="80"       Origin="CRF Page"       Comment="NAME OF ACTUAL TREATMENT"
+      def:Label="NAME OF ACTUAL TREATMENT">
+    </ItemDef>
+    <ItemDef OID="IE.IECAT"
+      Name="IECAT"
+      DataType="text"
+      Length="9"       Origin="CRF Page"       Comment="CATEGORY OF DISPOSITION EVENT"
+      def:Label="CATEGORY FOR EXCEPTION CRITERION">
+    </ItemDef>
+    <ItemDef OID="IE.IEDTC"
+      Name="IEDTC"
+      DataType="date"
+      Length="26"       Origin="CRF Page"       Comment="Inclusion/Exclusion Exceptions CRF Page 2, Inclusion/Exclusion Exceptions CRF Page 3"
+      def:Label="DATE/TIME OF COLLECTION">
+    </ItemDef>
+    <ItemDef OID="IE.IEORRES"
+      Name="IEORRES"
+      DataType="text"
+      Length="3"       Origin="CRF Page"       Comment="Inclusion/Exclusion Exceptions CRF Page 2, Inclusion/Exclusion Exceptions CRF Page 3"
+      def:Label="CRITERION MET">
+    </ItemDef>
+    <ItemDef OID="IE.IESEQ"
+      Name="IESEQ"
+      DataType="integer"
+      Length="8"       Origin="CRF Page"       Comment="SEQUENCE NUMBER"
+      def:Label="SEQUENCE NUMBER">
+    </ItemDef>
+    <ItemDef OID="IE.IESTRESC"
+      Name="IESTRESC"
+      DataType="text"
+      Length="3"       Origin="CRF Page"       Comment="Character result/finding in std format"
+      def:Label="CHARACTER RESULT/FINDING IN STD FORMAT">
+    </ItemDef>
+    <ItemDef OID="IE.IETEST"
+      Name="IETEST"
+      DataType="text"
+      Length="200"       Origin="CRF Page"       Comment="Inclusion/Exclusion Exceptions CRF Page 2, Inclusion/Exclusion Exceptions CRF Page 3"
+      def:Label="EXCEPTION CRITERION">
+    </ItemDef>
+    <ItemDef OID="IE.IETESTCD"
+      Name="IETESTCD"
+      DataType="text"
+      Length="8"       Origin="CRF Page"       Comment="Inclusion/Exclusion Exceptions CRF Page 2, Inclusion/Exclusion Exceptions CRF Page 3"
+      def:Label="EXCEPTION CRITERION SHORT NAME">
+    </ItemDef>
+    <ItemDef OID="IE.VISIT"
+      Name="VISIT"
+      DataType="text"
+      Length="20"       Origin="CRF Page"       Comment="VISIT NAME"
+      def:Label="VISIT NAME">
+    </ItemDef>
+    <ItemDef OID="IE.VISITNUM"
+      Name="VISITNUM"
+      DataType="integer"
+      Length="8"       Origin="DERIVED"       Comment="Clinical encounter number."
+      def:Label="VISIT NUMBER">
+    </ItemDef>
+    <ItemDef OID="LB.LBBLFL"
+      Name="LBBLFL"
+      DataType="text"
+      Length="1"       Origin="DERIVED"       Comment="BASELINE FLAG"
+      def:Label="BASELINE FLAG">
+    </ItemDef>
+    <ItemDef OID="LB.LBCAT"
+      Name="LBCAT"
+      DataType="text"
+      Length="30"       Origin="DERIVED"       Comment="CATEGORY FOR LAB TEST"
+      def:Label="CATEGORY FOR LAB TEST">
+    </ItemDef>
+    <ItemDef OID="LB.LBDTC"
+      Name="LBDTC"
+      DataType="date"
+      Length="26"       Origin="CRF Page"       Comment="Laboratory Tests CRF Page 9, Laboratory Tests CRF Page 11"
+      def:Label="DATE/TIME OF SPECIMEN COLLECTION">
+    </ItemDef>
+    <ItemDef OID="LB.LBDY"
+      Name="LBDY"
+      DataType="integer"
+      Length="8"       Origin="DERIVED"       Comment="STUDY DAY OF SPECIMEN COLLECTION"
+      def:Label="STUDY DAY OF SPECIMEN COLLECTION">
+    </ItemDef>
+    <ItemDef OID="LB.LBNRIND"
+      Name="LBNRIND"
+      DataType="text"
+      Length="1"       Origin="DERIVED"       Comment="REFERENCE RANGE INDICATOR"
+      def:Label="REFERENCE RANGE INDICATOR">
+    </ItemDef>
+    <ItemDef OID="LB.LBORNRHI"
+      Name="LBORNRHI"
+      DataType="text"
+      Length="8"       Origin="DERIVED"       Comment="NORMAL RANGE UPPER LIMIT IN ORIG UNITS"
+      def:Label="NORMAL RANGE UPPER LIMIT IN ORIG UNITS">
+    </ItemDef>
+    <ItemDef OID="LB.LBORNRLO"
+      Name="LBORNRLO"
+      DataType="text"
+      Length="8"       Origin="DERIVED"       Comment="NORMAL RANGE LOWER LIMIT IN ORIG UNITS"
+      def:Label="NORMAL RANGE LOWER LIMIT IN ORIG UNITS">
+    </ItemDef>
+    <ItemDef OID="LB.LBORRES"
+      Name="LBORRES"
+      DataType="text"
+      Length="80"       Origin="CRF Page"       Comment="RESULT OR FINDING IN ORIGINAL UNITS"
+      def:Label="RESULT OR FINDING IN ORIGINAL UNITS">
+    </ItemDef>
+    <ItemDef OID="LB.LBORRESU"
+      Name="LBORRESU"
+      DataType="text"
+      Length="30"       Origin="CRF Page"       Comment="ORIGINAL UNITS"
+      def:Label="ORIGINAL UNITS">
+    </ItemDef>
+    <ItemDef OID="LB.LBSEQ"
+      Name="LBSEQ"
+      DataType="integer"
+      Length="8"       Origin="DERIVED"       Comment="SEQUENCE NUMBER"
+      def:Label="SEQUENCE NUMBER">
+    </ItemDef>
+    <ItemDef OID="LB.LBSPID"
+      Name="LBSPID"
+      DataType="text"
+      Length="8"       Origin="DERIVED"       Comment="SPONSOR ID"
+      def:Label="SPONSOR ID">
+    </ItemDef>
+    <ItemDef OID="LB.LBSTNRHI"
+      Name="LBSTNRHI"
+      DataType="float"
+      Length="8"       SignificantDigits="2"       Origin="DERIVED"       Comment="NORMAL RANGE UPPER LIMIT IN STANDARD UNI"
+      def:Label="NORMAL RANGE UPPER LIMIT-STANDARD UNITS">
+    </ItemDef>
+    <ItemDef OID="LB.LBSTNRLO"
+      Name="LBSTNRLO"
+      DataType="float"
+      Length="8"       SignificantDigits="3"       Origin="DERIVED"       Comment="NORMAL RANGE LOWER LIMIT IN STANDARD UNI"
+      def:Label="NORMAL RANGE LOWER LIMIT-STANDARD UNITS">
+    </ItemDef>
+    <ItemDef OID="LB.LBSTRESC"
+      Name="LBSTRESC"
+      DataType="text"
+      Length="8"       Origin="DERIVED"       Comment="CHARACTER RESULT/FINDING IN STD FORMAT"
+      def:Label="CHARACTER RESULT/FINDING IN STD FORMAT">
+    </ItemDef>
+    <ItemDef OID="LB.LBSTRESN"
+      Name="LBSTRESN"
+      DataType="float"
+      Length="8"       SignificantDigits="4"       Origin="DERIVED"       Comment="NUMERIC RESULT/FINDING IN STANDARD UNITS"
+      def:Label="NUMERIC RESULT/FINDING IN STANDARD UNITS">
+    </ItemDef>
+    <ItemDef OID="LB.LBSTRESU"
+      Name="LBSTRESU"
+      DataType="text"
+      Length="30"       Origin="DERIVED"       Comment="STANDARD UNITS"
+      def:Label="STANDARD UNITS">
+    </ItemDef>
+    <ItemDef OID="LB.LBTEST"
+      Name="LBTEST"
+      DataType="text"
+      Length="50"       Origin="CRF Page"       Comment="LAB TEST OR EXAMINATION NAME"
+      def:Label="LAB TEST OR EXAMINATION NAME">
+    </ItemDef>
+    <ItemDef OID="LB.LBTESTCD"
+      Name="LBTESTCD"
+      DataType="text"
+      Length="8"       Origin="CRF Page"       Comment="SEQUENCE NUMBER"
+      def:Label="LAB TEST OR EXAMINATION SHORT NAME">
+    </ItemDef>
+    <ItemDef OID="LB.VISIT"
+      Name="VISIT"
+      DataType="text"
+      Length="10"       Origin="CRF Page"       Comment="VISIT NAME"
+      def:Label="VISIT NAME">
+    </ItemDef>
+    <ItemDef OID="LB.VISITNUM"
+      Name="VISITNUM"
+      DataType="integer"
+      Length="8"       Origin="DERIVED"       Comment="Clinical encounter number."
+      def:Label="VISIT NUMBER">
+    </ItemDef>
+    <ItemDef OID="MH.MHBODSYS"
+      Name="MHBODSYS"
+      DataType="text"
+      Length="50"       Origin="CRF Page"       Comment="BODY SYSTEM OR ORGAN CLASS"
+      def:Label="BODY SYSTEM OR ORGAN CLASS">
+    </ItemDef>
+    <ItemDef OID="MH.MHCAT"
+      Name="MHCAT"
+      DataType="text"
+      Length="7"       Origin="CRF Page"       Comment="CATEGORY FOR CONDITION OR PROCEDURE"
+      def:Label="CATEGORY FOR MEDICAL HISTORY">
+    </ItemDef>
+    <ItemDef OID="MH.MHDECOD"
+      Name="MHDECOD"
+      DataType="text"
+      Length="50"       Origin="CRF Page"       Comment="DICTIONARY-DERIVED TEXT DESCRIPTION"
+      def:Label="DICTIONARY-DERIVED TERM">
+    </ItemDef>
+    <ItemDef OID="MH.MHDTC"
+      Name="MHDTC"
+      DataType="date"
+      Length="26"       Origin="CRF Page"       Comment="Medical History CRF Page 5"
+      def:Label="DATE/TIME OF HISTORY COLLECTION">
+    </ItemDef>
+    <ItemDef OID="MH.MHENRF"
+      Name="MHENRF"
+      DataType="text"
+      Length="6"       Origin="CRF Page"       Comment="END RELATIVE TO REFERENCE PERIOD"
+      def:Label="END RELATIVE TO REFERENCE PERIOD">
+    </ItemDef>
+    <ItemDef OID="MH.MHGRPID"
+      Name="MHGRPID"
+      DataType="text"
+      Length="15"       Origin="CRF Page"       Comment="GROUP ID"
+      def:Label="GROUP ID">
+    </ItemDef>
+    <ItemDef OID="MH.MHSEQ"
+      Name="MHSEQ"
+      DataType="integer"
+      Length="8"       Origin="CRF Page"       Comment="SEQUENCE NUMBER"
+      def:Label="UNIQUE SEQUENCE NUMBER">
+    </ItemDef>
+    <ItemDef OID="MH.MHSPID"
+      Name="MHSPID"
+      DataType="text"
+      Length="5"       Origin="DERIVED"       Comment="SPONSOR ID"
+      def:Label="SPONSOR ID">
+    </ItemDef>
+    <ItemDef OID="MH.MHSTAT"
+      Name="MHSTAT"
+      DataType="text"
+      Length="25"       Origin="CRF Page"       Comment="Medical History CRF Page 5"
+      def:Label="MEDICAL HISTORY STATUS">
+    </ItemDef>
+    <ItemDef OID="MH.MHSTDTC"
+      Name="MHSTDTC"
+      DataType="text"
+      Length="1"       Origin="CRF Page"       Comment="START DATE/TIME OF MEDICAL HISTORY EVENT"
+      def:Label="START DATE/TIME OF MEDICAL HISTORY EVENT">
+    </ItemDef>
+    <ItemDef OID="MH.MHTERM"
+      Name="MHTERM"
+      DataType="text"
+      Length="80"       Origin="CRF Page"       Comment="Medical History CRF Page 5"
+      def:Label="REPORTED TERM FOR THE MEDICAL HISTORY">
+    </ItemDef>
+    <ItemDef OID="MH.VISITNUM"
+      Name="VISITNUM"
+      DataType="integer"
+      Length="8"       Origin="DERIVED"       Comment="Clinical encounter number."
+      def:Label="VISIT NUMBER">
+    </ItemDef>
+    <ItemDef OID="PE.PEBODSYS"
+      Name="PEBODSYS"
+      DataType="text"
+      Length="80"       Origin="CRF Page"       Comment="BODY SYSTEM OR ORGAN CLASS"
+      def:Label="BODY SYSTEM OR ORGAN CLASS">
+    </ItemDef>
+    <ItemDef OID="PE.PEDTC"
+      Name="PEDTC"
+      DataType="date"
+      Length="26"       Origin="CRF Page"       Comment="Physical Examinations CRF Page 8"
+      def:Label="DATE/TIME OF EXAMINATION">
+    </ItemDef>
+    <ItemDef OID="PE.PEDY"
+      Name="PEDY"
+      DataType="integer"
+      Length="8"       Origin="CRF Page"       Comment="STUDY DAY OF EXAMINATION"
+      def:Label="STUDY DAY OF EXAMINATION">
+    </ItemDef>
+    <ItemDef OID="PE.PEORRES"
+      Name="PEORRES"
+      DataType="text"
+      Length="200"       Origin="CRF Page"       Comment="Physical Examinations CRF Page 8, CRF Page 31"
+      def:Label="VERBATIM EXAMINATION FINDING">
+    </ItemDef>
+    <ItemDef OID="PE.PESEQ"
+      Name="PESEQ"
+      DataType="integer"
+      Length="8"       Origin="CRF Page"       Comment="SEQUENCE NUMBER"
+      def:Label="SEQUENCE NUMBER">
+    </ItemDef>
+    <ItemDef OID="PE.PESTAT"
+      Name="PESTAT"
+      DataType="text"
+      Length="8"       Origin="CRF Page"       Comment="Physical Examinations CRF Page 8"
+      def:Label="EXAMINATION STATUS">
+    </ItemDef>
+    <ItemDef OID="PE.PESTRESC"
+      Name="PESTRESC"
+      DataType="text"
+      Length="200"       Origin="CRF Page"       Comment="CHARACTER RESULT/FINDING IN STD FORMAT"
+      def:Label="CHARACTER RESULT/FINDING IN STD. FORMAT">
+    </ItemDef>
+    <ItemDef OID="PE.PETEST"
+      Name="PETEST"
+      DataType="text"
+      Length="40"       Origin="CRF Page"       Comment="SUBJECT CHARACTERISTIC"
+      def:Label="BODY SYSTEM EXAMINED">
+    </ItemDef>
+    <ItemDef OID="PE.PETESTCD"
+      Name="PETESTCD"
+      DataType="text"
+      Length="8"       Origin="CRF Page"       Comment="Physical Examinations CRF Page 8, CRF Page 31"
+      def:Label="BODY SYSTEM EXAMINED SHORT NAME">
+    </ItemDef>
+    <ItemDef OID="PE.VISIT"
+      Name="VISIT"
+      DataType="text"
+      Length="20"       Origin="CRF Page"       Comment="VISIT NAME"
+      def:Label="VISIT NAME">
+    </ItemDef>
+    <ItemDef OID="PE.VISITNUM"
+      Name="VISITNUM"
+      DataType="integer"
+      Length="8"       Origin="DERIVED"       Comment="Clinical encounter number."
+      def:Label="VISIT NUMBER">
+    </ItemDef>
+    <ItemDef OID="SC.SCCAT"
+      Name="SCCAT"
+      DataType="text"
+      Length="29"       Origin="CRF Page"       Comment="CATEGORY FOR SUBJECT CHARACTERISTIC"
+      def:Label="CATEGORY FOR SUBJECT CHARACTERISTIC">
+    </ItemDef>
+    <ItemDef OID="SC.SCDTC"
+      Name="SCDTC"
+      DataType="date"
+      Length="26"       Origin="CRF Page"       Comment="Subject Characteristics CRF Page 4"
+      def:Label="DATE/TIME OF COLLECTION">
+    </ItemDef>
+    <ItemDef OID="SC.SCORRES"
+      Name="SCORRES"
+      DataType="text"
+      Length="80"       Origin="CRF Page"       Comment="Subject Characteristics CRF Page 4"
+      def:Label="RESULT OR FINDING IN ORIGINAL UNITS">
+    </ItemDef>
+    <ItemDef OID="SC.SCSEQ"
+      Name="SCSEQ"
+      DataType="integer"
+      Length="8"       Origin="CRF Page"       Comment="SEQUENCE NUMBER"
+      def:Label="SEQUENCE NUMBER">
+    </ItemDef>
+    <ItemDef OID="SC.SCSTRESC"
+      Name="SCSTRESC"
+      DataType="text"
+      Length="80"       Origin="CRF Page"       Comment="CHARACTER RESULT/FINDING IN STD FORMAT"
+      def:Label="CHARACTER RESULT/FINDING IN STD FORMAT">
+    </ItemDef>
+    <ItemDef OID="SC.SCSTRESN"
+      Name="SCSTRESN"
+      DataType="integer"
+      Length="8"       Origin="CRF Page"       Comment="NUMERIC RESULT/FINDING IN STANDARD UNITS"
+      def:Label="NUMERIC RESULT/FINDING IN STANDARD UNITS">
+    </ItemDef>
+    <ItemDef OID="SC.SCSTRESU"
+      Name="SCSTRESU"
+      DataType="text"
+      Length="8"       Origin="CRF Page"       Comment="Default units."
+      def:Label="STANDARD UNITS">
+    </ItemDef>
+    <ItemDef OID="SC.SCTEST"
+      Name="SCTEST"
+      DataType="text"
+      Length="40"       Origin="CRF Page"       Comment="SUBJECT CHARACTERISTIC"
+      def:Label="SUBJECT CHARACTERISTIC">
+    </ItemDef>
+    <ItemDef OID="SC.SCTESTCD"
+      Name="SCTESTCD"
+      DataType="text"
+      Length="8"       Origin="CRF Page"       Comment="Subject Characteristics CRF Page 4"
+      def:Label="SUBJECT CHARACTERISTIC SHORT NAME">
+      <def:ValueListRef ValueListOID="ValueList.SC.SCTESTCD"/>
+    </ItemDef>
+    <ItemDef OID="SE.ELEMENT"
+      Name="ELEMENT"
+      DataType="text"
+      Length="200"       Origin="DERIVED"       Comment="The name of the Element."
+      def:Label="DESCRIPTION OF ELEMENT">
+    </ItemDef>
+    <ItemDef OID="SE.ETCD"
+      Name="ETCD"
+      DataType="text"
+      Length="8"       Origin="CRF Page"       Comment="Element Code"
+      def:Label="ELEMENT CODE">
+    </ItemDef>
+    <ItemDef OID="SE.SEENDTC"
+      Name="SEENDTC"
+      DataType="date"
+      Length="26"       Origin="DERIVED"       Comment="End date/time of an Element for each subject."
+      def:Label="END DATE/TIME OF ELEMENT">
+    </ItemDef>
+    <ItemDef OID="SE.SESTDTC"
+      Name="SESTDTC"
+      DataType="date"
+      Length="26"       Origin="DERIVED"       Comment="Start date/time for an Element for each subject."
+      def:Label="START DATE/TIME OF ELEMENT">
+    </ItemDef>
+    <ItemDef OID="SU.SUCAT"
+      Name="SUCAT"
+      DataType="text"
+      Length="7"       Origin="CRF Page"       Comment="CATEGORY FOR SUBSTANCE USE"
+      def:Label="CATEGORY FOR SUBSTANCE USE">
+    </ItemDef>
+    <ItemDef OID="SU.SUDECOD"
+      Name="SUDECOD"
+      DataType="text"
+      Length="7"       Origin="CRF Page"       Comment="STANDARDIZED SUBSTANCE NAME"
+      def:Label="STANDARDIZED SUBSTANCE NAME">
+    </ItemDef>
+    <ItemDef OID="SU.SUDOSE"
+      Name="SUDOSE"
+      DataType="float"
+      Length="8"       SignificantDigits="1"       Origin="CRF Page"       Comment="Substance Use CRF Page 4"
+      def:Label="SUBSTANCE USE CONSUMPTION">
+    </ItemDef>
+    <ItemDef OID="SU.SUDOSFRQ"
+      Name="SUDOSFRQ"
+      DataType="text"
+      Length="5"       Origin="CRF Page"       Comment="USE FREQUENCY PER INTERVAL"
+      def:Label="USE FREQUENCY PER INTERVAL">
+    </ItemDef>
+    <ItemDef OID="SU.SUDOSTXT"
+      Name="SUDOSTXT"
+      DataType="text"
+      Length="12"       Origin="CRF Page"       Comment="Substance Use CRF Page 4"
+      def:Label="SUBSTANCE USE CONSUMPTION TEXT">
+    </ItemDef>
+    <ItemDef OID="SU.SUDOSU"
+      Name="SUDOSU"
+      DataType="text"
+      Length="7"       Origin="CRF Page"       Comment="Default units."
+      def:Label="CONSUMPTION UNITS">
+    </ItemDef>
+    <ItemDef OID="SU.SUGRPID"
+      Name="SUGRPID"
+      DataType="text"
+      Length="13"       Origin="CRF Page"       Comment="GROUP ID"
+      def:Label="GROUP ID">
+    </ItemDef>
+    <ItemDef OID="SU.SUOCCUR"
+      Name="SUOCCUR"
+      DataType="text"
+      Length="1"       Origin="CRF Page"       Comment="SU OCCURRENCE"
+      def:Label="SU OCCURRENCE">
+    </ItemDef>
+    <ItemDef OID="SU.SUROUTE"
+      Name="SUROUTE"
+      DataType="text"
+      Length="15"       Origin="CRF Page"       Comment="ROUTE OF ADMINISTRATION"
+      def:Label="ROUTE OF ADMINISTRATION">
+    </ItemDef>
+    <ItemDef OID="SU.SUSCAT"
+      Name="SUSCAT"
+      DataType="text"
+      Length="40"       Origin="CRF Page"       Comment="SUBCATEGORY FOR SUBSTANCE USE"
+      def:Label="SUBCATEGORY FOR SUBSTANCE USE">
+    </ItemDef>
+    <ItemDef OID="SU.SUSEQ"
+      Name="SUSEQ"
+      DataType="integer"
+      Length="8"       Origin="CRF Page"       Comment="SEQUENCE NUMBER"
+      def:Label="SEQUENCE NUMBER">
+    </ItemDef>
+    <ItemDef OID="SU.SUSTAT"
+      Name="SUSTAT"
+      DataType="text"
+      Length="8"       Origin="CRF Page"       Comment="SUBSTANCE USE STATUS"
+      def:Label="SUBSTANCE USE STATUS">
+    </ItemDef>
+    <ItemDef OID="SU.SUTRT"
+      Name="SUTRT"
+      DataType="text"
+      Length="12"       Origin="CRF Page"       Comment="Substance Use CRF Page 4"
+      def:Label="NAME OF SUBSTANCE">
+      <def:ValueListRef ValueListOID="ValueList.SU.SUTRT"/>
+    </ItemDef>
+    <ItemDef OID="SU.VISITNUM"
+      Name="VISITNUM"
+      DataType="integer"
+      Length="8"       Origin="DERIVED"       Comment="Clinical encounter number."
+      def:Label="VISIT NUMBER">
+    </ItemDef>
+    <ItemDef OID="SV.SVENDTC"
+      Name="SVENDTC"
+      DataType="date"
+      Length="26"       Origin="DERIVED"       Comment="End date/time of a Visit treatment."
+      def:Label="END DATE/TIME OF VISIT">
+    </ItemDef>
+    <ItemDef OID="SV.SVSTDTC"
+      Name="SVSTDTC"
+      DataType="date"
+      Length="26"       Origin="DERIVED"       Comment="Start date/time for a Visit."
+      def:Label="START DATE/TIME OF VISIT">
+    </ItemDef>
+    <ItemDef OID="SV.VISIT"
+      Name="VISIT"
+      DataType="text"
+      Length="200"       Origin="CRF Page"       Comment="VISIT NAME"
+      def:Label="VISIT NAME">
+    </ItemDef>
+    <ItemDef OID="SV.VISITNUM"
+      Name="VISITNUM"
+      DataType="integer"
+      Length="8"       Origin="DERIVED"       Comment="Clinical encounter number."
+      def:Label="VISIT NUMBER">
+    </ItemDef>
+    <ItemDef OID="TA.ARM"
+      Name="ARM"
+      DataType="text"
+      Length="21"       Origin="DERIVED"       Comment="DESCRIPTION OF PLANNED ARM"
+      def:Label="DESCRIPTION OF ARM (TREATMENT GROUP)">
+    </ItemDef>
+    <ItemDef OID="TA.ARMCD"
+      Name="ARMCD"
+      DataType="text"
+      Length="7"       Origin="DERIVED"       Comment="PLANNED ARM CODE"
+      def:Label="ARM CODE (TREATMENT CODE)">
+    </ItemDef>
+    <ItemDef OID="TA.ELEMENT"
+      Name="ELEMENT"
+      DataType="text"
+      Length="200"       Origin="DERIVED"       Comment="Topic variable for an Element."
+      def:Label="DESCRIPTION OF ELEMENT">
+    </ItemDef>
+    <ItemDef OID="TA.ETCD"
+      Name="ETCD"
+      DataType="text"
+      Length="200"       Origin="CRF Page"       Comment="Element Code"
+      def:Label="ELEMENT CODE">
+    </ItemDef>
+    <ItemDef OID="TA.TABRANCH"
+      Name="TABRANCH"
+      DataType="text"
+      Length="200"       Origin="DERIVED"       Comment="Condition subject met, at a 'branch' in the trial design at the end of this Element."
+      def:Label="BRANCH">
+    </ItemDef>
+    <ItemDef OID="TA.TAETORD"
+      Name="TAETORD"
+      DataType="integer"
+      Length="8"       Origin="DERIVED"       Comment="Number that gives the order of the Element within the Arm."
+      def:Label="ORDER OF ELEMENT WITHIN ARM">
+    </ItemDef>
+    <ItemDef OID="TA.TATRANS"
+      Name="TATRANS"
+      DataType="text"
+      Length="200"       Origin="DERIVED"       Comment="If the trial design allows a subject to transition to an Element other than the next Element in sequence."
+      def:Label="TRANSITION RULE">
+    </ItemDef>
+    <ItemDef OID="TE.ELEMENT"
+      Name="ELEMENT"
+      DataType="text"
+      Length="200"       Origin="DERIVED"       Comment="Topic variable for an Element."
+      def:Label="DESCRIPTION OF ELEMENT">
+    </ItemDef>
+    <ItemDef OID="TE.ETCD"
+      Name="ETCD"
+      DataType="text"
+      Length="8"       Origin="CRF Page"       Comment="Element Code"
+      def:Label="ELEMENT CODE">
+    </ItemDef>
+    <ItemDef OID="TE.TEDUR"
+      Name="TEDUR"
+      DataType="text"
+      Length="6"       Origin="CRF Page"       Comment="Planned Duration of Element"
+      def:Label="PLANNED DURATION OF ELEMENT">
+    </ItemDef>
+    <ItemDef OID="TE.TEENRL"
+      Name="TEENRL"
+      DataType="text"
+      Length="200"       Origin="DERIVED"       Comment="Expresses rule for ending Element."
+      def:Label="RULE FOR END OF ELEMENT">
+    </ItemDef>
+    <ItemDef OID="TE.TESTRL"
+      Name="TESTRL"
+      DataType="text"
+      Length="200"       Origin="DERIVED"       Comment="Expresses rule for beginning Element."
+      def:Label="RULE FOR START OF ELEMENT">
+    </ItemDef>
+    <ItemDef OID="TV.ARM"
+      Name="ARM"
+      DataType="text"
+      Length="21"       Origin="DERIVED"       Comment="DESCRIPTION OF PLANNED ARM"
+      def:Label="DESCRIPTION OF ARM">
+    </ItemDef>
+    <ItemDef OID="TV.ARMCD"
+      Name="ARMCD"
+      DataType="text"
+      Length="7"       Origin="DERIVED"       Comment="PLANNED ARM CODE"
+      def:Label="ARM CODE (TREATMENT CODE)">
+    </ItemDef>
+    <ItemDef OID="TV.TVENRL"
+      Name="TVENRL"
+      DataType="text"
+      Length="200"       Origin="DERIVED"       Comment="Rule describing when the Visit ends."
+      def:Label="VISIT END RULE">
+    </ItemDef>
+    <ItemDef OID="TV.TVSTRL"
+      Name="TVSTRL"
+      DataType="text"
+      Length="200"       Origin="DERIVED"       Comment="Rule describing when the Visit starts."
+      def:Label="VISIT START RULE">
+    </ItemDef>
+    <ItemDef OID="TV.VISIT"
+      Name="VISIT"
+      DataType="text"
+      Length="200"       Origin="CRF Page"       Comment="VISIT NAME"
+      def:Label="VISIT NAME">
+    </ItemDef>
+    <ItemDef OID="TV.VISITNUM"
+      Name="VISITNUM"
+      DataType="integer"
+      Length="8"       Origin="DERIVED"       Comment="Clinical encounter number."
+      def:Label="VISIT SEQUENCE NUMBER">
+    </ItemDef>
+    <ItemDef OID="VS.VISIT"
+      Name="VISIT"
+      DataType="text"
+      Length="30"       Origin="CRF Page"       Comment="VISIT NAME"
+      def:Label="VISIT NAME">
+    </ItemDef>
+    <ItemDef OID="VS.VISITNUM"
+      Name="VISITNUM"
+      DataType="integer"
+      Length="8"       Origin="DERIVED"       Comment="Clinical encounter number."
+      def:Label="VISIT NUMBER">
+    </ItemDef>
+    <ItemDef OID="VS.VSDTC"
+      Name="VSDTC"
+      DataType="date"
+      Length="26"       Origin="CRF Page"       Comment="Vital Signs CRF Page 4, CRF Page 7"
+      def:Label="DATE/TIME OF MEASUREMENTS">
+    </ItemDef>
+    <ItemDef OID="VS.VSDY"
+      Name="VSDY"
+      DataType="integer"
+      Length="8"       Origin="CRF Page"       Comment="STUDY DAY OF VITAL SIGNS"
+      def:Label="STUDY DAY OF VITAL SIGNS">
+    </ItemDef>
+    <ItemDef OID="VS.VSLOC"
+      Name="VSLOC"
+      DataType="text"
+      Length="1"       Origin="CRF Page"       Comment="LOCATION OF VITAL SIGNS MEASUREMENT"
+      def:Label="LOCATION OF VITAL SIGNS MEASUREMENT">
+    </ItemDef>
+    <ItemDef OID="VS.VSORRES"
+      Name="VSORRES"
+      DataType="text"
+      Length="8"       Origin="CRF Page"       Comment="Vital Signs CRF Page 4, CRF Page 7"
+      def:Label="RESULT OR FINDING IN ORIGINAL UNITS">
+    </ItemDef>
+    <ItemDef OID="VS.VSORRESU"
+      Name="VSORRESU"
+      DataType="text"
+      Length="15"       Origin="CRF Page"       Comment="ORIGINAL UNITS"
+      def:Label="ORIGINAL UNITS">
+    </ItemDef>
+    <ItemDef OID="VS.VSPOS"
+      Name="VSPOS"
+      DataType="text"
+      Length="8"       Origin="CRF Page"       Comment="POSITION OF THE SUBJECT DURING A MEASUREMENT OR EXAMINATION."
+      def:Label="VITAL SIGNS POSITION OF SUBJECT">
+    </ItemDef>
+    <ItemDef OID="VS.VSSEQ"
+      Name="VSSEQ"
+      DataType="integer"
+      Length="8"       Origin="CRF Page"       Comment="SEQUENCE NUMBER"
+      def:Label="SEQUENCE NUMBER">
+    </ItemDef>
+    <ItemDef OID="VS.VSSTAT"
+      Name="VSSTAT"
+      DataType="text"
+      Length="8"       Origin="CRF Page"       Comment="VITALS STATUS"
+      def:Label="VITALS STATUS">
+    </ItemDef>
+    <ItemDef OID="VS.VSSTRESC"
+      Name="VSSTRESC"
+      DataType="text"
+      Length="20"       Origin="CRF Page"       Comment="CHARACTER RESULT/FINDING IN STD FORMAT"
+      def:Label="CHARACTER RESULT/FINDING IN STD FORMAT">
+    </ItemDef>
+    <ItemDef OID="VS.VSSTRESN"
+      Name="VSSTRESN"
+      DataType="float"
+      Length="8"       SignificantDigits="1"       Origin="CRF Page"       Comment="CHARACTER RESULT/FINDING IN STD FORMAT"
+      def:Label="NUMERIC RESULT/FINDING IN STANDARD UNITS">
+    </ItemDef>
+    <ItemDef OID="VS.VSSTRESU"
+      Name="VSSTRESU"
+      DataType="text"
+      Length="15"       Origin="CRF Page"       Comment="Default units."
+      def:Label="STANDARD UNITS">
+    </ItemDef>
+    <ItemDef OID="VS.VSTEST"
+      Name="VSTEST"
+      DataType="text"
+      Length="40"       Origin="CRF Page"       Comment="VITALS SIGNS TEST NAME"
+      def:Label="VITAL SIGNS TEST NAME">
+    </ItemDef>
+    <ItemDef OID="VS.VSTESTCD"
+      Name="VSTESTCD"
+      DataType="text"
+      Length="8"       Origin="CRF Page"       Comment="Vital Signs CRF Page 4, CRF Page 7"
+      def:Label="VITAL SIGNS TEST SHORT NAME">
+      <def:ValueListRef ValueListOID="ValueList.VS.VSTESTCD"/>
+    </ItemDef>
+    <ItemDef OID="SC.SCTESTCD.ALLERGY"
+      Name="ALLERGY"
+      DataType="integer"
+      Length="8"       Origin="CRF Page"       Comment="Subject Characteristics CRF Page 4"
+      def:Label="Allergy Status">
+      <CodeListRef CodeListOID="YESNOUNK"/>
+    </ItemDef>
+    <ItemDef OID="SC.SCTESTCD.EDLEVLN"
+      Name="EDLEVLN"
+      DataType="float"
+      Length="8"       SignificantDigits="1"       Origin="CRF Page"       Comment="Subject Characteristics CRF Page 4"
+      def:Label="EDUCATIONAL LEVEL-DVN">
+    </ItemDef>
+    <ItemDef OID="SC.SCTESTCD.EXCLSN"
+      Name="EXCLSN"
+      DataType="float"
+      Length="8"       SignificantDigits="1"       Origin="CRF Page"       Comment="Subject Characteristics CRF Page 4"
+      def:Label="EXERCISE CLASSIFICATION-DVN">
+    </ItemDef>
+    <ItemDef OID="SC.SCTESTCD.RACEOTH"
+      Name="RACEOTH"
+      DataType="text"
+      Length="80"       Origin="CRF Page"       Comment="Subject Characteristics CRF Page 4"
+      def:Label="Text for other race">
+    </ItemDef>
+    <ItemDef OID="SU.SUTRT.ALCBEERA"
+      Name="ALCBEERA"
+      DataType="float"
+      Length="8"       SignificantDigits="1"       Origin="CRF Page"       Comment="Substance Use CRF Page 4"
+      def:Label="Beer consumed-oz/week">
+    </ItemDef>
+    <ItemDef OID="SU.SUTRT.ALCHIST2"
+      Name="ALCHIST2"
+      DataType="integer"
+      Length="8"       Origin="CRF Page"       Comment="Substance Use CRF Page 4"
+      def:Label="Does the patient drink">
+      <CodeListRef CodeListOID="YESNO"/>
+    </ItemDef>
+    <ItemDef OID="SU.SUTRT.ALCOTHA"
+      Name="ALCOTHA"
+      DataType="float"
+      Length="8"       SignificantDigits="1"       Origin="CRF Page"       Comment="Substance Use CRF Page 4"
+      def:Label="Spirits/liquor consumed-oz/week">
+    </ItemDef>
+    <ItemDef OID="SU.SUTRT.ALCWINEA"
+      Name="ALCWINEA"
+      DataType="float"
+      Length="8"       SignificantDigits="1"       Origin="CRF Page"       Comment="Substance Use CRF Page 4"
+      def:Label="Wine consumption-oz/week">
+    </ItemDef>
+    <ItemDef OID="SU.SUTRT.SMKCLASS"
+      Name="SMKCLASS"
+      DataType="integer"
+      Length="8"       Origin="CRF Page"       Comment="Substance Use CRF Page 4"
+      def:Label="Smoking classification">
+      <CodeListRef CodeListOID="SMKCLAS"/>
+    </ItemDef>
+    <ItemDef OID="VS.VSTESTCD.FRAME"
+      Name="FRAME"
+      DataType="float"
+      Length="8"       SignificantDigits="1"       Origin="CRF Page"       Comment="Vital Signs CRF Page 4"
+      def:Label="Frame">
+      <CodeListRef CodeListOID="FRAME"/>
+    </ItemDef>
+    <ItemDef OID="VS.VSTESTCD.HTRAW"
+      Name="HTRAW"
+      DataType="text"
+      Length="80" Origin="CRF Page" Comment="Vital Signs CRF Page 4"
+      def:Label="Height raw">
+    </ItemDef>
+    <ItemDef OID="VS.VSTESTCD.WTRAW"
+      Name="WTRAW"
+      DataType="text"
+      Length="80" Origin="CRF Page" Comment="Vital Signs CRF Page 4"
+      def:Label="Weight raw">
+    </ItemDef>
+    <ItemDef OID="VS.VSTESTCD.MEANBP" 
+	Name="MEANBP" 
+	DataType="float" 
+	Length="8"
+	SignificantDigits="2"
+	Origin="VSSTRESN" 
+	def:Label="Mean Blood Pressure" 	
+	def:DisplayFormat="8.2"
+	def:ComputationMethodOID="COMPMETHOD.MEANBP">
+    </ItemDef>
+    <!-- ************************************************************ -->
+    <!-- The Codelist details are here for all domains                -->
+    <!-- ************************************************************ -->
+    <CodeList OID="FRAME" Name="FRAME" DataType="text">
+      <CodeListItem CodedValue="S">
+        <Decode>
+          <TranslatedText xml:lang="en">Small</TranslatedText>
+        </Decode>
+      </CodeListItem>
+      <CodeListItem CodedValue="M">
+        <Decode>
+          <TranslatedText xml:lang="en">Medium</TranslatedText>
+        </Decode>
+      </CodeListItem>
+      <CodeListItem CodedValue="L">
+        <Decode>
+          <TranslatedText xml:lang="en">Large</TranslatedText>
+        </Decode>
+      </CodeListItem>
+      <CodeListItem CodedValue="XL">
+        <Decode>
+          <TranslatedText xml:lang="en">Extra large</TranslatedText>
+        </Decode>
+      </CodeListItem>
+    </CodeList>
+    <CodeList OID="SMKCLAS" Name="SMKCLAS" DataType="integer">
+      <CodeListItem CodedValue="1">
+        <Decode>
+          <TranslatedText xml:lang="en">NEVER SMOKED</TranslatedText>
+        </Decode>
+      </CodeListItem>
+      <CodeListItem CodedValue="2">
+        <Decode>
+          <TranslatedText xml:lang="en">SMOKER</TranslatedText>
+        </Decode>
+      </CodeListItem>
+      <CodeListItem CodedValue="3">
+        <Decode>
+          <TranslatedText xml:lang="en">EX SMOKER</TranslatedText>
+        </Decode>
+      </CodeListItem>
+    </CodeList>
+    <CodeList OID="YESNO" Name="YESNO" DataType="text">
+      <CodeListItem CodedValue="Y">
+        <Decode>
+          <TranslatedText xml:lang="en">YES</TranslatedText>
+        </Decode>
+      </CodeListItem>
+      <CodeListItem CodedValue="N">
+        <Decode>
+          <TranslatedText xml:lang="en">NO</TranslatedText>
+        </Decode>
+      </CodeListItem>
+      <CodeListItem CodedValue="U">
+        <Decode>
+          <TranslatedText xml:lang="en">NOT APPLICABLE</TranslatedText>
+        </Decode>
+      </CodeListItem>
+    </CodeList>
+    <CodeList OID="YESNOUNK" Name="YESNOUNK" DataType="text">
+      <CodeListItem CodedValue="Y">
+        <Decode>
+          <TranslatedText xml:lang="en">YES</TranslatedText>
+        </Decode>
+      </CodeListItem>
+      <CodeListItem CodedValue="N">
+        <Decode>
+          <TranslatedText xml:lang="en">NO</TranslatedText>
+        </Decode>
+      </CodeListItem>
+      <CodeListItem CodedValue="U">
+        <Decode>
+          <TranslatedText xml:lang="en">UNKNOWN</TranslatedText>
+        </Decode>
+      </CodeListItem>
+      <CodeListItem CodedValue="NA">
+        <Decode>
+          <TranslatedText xml:lang="en">NOT APPLICABLE</TranslatedText>
+        </Decode>
+      </CodeListItem>
+    </CodeList>
+  </MetaDataVersion>
+</Study>
+</ODM>

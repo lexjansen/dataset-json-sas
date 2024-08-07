@@ -1,0 +1,201 @@
+{
+  "datasetJSONCreationDateTime": "2023-06-28T15:38:43",
+  "datasetJSONVersion": "1.1.0",
+  "fileOID": "www.cdisc.org/StudyMSGv2/1/Define-XML_2.1.0/2023-06-28/dm",
+  "dbLastModifiedDateTime": "2023-05-31T00:00:00",
+  "originator": "CDISC SDTM MSG Team",
+  "sourceSystem": {
+    "name": "SAS on X64_10PRO",
+    "version": "9.0401M7"
+  },
+  "studyOID": "cdisc.com/CDISCPILOT01",
+  "metaDataVersionOID": "MDV.MSGv2.0.SDTMIG.3.3.SDTM.1.7",
+  "metaDataRef": "https://metadata.location.org/CDISCPILOT01/define.xml",
+  "records": 0,
+  "name": "DM",
+  "label": "Demographics",
+  "columns": [
+    {
+      "itemOID": "ITEMGROUPDATASEQ",
+      "name": "ITEMGROUPDATASEQ",
+      "label": "Record Identifier",
+      "dataType": "integer"
+    },
+    {
+      "itemOID": "IT.DM.STUDYID",
+      "name": "STUDYID",
+      "label": "Study Identifier",
+      "dataType": "string",
+      "length": 12,
+      "keySequence": 1
+    },
+    {
+      "itemOID": "IT.DM.DOMAIN",
+      "name": "DOMAIN",
+      "label": "Domain Abbreviation",
+      "dataType": "string",
+      "length": 2
+    },
+    {
+      "itemOID": "IT.DM.USUBJID",
+      "name": "USUBJID",
+      "label": "Unique Subject Identifier",
+      "dataType": "string",
+      "length": 8,
+      "keySequence": 2
+    },
+    {
+      "itemOID": "IT.DM.SUBJID",
+      "name": "SUBJID",
+      "label": "Subject Identifier for the Study",
+      "dataType": "string",
+      "length": 4
+    },
+    {
+      "itemOID": "IT.DM.RFSTDTC",
+      "name": "RFSTDTC",
+      "label": "Subject Reference Start Date/Time",
+      "dataType": "string"
+    },
+    {
+      "itemOID": "IT.DM.RFENDTC",
+      "name": "RFENDTC",
+      "label": "Subject Reference End Date/Time",
+      "dataType": "string"
+    },
+    {
+      "itemOID": "IT.DM.RFXSTDTC",
+      "name": "RFXSTDTC",
+      "label": "Date/Time of First Study Treatment",
+      "dataType": "string"
+    },
+    {
+      "itemOID": "IT.DM.RFXENDTC",
+      "name": "RFXENDTC",
+      "label": "Date/Time of Last Study Treatment",
+      "dataType": "string"
+    },
+    {
+      "itemOID": "IT.DM.RFICDTC",
+      "name": "RFICDTC",
+      "label": "Date/Time of Informed Consent",
+      "dataType": "string"
+    },
+    {
+      "itemOID": "IT.DM.RFPENDTC",
+      "name": "RFPENDTC",
+      "label": "Date/Time of End of Participation",
+      "dataType": "string"
+    },
+    {
+      "itemOID": "IT.DM.DTHDTC",
+      "name": "DTHDTC",
+      "label": "Date/Time of Death",
+      "dataType": "string"
+    },
+    {
+      "itemOID": "IT.DM.DTHFL",
+      "name": "DTHFL",
+      "label": "Subject Death Flag",
+      "dataType": "string",
+      "length": 1
+    },
+    {
+      "itemOID": "IT.DM.SITEID",
+      "name": "SITEID",
+      "label": "Study Site Identifier",
+      "dataType": "string",
+      "length": 3
+    },
+    {
+      "itemOID": "IT.DM.BRTHDTC",
+      "name": "BRTHDTC",
+      "label": "Date/Time of Birth",
+      "dataType": "string"
+    },
+    {
+      "itemOID": "IT.DM.AGE",
+      "name": "AGE",
+      "label": "Age",
+      "dataType": "integer",
+      "length": 8
+    },
+    {
+      "itemOID": "IT.DM.AGEU",
+      "name": "AGEU",
+      "label": "Age Units",
+      "dataType": "string",
+      "length": 5
+    },
+    {
+      "itemOID": "IT.DM.SEX",
+      "name": "SEX",
+      "label": "Sex",
+      "dataType": "string",
+      "length": 1
+    },
+    {
+      "itemOID": "IT.DM.RACE",
+      "name": "RACE",
+      "label": "Race",
+      "dataType": "string",
+      "length": 41
+    },
+    {
+      "itemOID": "IT.DM.ETHNIC",
+      "name": "ETHNIC",
+      "label": "Ethnicity",
+      "dataType": "string",
+      "length": 22
+    },
+    {
+      "itemOID": "IT.DM.ARMCD",
+      "name": "ARMCD",
+      "label": "Planned Arm Code",
+      "dataType": "string",
+      "length": 8
+    },
+    {
+      "itemOID": "IT.DM.ARM",
+      "name": "ARM",
+      "label": "Description of Planned Arm",
+      "dataType": "string",
+      "length": 28
+    },
+    {
+      "itemOID": "IT.DM.ACTARMCD",
+      "name": "ACTARMCD",
+      "label": "Actual Arm Code",
+      "dataType": "string",
+      "length": 8
+    },
+    {
+      "itemOID": "IT.DM.ACTARM",
+      "name": "ACTARM",
+      "label": "Description of Actual Arm",
+      "dataType": "string",
+      "length": 28
+    },
+    {
+      "itemOID": "IT.DM.ARMNRS",
+      "name": "ARMNRS",
+      "label": "Reason Arm and/or Actual Arm is Null",
+      "dataType": "string",
+      "length": 14
+    },
+    {
+      "itemOID": "IT.DM.ACTARMUD",
+      "name": "ACTARMUD",
+      "label": "Description of Unplanned Actual Arm",
+      "dataType": "string",
+      "length": 200
+    },
+    {
+      "itemOID": "IT.DM.COUNTRY",
+      "name": "COUNTRY",
+      "label": "Country",
+      "dataType": "string",
+      "length": 3
+    }
+  ]
+}
