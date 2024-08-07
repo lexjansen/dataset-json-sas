@@ -2,11 +2,15 @@
 %let project_folder=/_github/lexjansen/dataset-json-sas;
 %include "&project_folder/programs/config.sas";
 
+data work.class(label="%cstutilgetattribute(_cstDataSetName=sashelp.class,_cstAttribute=LABEL)");
+  label Name="Name" Sex="Sex" Age="Age" Height="Height" Weight="Weight";
+  set sashelp.class;
+run;  
+
 %write_datasetjson(
-    dataset=sashelp.class,
+    dataset=work.class,
     jsonpath=&project_folder/demo/class.json,
     fileOID=,
-    asOfDateTime=,
     originator=,
     sourceSystem=,
     sourceSystemVersion=,
