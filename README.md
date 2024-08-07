@@ -22,7 +22,7 @@ The purpose of the test programs is to demonstrate the macros. The user at a min
 Other updates in the test programs may be needed to make them work in a specific SAS environment. The macros should work in any SAS environment with at least SAS 9.4 (TS1M7).
 This was tested on Windows 10 and SAS OnDemand (Linux).
 
-The **06_validate_datasetjson.sas** program assumes that your SAS environment is able to run Python objects.
+The **07_validate_datasetjson.sas** program assumes that your SAS environment is able to run Python objects.
 Check the programs/config.sas file for the Python cofiguration.
 Python objects require environment variables to be set before you can use Python objects in your SAS environment.
 If the environment variables have not been set, or if they have been set incorrectly,
@@ -54,7 +54,7 @@ More information:
 
 ## Documentation
 
-Documentation is in the **doc** folder:
+Documentation is in the **doc** folder (not updated yet for Dataset-JSON v1.1):
 
 - [CDISC COSA presentation, October 2023](doc/CDISC_COSA_webinar_20231005_dataset-json_SAS.pdf)
 - [CDISC COSA Hackathon summary](doc/Dataset-JSON-Hackathon-SAS-implementation-LexJansen.pdf)
