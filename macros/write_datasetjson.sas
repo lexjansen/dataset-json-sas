@@ -365,10 +365,6 @@
   %************************************************************;
   /* Convert numeric variables to decimal strings if needed */
   %************************************************************;
-  
-  
-  
-  
   %if "%substr(%upcase(&usemetadata),1,1)" eq "Y" %then %do;
     %let _decimal_variables=;
     proc sql noprint;
@@ -399,31 +395,29 @@
   %************************************************************;
   /* Convert numeric ISO 8601 variables to strings if needed  */
   %************************************************************;
-  %*if "%substr(%upcase(&usemetadata),1,1)" eq "Y" %then %do;
-    %let _iso8601_variables=;
-    proc sql noprint;
-      select name into :_iso8601_variables separated by ' '
-        from work.column_metadata
-        where (datatype in ('datetime', 'date', 'time')) and (targetdatatype = 'integer');  
-    quit;
-  %*end;
-  %*else %do;
-    %if %sysevalf(%superq(iso8601Variables)=, boolean)=0 %then %do;
-      data work.column_metadata;
-        set work.column_metadata;
-          %do _count=1 %to %sysfunc(countw(&iso8601Variables, %str(' ')));
-            if upcase(name)=upcase("%scan(&iso8601Variables, &_count)") then do; 
-              if missing(displayFormat) then 
-                putlog "WAR" "NING: [&sysmacroname] &dataset.." name +(-1) ": variable has no format attached." name= dataType= targetDataType=;
-              else do; 
-                putlog name= dataType= targetDataType= displayFormat=; 
-              end;
+  %let _iso8601_variables=;
+  proc sql noprint;
+    select name into :_iso8601_variables separated by ' '
+      from work.column_metadata
+      where (datatype in ('datetime', 'date', 'time')) and (targetdatatype = 'integer');  
+  quit;
+
+  %if %sysevalf(%superq(iso8601Variables)=, boolean)=0 %then %do;
+    data work.column_metadata;
+      set work.column_metadata;
+        %do _count=1 %to %sysfunc(countw(&iso8601Variables, %str(' ')));
+          if upcase(name)=upcase("%scan(&iso8601Variables, &_count)") then do; 
+            if missing(displayFormat) then 
+              putlog "WAR" "NING: [&sysmacroname] &dataset.." name +(-1) ": variable has no format attached." name= dataType= targetDataType=;
+            else do; 
+              putlog name= dataType= targetDataType= displayFormat=; 
             end;
-          %end;
-      run;  
-      %let _iso8601_variables=&iso8601Variables;
-    %end;  
-  %*end;
+          end;
+        %end;
+    run;  
+    %let _iso8601_variables=&iso8601Variables;
+  %end;  
+
   %if %sysevalf(%superq(_iso8601_variables)=, boolean)=0 %then %do;
     %put NOTE: [&sysmacroname] &dataset: numeric ISO 8601 variables converted to strings: &_iso8601_variables;
   %end;    
@@ -439,23 +433,6 @@
      if dataType = "time" and find(displayFormat, "E8601TM", 'it')=0 then displayFormat = "E8601TM.";
   run;
 
-  /*
-  %let _format=;
-  proc sql noprint;
-    select catx(' ', name, strip(displayFormat)) into :_format separated by ' '
-        from work.column_metadata_formats
-        where not(missing(displayformat));
-  quit;
-  
-  %if %sysevalf(%superq(_format)=, boolean)=0 %then %do;
-    proc datasets library=work nolist memtype=data;
-      modify column_data;
-        format &_format;
-    quit;    
-    run;
-  %end;  
-  */
-    
   %add_formats_to_datasets(
     metadata=work.column_metadata_formats, 
     datalib=work, 
@@ -463,6 +440,9 @@
     format=displayFormat
     );
   
+  proc delete data=work.column_metadata_formats;
+  run;
+
   %******************************************************************************;
 
   %create_template(type=STUDY, out=work.study_metadata);

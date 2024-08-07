@@ -35,4 +35,4 @@ options set=MAS_M2PATH="%sysget(SASROOT)/tkmas/sasmisc/mas2py.py";
 
 options cmplib=&fcmplib..datasetjson_funcs;
 
-options mprint nomlogic nosymbolgen ;
+options mprint nomlogic nosymbolgen;
