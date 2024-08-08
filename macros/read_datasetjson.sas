@@ -250,7 +250,14 @@
 
     data &metadatalib..metadata_columns(%if %substr(%upcase(&DropSeqVar),1,1) eq Y %then where=(upcase(name) ne "ITEMGROUPDATASEQ"););
       set &metadatalib..metadata_columns work.&_items_(rename=(itemOID=OID) in=init);
-      if init then dataset_name = "&_ItemGroupName";
+      if init then do;
+        dataset_name = "&_ItemGroupName";
+        %if %substr(%upcase(&DropSeqVar),1,1) eq Y %then %do;
+          order = order - 1;   
+        %end;  
+        json_length = length;
+        length = .;
+      end;
     run;
 
     proc delete data=work.&_items_;
