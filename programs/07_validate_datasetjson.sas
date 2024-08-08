@@ -28,8 +28,10 @@ More information:
   Configuring SAS to Run the Python Language:
   https://go.documentation.sas.com/doc/en/bicdc/9.4/biasag/n1mquxnfmfu83en1if8icqmx8cdf.htm
 */
+%check_python();
 
-/* Get the paths of the ADaM JSON filess */
+
+/* Get the paths of the ADaM JSON files */
 %util_gettree(
   dir=&json_folder/adam,
   outds=work.dirtree_adam,
