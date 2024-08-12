@@ -13,6 +13,7 @@
   studyOID=,
   metaDataVersionOID=,
   metaDataRef=,
+  datasetlabel=,
   pretty=NOPRETTY
   ) / des = 'Write a SAS dataset to a Dataset-JSON file';
 
@@ -194,6 +195,8 @@
 
   %if %sysevalf(%superq(dataset_label)=, boolean) %then
     %let dataset_label=%cstutilgetattribute(_cstDataSetName=&dataset_new,_cstAttribute=LABEL);
+  %if %sysevalf(%superq(dataset_label)=, boolean) %then
+    %let dataset_label=&datasetlabel;
 
   %if %sysevalf(%superq(dataset_label)=, boolean) %then %do;
     %put %str(WAR)NING: [&sysmacroname] Dataset &dataset has no dataset label.;
