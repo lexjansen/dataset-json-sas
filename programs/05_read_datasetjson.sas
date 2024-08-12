@@ -78,7 +78,7 @@ run;
 );
 
 %if %cstutilnobs(_cstDataSetName=work.dirtree_send)=0 %then %do;
-  %put WAR%str(NING): No JSON files to read in directory &root/json_out/sdtm.;
+  %put WAR%str(NING): No JSON files to read in directory &root/json_out/send.;
 %end;  
 
 proc datasets lib=metasvse nolist kill; 
