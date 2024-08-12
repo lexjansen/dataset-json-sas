@@ -28,8 +28,10 @@ More information:
   Configuring SAS to Run the Python Language:
   https://go.documentation.sas.com/doc/en/bicdc/9.4/biasag/n1mquxnfmfu83en1if8icqmx8cdf.htm
 */
+%check_python();
 
-/* Get the paths of the ADaM JSON filess */
+
+/* Get the paths of the ADaM JSON files */
 %util_gettree(
   dir=&json_folder/adam,
   outds=work.dirtree_adam,
@@ -95,7 +97,7 @@ data results.schema_validation_results;
 run;
 
 ods listing close;
-ods html5 file="&project_folder/programs/08_validate_datasetjson_results_&today_iso8601..html";
+ods html5 path="&project_folder/programs" file="08_validate_datasetjson_results_&today_iso8601..html";
 
   proc print data=results.schema_validation_results label;
     title01 "Validation Results - &now_iso8601";
