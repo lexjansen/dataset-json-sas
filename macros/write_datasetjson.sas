@@ -223,7 +223,7 @@
         if missing(datatype) then putlog "WAR" "NING: [&sysmacroname] Missing dataType for variable: &dataset.." name +(-1) ", " oid=;
         
         if dataType in ("date", "datetime", "time") and targetDataType = "integer" and missing(displayFormat) 
-          then putlog "WAR" "NING: [&sysmacroname] Missing displayFormat for variable: &dataset.." name +(-1) ", " oid= ", " dataType= ", " targetDataType=;
+          then putlog "WAR" "NING: [&sysmacroname] Missing displayFormat for variable: &dataset.." name +(-1) ", " oid= +(-1) ", " dataType= +(-1) ", " targetDataType=;
         
     run;
 

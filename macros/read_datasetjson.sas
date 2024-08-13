@@ -124,8 +124,27 @@
   %end;
 
   data out_&_Random..&_items_;
+    length displayFormat $ 32;
     set out_&_Random..&_items_;
     dataset_name = "&_ItemGroupName";
+    
+    if dataType in ("date", "datetime", "time") and targetDataType = "integer" and missing(displayFormat) 
+      then do;
+        putlog "WAR" "NING: [&sysmacroname] Missing displayFormat for variable: &datalib..&_ItemGroupName.." name +(-1) ", " ItemOID= +(-1) ", " dataType= +(-1) ", " targetDataType=;
+        if dataType="datetime" then do;
+          putlog "WAR" "NING: [&sysmacroname] displayFormat E8601DT. will be used.";
+          displayFormat = "E8601DT.";
+        end;  
+        if dataType="date" then do;
+          putlog "WAR" "NING: [&sysmacroname] displayFormat E8601DA. will be used."; 
+          displayFormat = "E8601DA.";
+        end;  
+        if dataType="time" then do;
+          putlog "WAR" "NING: [&sysmacroname] displayFormat E8601TM. will be used.";
+          displayFormat = "E8601TM.";
+        end;  
+      end;  
+    
   run;
     
 
