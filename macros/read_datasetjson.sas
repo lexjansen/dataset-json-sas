@@ -13,7 +13,7 @@
          metadata_study_columns metadata_tables_columns metadata_columns_columns
          _items_ _itemdata_ _itemgroupdata_ ItemGroupOID _ItemGroupName
          dslabel dsname variables rename label length format
-         _decimal_variables _iso8601_variables;
+         _var_exist _decimal_variables _iso8601_variables;
 
   %let _Random=%sysfunc(putn(%sysevalf(%sysfunc(ranuni(0))*10000,floor),z4.));
 
@@ -123,28 +123,32 @@
       %goto exit_macro;
   %end;
 
+  %let _var_exist = %cstutilcheckvarsexist(_cstDataSetName=out_&_Random..&_items_, _cstVarList=targetDataType);
   data out_&_Random..&_items_;
-    length displayFormat $ 32;
+    %if &_var_exist %then %do;
+      length targetDataType displayFormat $ 32;
+    %end;
     set out_&_Random..&_items_;
     dataset_name = "&_ItemGroupName";
     
-    if dataType in ("date", "datetime", "time") and targetDataType = "integer" and missing(displayFormat) 
-      then do;
-        putlog "WAR" "NING: [&sysmacroname] Missing displayFormat for variable: &datalib..&_ItemGroupName.." name +(-1) ", " ItemOID= +(-1) ", " dataType= +(-1) ", " targetDataType=;
-        if dataType="datetime" then do;
-          putlog "WAR" "NING: [&sysmacroname] displayFormat E8601DT. will be used.";
-          displayFormat = "E8601DT.";
+    %if &_var_exist %then %do;
+      if dataType in ("date", "datetime", "time") and targetDataType = "integer" and missing(displayFormat) 
+        then do;
+          putlog "WAR" "NING: [&sysmacroname] Missing displayFormat for variable: &datalib..&_ItemGroupName.." name +(-1) ", " ItemOID= +(-1) ", " dataType= +(-1) ", " targetDataType=;
+          if dataType="datetime" then do;
+            putlog "WAR" "NING: [&sysmacroname] displayFormat E8601DT. will be used.";
+            displayFormat = "E8601DT.";
+          end;  
+          if dataType="date" then do;
+            putlog "WAR" "NING: [&sysmacroname] displayFormat E8601DA. will be used."; 
+            displayFormat = "E8601DA.";
+          end;  
+          if dataType="time" then do;
+            putlog "WAR" "NING: [&sysmacroname] displayFormat E8601TM. will be used.";
+            displayFormat = "E8601TM.";
+          end;  
         end;  
-        if dataType="date" then do;
-          putlog "WAR" "NING: [&sysmacroname] displayFormat E8601DA. will be used."; 
-          displayFormat = "E8601DA.";
-        end;  
-        if dataType="time" then do;
-          putlog "WAR" "NING: [&sysmacroname] displayFormat E8601TM. will be used.";
-          displayFormat = "E8601TM.";
-        end;  
-      end;  
-    
+    %end;    
   run;
     
 
@@ -156,15 +160,17 @@
     select cats(name, '=', quote(strip(label))) into :label separated by ' '
       from out_&_Random..&_items_
       where not(missing(label));
+/*
     select catt(name, ' $', length) into :length separated by ' '
       from out_&_Random..&_items_
       where datatype="string" and (not(missing(length)));
+*/
   quit;
 
   %put &=variables;
   %put &=rename;
   %put &=label;
-  %put &=length;
+  %*put &=length;
 
   %let dslabel=;
   %let dsname=;
@@ -363,26 +369,27 @@
 
 %******************************************************************************;
   
-  
-
   /* Update lengths */
-  proc sql noprint;
-    select catt(d.name, ' $', i.length) into :length separated by ' '
-      from dictionary.columns d,
-           out_&_Random..&_items_ i
-    where upcase(libname)="%upcase(&datalib)" and
-         upcase(memname)="%upcase(&dsname)" and
-         d.name = i.name and
-         d.type="char" and (not(missing(i.length))) and (i.length gt d.length)
-   ;
-  quit ;
-
+  %let length=;
+  %if %cstutilcheckvarsexist(_cstDataSetName=out_&_Random..&_items_, _cstVarList=length) %then %do;
+    proc sql noprint;
+      select catt(d.name, ' $', i.length) into :length separated by ' '
+        from dictionary.columns d,
+             out_&_Random..&_items_ i
+      where upcase(libname)="%upcase(&datalib)" and
+           upcase(memname)="%upcase(&dsname)" and
+           d.name = i.name and
+           d.type="char" and (not(missing(i.length))) and (i.length gt d.length)
+     ;
+    quit ;
+  %end;
+  
   data &datalib..&dsname(
       %if %sysevalf(%superq(dslabel)=, boolean)=0 %then %str(label = %sysfunc(quote(%nrbquote(&dslabel))));
       %if %substr(%upcase(&DropSeqVar),1,1) eq Y %then drop=ITEMGROUPDATASEQ;
     );
     retain &variables;
-    length &length;
+    %if %sysevalf(%superq(length)=, boolean)=0 %then length &length;;
     %if %sysevalf(%superq(format)=, boolean)=0 %then format &format;;
     set &datalib..&dsname;
   run;
@@ -400,8 +407,10 @@
     d.name,
     d.type as datatype,
     i.datatype as type,
-    d.length as sas_length,
-    i.length,
+    %if %sysevalf(%superq(length)=, boolean)=0 %then %do;
+      d.length as sas_length,
+      i.length,
+    %end;
     d.format
    from dictionary.columns d,
         out_&_Random..&_items_ i
@@ -417,8 +426,10 @@
       then putlog "WAR" "NING: [&sysmacroname] TYPE ISSUE: dataset=datalib..&dsname " OID= name= DataType= type=;
     if DataType="num" and not (type in ('integer' 'double' 'float' 'decimal' 'datetime' 'date' 'time')) 
       then putlog "WAR" "NING: [&sysmacroname] TYPE ISSUE: dataset=datalib..&dsname " OID= name= DataType= type=;
-    if DataType="char" and not(missing(length)) and (length lt sas_length) 
-      then putlog "WAR" "NING: [&sysmacroname] LENGTH ISSUE: dataset=datalib..&dsname " OID= name= length= sas_length=;
+    %if %sysevalf(%superq(length)=, boolean)=0 %then %do;
+      if DataType="char" and not(missing(length)) and (length lt sas_length) 
+        then putlog "WAR" "NING: [&sysmacroname] LENGTH ISSUE: dataset=datalib..&dsname " OID= name= length= sas_length=;
+    %end;
   run;
 
   proc delete data=work.column_metadata;
