@@ -88,6 +88,7 @@
   %* Restore options;
   options &_SaveOptions2;
 
+  %let datasetJSONVersion=;
   proc sql noprint;
     select datasetJSONVersion into :datasetJSONVersion separated by ' '
       from out_&_Random..root;
@@ -152,6 +153,9 @@
   run;
     
 
+  %let variable=;
+  %let rename=;
+  %let label=;
   proc sql noprint;
     select name into :variables separated by ' '
       from out_&_Random..&_items_;
@@ -160,17 +164,11 @@
     select cats(name, '=', quote(strip(label))) into :label separated by ' '
       from out_&_Random..&_items_
       where not(missing(label));
-/*
-    select catt(name, ' $', length) into :length separated by ' '
-      from out_&_Random..&_items_
-      where datatype="string" and (not(missing(length)));
-*/
   quit;
 
   %put &=variables;
   %put &=rename;
   %put &=label;
-  %*put &=length;
 
   %let dslabel=;
   %let dsname=;
@@ -383,6 +381,8 @@
      ;
     quit ;
   %end;
+  
+  %put &=length;
   
   data &datalib..&dsname(
       %if %sysevalf(%superq(dslabel)=, boolean)=0 %then %str(label = %sysfunc(quote(%nrbquote(&dslabel))));
