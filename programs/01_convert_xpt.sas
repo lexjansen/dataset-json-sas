@@ -6,7 +6,7 @@
 %let _cst_rc=;
 %let _cst_rcmsg=;
 
-/* Convert ADaM XPT files to SAS datasets */
+/* Convert ADaM v5 XPT files to SAS datasets */
 %cstutilxptread(
   _cstSourceFolder=&project_folder/data/adam_xpt,
   _cstOutputLibrary=dataadam,
@@ -18,7 +18,7 @@ proc contents data=dataadam._ALL_ varnum;
 run;
 */
 
-/* Convert SDTM XPT files to SAS datasets */
+/* Convert SDTM v5 XPT files to SAS datasets */
 %cstutilxptread(
   _cstSourceFolder=&project_folder/data/sdtm_xpt,
   _cstOutputLibrary=datasdtm,
@@ -30,7 +30,7 @@ proc contents data=datasdtm._ALL_ varnum;
 run;
 */
 
-/* Convert SEND XPT files to SAS datasets */
+/* Convert SEND v5 XPT files to SAS datasets */
 %cstutilxptread(
   _cstSourceFolder=&project_folder/data/send_xpt,
   _cstOutputLibrary=datasend,
