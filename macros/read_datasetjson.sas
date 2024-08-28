@@ -1,5 +1,6 @@
 %macro read_datasetjson(
   jsonpath=,
+  jsonfref=,
   datalib=,
   dropseqvar=Y,
   savemetadata=Y,
@@ -27,7 +28,6 @@
 
   %* Check for missing parameters ;
   %let _Missing=;
-  %if %sysevalf(%superq(jsonpath)=, boolean) %then %let _Missing = &_Missing jsonpath;
   %if %sysevalf(%superq(datalib)=, boolean) %then %let _Missing = &_Missing datalib;
   %if %sysevalf(%superq(dropseqvar)=, boolean) %then %let _Missing = &_Missing dropseqvar;
   %if %sysevalf(%superq(savemetadata)=, boolean) %then %let _Missing = &_Missing savemetadata;
@@ -38,6 +38,28 @@
       %goto exit_macro;
     %end;
 
+  %* Spoecify either jsonpath or jsonfref;
+  %if %sysevalf(%superq(jsonpath)=, boolean) and %sysevalf(%superq(jsonfref)=, boolean) %then %do;
+      %put ERR%str(OR): [&sysmacroname] Both jsonpath and jsonfref are missing. Specify one of them.;
+      %goto exit_macro;
+  %end;
+
+
+  %* Spoecify either jsonpath or jsonfref;
+  %if %sysevalf(%superq(jsonpath)=, boolean)=0 and %sysevalf(%superq(jsonfref)=, boolean)=0 %then %do;
+      %put ERR%str(OR): [&sysmacroname] Specify either jsonpath or jsonfref, but not both.;
+      %goto exit_macro;
+  %end;
+
+  %* Check for non-existing jsonpath;
+  %if %sysevalf(%superq(jsonpath)=, boolean)=0 %then %do;
+    %if not %sysfunc(fileexist(&jsonpath)) %then %do;
+      %put ERR%str(OR): [&sysmacroname] JSON file jsonpath=&jsonpath does not exist.;
+      %goto exit_macro;
+    %end;
+  %end;  
+
+  %* Check if datalib has been assigned ;
   %if %sysevalf(%superq(datalib)=, boolean)=0 %then %do;
     %if (%sysfunc(libref(&datalib)) ne 0 ) %then %do;
         %put ERR%str(OR): [&sysmacroname] datalib library &datalib has not been assigned.;
@@ -45,6 +67,7 @@
     %end;  
   %end;
 
+  %* Check if metadatalib has been assigned ;
   %if %sysevalf(%superq(metadatalib)=, boolean)=0 %then %do;
     %if (%sysfunc(libref(&metadatalib)) ne 0 ) %then %do;
         %put ERR%str(OR): [&sysmacroname] metadatalib library &metadatalib has not been assigned.;
@@ -75,13 +98,16 @@
   %let _SaveOptions2 = %sysfunc(getoption(compress, keyword)) %sysfunc(getoption(reuse, keyword));
   options compress=Yes reuse=Yes;
 
-  filename json&_Random "&jsonpath";
+  %if %sysevalf(%superq(jsonpath)=, boolean)=0 %then
+    filename json&_Random "&jsonpath";;
+  %if %sysevalf(%superq(jsonfref)=, boolean)=0 %then
+    filename json&_random "%sysfunc(pathname(&jsonfref))";;
+  
   filename mapmeta "../maps/map_meta.map";
-  filename map&_Random "%sysfunc(pathname(work))/map_%scan(&jsonpath, -2, %str(.\/)).map";
-  libname out_&_Random "%sysfunc(pathname(work))/%scan(&jsonpath, -2, %str(.\/))";
+  filename map&_Random "%sysfunc(pathname(work))/map_%scan(%sysfunc(pathname(json&_random)), -2, %str(.\/)).map";
+  libname out_&_Random "%sysfunc(pathname(work))/%scan(%sysfunc(pathname(json&_random)), -2, %str(.\/))";
 
-  libname json&_Random json map=map&_Random automap=create fileref=json&_Random
-          %if "%substr(%upcase(&savemetadata),1,1)" ne "Y" %then noalldata; ordinalcount=none;
+  libname json&_Random json map=map&_Random automap=create fileref=json&_Random noalldata ordinalcount=none;
   proc copy in=json&_Random out=out_&_Random;
   run;
 
@@ -437,8 +463,8 @@
 
   %exit_macro_no_rows:
   
-  libname json&_Random clear;
   filename json&_Random clear;
+  libname json&_Random clear;
   filename map&_Random clear;
   filename mapmeta clear;
 

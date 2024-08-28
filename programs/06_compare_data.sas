@@ -99,7 +99,7 @@ data _null_;
 run;
 
 ods html5 close;
-ods html5 file="&project_folder/programs" file="07_compare_data_summary_&today_iso8601..html";
+ods html5 path="&project_folder/programs" file="07_compare_data_summary_&today_iso8601..html";
 
   proc print data=results.dataset_compare_results label;
     title01 "Compare Summary - &now_iso8601";
@@ -114,7 +114,7 @@ proc delete data=work.members;
 run;
 
 /*
-libname dataaadam clear;
+libname dataadam clear;
 libname outadam clear;
 libname datasdtm clear;
 libname outsdtm clear;
