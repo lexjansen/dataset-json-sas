@@ -1,10 +1,10 @@
 %macro write_datasetjson(
   dataset=,
   jsonpath=,
+  jsonfref=,
   usemetadata=N,
   metadatalib=,
   decimalVariables=,
-  iso8601Variables=,
   datasetJSONVersion=1.1.0,
   fileOID=,
   originator=,
@@ -59,7 +59,6 @@
   %* Check for missing parameters ;
   %let _Missing=;
   %if %sysevalf(%superq(dataset)=, boolean) %then %let _Missing = &_Missing dataset;
-  %if %sysevalf(%superq(jsonpath)=, boolean) %then %let _Missing = &_Missing jsonpath;
   %if %sysevalf(%superq(usemetadata)=, boolean) %then %let _Missing = &_Missing usemetadata;
 
   %if %length(&_Missing) gt 0
@@ -67,6 +66,26 @@
       %put ERR%str(OR): [&sysmacroname] Required macro parameter(s) missing: &_Missing;
       %goto exit_macro;
     %end;
+
+  %* Check for non-existing dataset ;
+  %if not %sysfunc(exist(&dataset)) %then %do;
+    %put ERR%str(OR): [&sysmacroname] Dataset dataset=&dataset does not exist.;
+    %goto exit_macro;
+  %end;
+
+  %* Spoecify either jsonpath or jsonfref;
+  %if %sysevalf(%superq(jsonpath)=, boolean) and %sysevalf(%superq(jsonfref)=, boolean) %then %do;
+      %put ERR%str(OR): [&sysmacroname] Both jsonpath and jsonfref are missing. Specify one of them.;
+      %goto exit_macro;
+  %end;
+
+
+  %* Spoecify either jsonpath or jsonfref;
+  %if %sysevalf(%superq(jsonpath)=, boolean)=0 and %sysevalf(%superq(jsonfref)=, boolean)=0 %then %do;
+      %put ERR%str(OR): [&sysmacroname] Specify either jsonpath or jsonfref, but not both.;
+      %goto exit_macro;
+  %end;
+
 
   %* Rule: usemetadata has to be Y or N  *;
   %if "%substr(%upcase(&usemetadata),1,1)" ne "Y" and "%substr(%upcase(&usemetadata),1,1)" ne "N" %then
@@ -92,15 +111,15 @@
   %* Rule: when usemetadata eq Y then metadata datasets need to exist in the metadatalib library *;
   %if "%substr(%upcase(&usemetadata),1,1)" eq "Y" %then %do;
     %if not %sysfunc(exist(&metadatalib..metadata_study)) %then %do;
-      %put ERR%str(OR): [&sysmacroname] When usemetadata=Y, then &metadatalib..metadata_study must exist.;
+      %put ERR%str(OR): [&sysmacroname] usemetadata=Y, but &metadatalib..metadata_study does not exist.;
       %goto exit_macro;
     %end;
     %if not %sysfunc(exist(&metadatalib..metadata_tables)) %then %do;
-      %put ERR%str(OR): [&sysmacroname] When usemetadata=Y, then &metadatalib..metadata_tables must exist.;
+      %put ERR%str(OR): [&sysmacroname] usemetadata=Y, but &metadatalib..metadata_tables does not exist.;
       %goto exit_macro;
     %end;  
     %if not %sysfunc(exist(&metadatalib..metadata_columns)) %then %do;
-      %put ERR%str(OR): [&sysmacroname] When usemetadata=Y, then &metadatalib..metadata_columns must exist.;
+      %put ERR%str(OR): [&sysmacroname] usemetadata=Y, but &metadatalib..metadata_columns does not exist.;
       %goto exit_macro;
     %end;
   %end;
@@ -109,8 +128,6 @@
   %if "%substr(%upcase(&usemetadata),1,1)" eq "Y" %then %do;
     %if %sysevalf(%superq(decimalVariables)=, boolean)=0
         %then %put WAR%str(NING): [&sysmacroname] When macro parameter usemetadata=&usemetadata then parameter decimalVariables will not be used.;
-    %if %sysevalf(%superq(iso8601Variables)=, boolean)=0
-        %then %put WAR%str(NING): [&sysmacroname] When macro parameter usemetadata=&usemetadata then parameter iso8601Variables will not be used.;
   %end;
 
   %* Rule: allowed versions *;
@@ -405,22 +422,6 @@
       where (datatype in ('datetime', 'date', 'time')) and (targetdatatype = 'integer');  
   quit;
 
-  %if %sysevalf(%superq(iso8601Variables)=, boolean)=0 %then %do;
-    data work.column_metadata;
-      set work.column_metadata;
-        %do _count=1 %to %sysfunc(countw(&iso8601Variables, %str(' ')));
-          if upcase(name)=upcase("%scan(&iso8601Variables, &_count)") then do; 
-            if missing(displayFormat) then 
-              putlog "WAR" "NING: [&sysmacroname] &dataset.." name +(-1) ": variable has no format attached." name= dataType= targetDataType=;
-            else do; 
-              putlog name= dataType= targetDataType= displayFormat=; 
-            end;
-          end;
-        %end;
-    run;  
-    %let _iso8601_variables=&iso8601Variables;
-  %end;  
-
   %if %sysevalf(%superq(_iso8601_variables)=, boolean)=0 %then %do;
     %put NOTE: [&sysmacroname] &dataset: numeric ISO 8601 variables converted to strings: &_iso8601_variables;
   %end;    
@@ -486,7 +487,10 @@
     ;
   quit;  
 
-  filename json&_random "&jsonpath";
+  %if %sysevalf(%superq(jsonpath)=, boolean)=0 %then
+    filename json&_random "&jsonpath";;
+  %if %sysevalf(%superq(jsonfref)=, boolean)=0 %then
+    filename json&_random "%sysfunc(pathname(&jsonfref))";;
 
   data work.column_metadata;
     retain itemOID name label dataType targetDataType length displayFormat keySequence;
