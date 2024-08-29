@@ -69,28 +69,36 @@
 
   %* Check for non-existing dataset ;
   %if not %sysfunc(exist(&dataset)) %then %do;
-    %put ERR%str(OR): [&sysmacroname] Dataset dataset=&dataset does not exist.;
+    %put ERR%str(OR): [&sysmacroname] Dataset &=dataset does not exist.;
     %goto exit_macro;
   %end;
 
-  %* Spoecify either jsonpath or jsonfref;
+  %* Specify either jsonpath or jsonfref;
   %if %sysevalf(%superq(jsonpath)=, boolean) and %sysevalf(%superq(jsonfref)=, boolean) %then %do;
       %put ERR%str(OR): [&sysmacroname] Both jsonpath and jsonfref are missing. Specify one of them.;
       %goto exit_macro;
   %end;
 
 
-  %* Spoecify either jsonpath or jsonfref;
+  %* Specify either jsonpath or jsonfref;
   %if %sysevalf(%superq(jsonpath)=, boolean)=0 and %sysevalf(%superq(jsonfref)=, boolean)=0 %then %do;
       %put ERR%str(OR): [&sysmacroname] Specify either jsonpath or jsonfref, but not both.;
       %goto exit_macro;
   %end;
 
+  %* Check for non-assigned jsonfref;
+  %if %sysevalf(%superq(jsonfref)=, boolean)=0 %then %do;
+    %if %sysfunc(fileref(&jsonfref)) gt 0 %then %do;
+      %put ERR%str(OR): [&sysmacroname] JSON file reference &=jsonfref is not assigned.;
+      %put %sysfunc(sysmsg());
+      %goto exit_macro;
+    %end;
+  %end;  
 
   %* Rule: usemetadata has to be Y or N  *;
   %if "%substr(%upcase(&usemetadata),1,1)" ne "Y" and "%substr(%upcase(&usemetadata),1,1)" ne "N" %then
   %do;
-    %put ERR%str(OR): [&sysmacroname] Required macro parameter usemetadata=&usemetadata must be Y or N.;
+    %put ERR%str(OR): [&sysmacroname] Required macro parameter &=usemetadata must be Y or N.;
     %goto exit_macro;
   %end;
 
@@ -103,7 +111,8 @@
 
   %if %sysevalf(%superq(metadatalib)=, boolean)=0 %then %do;
     %if (%sysfunc(libref(&metadatalib)) ne 0 ) %then %do;
-      %put ERR%str(OR): [&sysmacroname] metadatalib library &metadatalib has not been assigned.;
+      %put ERR%str(OR): [&sysmacroname] metadatalib library &=metadatalib has not been assigned.;
+      %put %sysfunc(sysmsg());
       %goto exit_macro;
     %end;  
   %end;
@@ -127,13 +136,13 @@
   %* Rule: when usemetadata eq Y then decimalVariables will not be used *;
   %if "%substr(%upcase(&usemetadata),1,1)" eq "Y" %then %do;
     %if %sysevalf(%superq(decimalVariables)=, boolean)=0
-        %then %put WAR%str(NING): [&sysmacroname] When macro parameter usemetadata=&usemetadata then parameter decimalVariables will not be used.;
+        %then %put WAR%str(NING): [&sysmacroname] When macro parameter &=usemetadata then parameter decimalVariables will not be used.;
   %end;
 
   %* Rule: allowed versions *;
   %if %substr(&datasetJSONVersion,1,3) ne %str(1.1) %then
   %do;
-    %put ERR%str(OR): [&sysmacroname] Macro parameter datasetJSONVersion=&datasetJSONVersion. Allowed values: 1.1.x.;
+    %put ERR%str(OR): [&sysmacroname] Macro parameter &=datasetJSONVersion. Allowed values: 1.1.x.;
     %goto exit_macro;
   %end;
 

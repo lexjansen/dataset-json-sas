@@ -43,7 +43,6 @@ run;
       jsonpath=&project_folder\test\class.json,
       usemetadata=N,
       decimalVariables=bmi,
-      iso8601Variables=birthdate,
       pretty=PRETTY);
 
 proc datasets library=work noprint nolist nodetails;

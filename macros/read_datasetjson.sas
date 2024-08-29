@@ -38,14 +38,13 @@
       %goto exit_macro;
     %end;
 
-  %* Spoecify either jsonpath or jsonfref;
+  %* Specify either jsonpath or jsonfref;
   %if %sysevalf(%superq(jsonpath)=, boolean) and %sysevalf(%superq(jsonfref)=, boolean) %then %do;
       %put ERR%str(OR): [&sysmacroname] Both jsonpath and jsonfref are missing. Specify one of them.;
       %goto exit_macro;
   %end;
 
-
-  %* Spoecify either jsonpath or jsonfref;
+  %* Specify either jsonpath or jsonfref;
   %if %sysevalf(%superq(jsonpath)=, boolean)=0 and %sysevalf(%superq(jsonfref)=, boolean)=0 %then %do;
       %put ERR%str(OR): [&sysmacroname] Specify either jsonpath or jsonfref, but not both.;
       %goto exit_macro;
@@ -54,7 +53,20 @@
   %* Check for non-existing jsonpath;
   %if %sysevalf(%superq(jsonpath)=, boolean)=0 %then %do;
     %if not %sysfunc(fileexist(&jsonpath)) %then %do;
-      %put ERR%str(OR): [&sysmacroname] JSON file jsonpath=&jsonpath does not exist.;
+      %put ERR%str(OR): [&sysmacroname] JSON file &=jsonpath does not exist.;
+      %goto exit_macro;
+    %end;
+  %end;  
+
+  %* Check for non-assigned jsonfref;
+  %if %sysevalf(%superq(jsonfref)=, boolean)=0 %then %do;
+    %if %sysfunc(fileref(&jsonfref)) gt 0 %then %do;
+      %put ERR%str(OR): [&sysmacroname] JSON file reference &=jsonfref is not assigned.;
+      %put %sysfunc(sysmsg());
+      %goto exit_macro;
+    %end;
+    %if %sysfunc(fileref(&jsonfref)) lt 0 %then %do;
+      %put ERR%str(OR): [&sysmacroname] JSON file referenced by &=jsonfref (%sysfunc(pathname(&jsonfref))) does not exist.;
       %goto exit_macro;
     %end;
   %end;  
@@ -62,7 +74,8 @@
   %* Check if datalib has been assigned ;
   %if %sysevalf(%superq(datalib)=, boolean)=0 %then %do;
     %if (%sysfunc(libref(&datalib)) ne 0 ) %then %do;
-        %put ERR%str(OR): [&sysmacroname] datalib library &datalib has not been assigned.;
+        %put ERR%str(OR): [&sysmacroname] datalib library &=datalib has not been assigned.;
+        %put %sysfunc(sysmsg());
         %goto exit_macro;
     %end;  
   %end;
@@ -70,7 +83,8 @@
   %* Check if metadatalib has been assigned ;
   %if %sysevalf(%superq(metadatalib)=, boolean)=0 %then %do;
     %if (%sysfunc(libref(&metadatalib)) ne 0 ) %then %do;
-        %put ERR%str(OR): [&sysmacroname] metadatalib library &metadatalib has not been assigned.;
+        %put ERR%str(OR): [&sysmacroname] metadatalib library &=metadatalib has not been assigned.;
+        %put %sysfunc(sysmsg());
         %goto exit_macro;
     %end;  
   %end;
@@ -78,14 +92,14 @@
   %* Rule: dropseqvar has to be Y or N  *;
   %if "%substr(%upcase(&dropseqvar),1,1)" ne "Y" and "%substr(%upcase(&dropseqvar),1,1)" ne "N" %then
   %do;
-    %put ERR%str(OR): [&sysmacroname] Required macro parameter dropseqvar=&dropseqvar must be Y or N.;
+    %put ERR%str(OR): [&sysmacroname] Required macro parameter &=dropseqvar must be Y or N.;
     %goto exit_macro;
   %end;
 
   %* Rule: savemetadata has to be Y or N  *;
   %if "%substr(%upcase(&savemetadata),1,1)" ne "Y" and "%substr(%upcase(&savemetadata),1,1)" ne "N" %then
   %do;
-    %put ERR%str(OR): [&sysmacroname] Required macro parameter savemetadata=&savemetadata must be Y or N.;
+    %put ERR%str(OR): [&sysmacroname] Required macro parameter &=savemetadata must be Y or N.;
     %goto exit_macro;
   %end;
 
