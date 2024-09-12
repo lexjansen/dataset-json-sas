@@ -8,7 +8,8 @@
 %util_gettree(
   dir=&project_folder/json_out/adam, 
   outds=work.dirtree_adam, 
-  where=%str(ext="json" and dir=0)
+  where=%str(ext="json" and dir=0),
+  keep=fullpath
 );
 
 %if %cstutilnobs(_cstDataSetName=work.dirtree_adam)=0 %then %do;
@@ -41,7 +42,8 @@ run;
 %util_gettree(
   dir=&project_folder/json_out/sdtm, 
   outds=work.dirtree_sdtm, 
-  where=%str(ext="json" and dir=0)
+  where=%str(ext="json" and dir=0),
+  keep=fullpath
 );
 
 %if %cstutilnobs(_cstDataSetName=work.dirtree_sdtm)=0 %then %do;
@@ -74,7 +76,8 @@ run;
 %util_gettree(
   dir=&project_folder/json_out/send, 
   outds=work.dirtree_send, 
-  where=%str(ext="json" and dir=0)
+  where=%str(ext="json" and dir=0),
+  keep=fullpath
 );
 
 %if %cstutilnobs(_cstDataSetName=work.dirtree_send)=0 %then %do;

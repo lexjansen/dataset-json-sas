@@ -1,10 +1,34 @@
+/**  
+  @file util_gettree.sas
+  @brief Create a dataset with directory information.
+
+  @details
+  credit: https://communities.sas.com/t5/SAS-Programming/listing-all-files-of-all-types-from-all-subdirectories/m-p/334113/highlight/true#M75419
+
+  Example usage:
+  
+      %util_gettree(
+        dir=&project_folder/json_out/sdtm, 
+        outds=work.dirtree_sdtm, 
+        where=%str(ext="json" and dir=0)
+      );
+
+  @author Lex Jansen
+
+  @param[in] dir= The starting directory
+  @param[out] outds= (work.dirtree) Output dataset
+  @param[in] where= Filter records
+  @param[in] keep=  Variables to keep in output dataset
+  @param[in] drop= (ext) Variables to drop in output dataset
+
+**/
 %macro util_gettree(
   dir=, 
   outds=work.dirtree, 
   where=,
   keep=,
   drop=ext
-  );
+  ) / des = 'Create a dataset with directory information';
 
   /*
   credit:

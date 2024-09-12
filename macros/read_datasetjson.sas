@@ -1,3 +1,42 @@
+/**
+  @file read_datasetjson.sas
+  @brief Read a Dataset-JSON file to a SAS dataset.
+
+  @details This macro creates a SAS dataset from a Dataset-JSON file<br />
+  Optionally, the dataset-JSON metadata is saved in a number of metadata tables:
+  @li metadata_study
+  @li metadata_tables
+  @li metadata_columns
+
+  Example usage:
+
+      %read_datasetjson(
+          jsonpath=&project_folder/json_out/sdtm/dm.json,
+          datalib=datasdtm,
+          savemetadata=N
+          );
+
+      %read_datasetjson(
+          jsonpath=&project_folder/json_out/sdtm/dm.json,
+          datalib=datasdtm
+          savemetadata=Y,
+          metadatalib=metasdtm);
+
+  @author Lex Jansen
+
+  @param[in] jsonpath= Path to Dataset-JSON file
+  @param[in] jsonfref= File reference for the Dataset-JSON file. Either jsonpath or jsonfref has to be sppecified.
+  @param[out] datalib= Library to save SAS data set
+  @param[in] savemetadata= (Y) Use Define-XML metadata? (Y/N)
+  @param[out] metadatalib= (work) Library to save the metadata datasets
+    The following datasets are saved:
+    @li metadata_study
+    @li metadata_tables
+    @li metadata_columns
+  @param[in] dropseqvar= (Y) Drop record sequence variable? (Y/N)
+
+**/
+
 %macro read_datasetjson(
   jsonpath=,
   jsonfref=,
@@ -56,7 +95,7 @@
       %put ERR%str(OR): [&sysmacroname] JSON file &=jsonpath does not exist.;
       %goto exit_macro;
     %end;
-  %end;  
+  %end;
 
   %* Check for non-assigned jsonfref;
   %if %sysevalf(%superq(jsonfref)=, boolean)=0 %then %do;
@@ -69,7 +108,7 @@
       %put ERR%str(OR): [&sysmacroname] JSON file referenced by &=jsonfref (%sysfunc(pathname(&jsonfref))) does not exist.;
       %goto exit_macro;
     %end;
-  %end;  
+  %end;
 
   %* Check if datalib has been assigned ;
   %if %sysevalf(%superq(datalib)=, boolean)=0 %then %do;
@@ -77,7 +116,7 @@
         %put ERR%str(OR): [&sysmacroname] datalib library &=datalib has not been assigned.;
         %put %sysfunc(sysmsg());
         %goto exit_macro;
-    %end;  
+    %end;
   %end;
 
   %* Check if metadatalib has been assigned ;
@@ -86,7 +125,7 @@
         %put ERR%str(OR): [&sysmacroname] metadatalib library &=metadatalib has not been assigned.;
         %put %sysfunc(sysmsg());
         %goto exit_macro;
-    %end;  
+    %end;
   %end;
 
   %* Rule: dropseqvar has to be Y or N  *;
@@ -116,7 +155,7 @@
     filename json&_Random "&jsonpath";;
   %if %sysevalf(%superq(jsonfref)=, boolean)=0 %then
     filename json&_random "%sysfunc(pathname(&jsonfref))";;
-  
+
   filename mapmeta "../maps/map_meta.map";
   filename map&_Random "%sysfunc(pathname(work))/map_%scan(%sysfunc(pathname(json&_random)), -2, %str(.\/)).map";
   libname out_&_Random "%sysfunc(pathname(work))/%scan(%sysfunc(pathname(json&_random)), -2, %str(.\/))";
@@ -133,9 +172,9 @@
     select datasetJSONVersion into :datasetJSONVersion separated by ' '
       from out_&_Random..root;
   quit;
-  
+
   %put &=datasetJSONVersion;
-  
+
   %* Rule: allowed versions *;
   %if %substr(&datasetJSONVersion,1,3) ne %str(1.1) %then
   %do;
@@ -144,7 +183,7 @@
   %end;
 
   /* Find the names of the dataset that were created */
-  %let _itemgroupdata_=root;  
+  %let _itemgroupdata_=root;
   %let _items_=columns;
   %let _itemdata_=rows;
 
@@ -171,27 +210,27 @@
     %end;
     set out_&_Random..&_items_;
     dataset_name = "&_ItemGroupName";
-    
+
     %if &_var_exist %then %do;
-      if dataType in ("date", "datetime", "time") and targetDataType = "integer" and missing(displayFormat) 
+      if dataType in ("date", "datetime", "time") and targetDataType = "integer" and missing(displayFormat)
         then do;
           putlog "WAR" "NING: [&sysmacroname] Missing displayFormat for variable: &datalib..&_ItemGroupName.." name +(-1) ", " ItemOID= +(-1) ", " dataType= +(-1) ", " targetDataType=;
           if dataType="datetime" then do;
             putlog "WAR" "NING: [&sysmacroname] displayFormat E8601DT. will be used.";
             displayFormat = "E8601DT.";
-          end;  
+          end;
           if dataType="date" then do;
-            putlog "WAR" "NING: [&sysmacroname] displayFormat E8601DA. will be used."; 
+            putlog "WAR" "NING: [&sysmacroname] displayFormat E8601DA. will be used.";
             displayFormat = "E8601DA.";
-          end;  
+          end;
           if dataType="time" then do;
             putlog "WAR" "NING: [&sysmacroname] displayFormat E8601TM. will be used.";
             displayFormat = "E8601TM.";
-          end;  
-        end;  
-    %end;    
+          end;
+        end;
+    %end;
   run;
-    
+
 
   %let variable=;
   %let rename=;
@@ -220,7 +259,7 @@
     %else %do;
       select name into :dsname trimmed
         from out_&_Random..&_itemgroupdata_
-    %end;    
+    %end;
     ;
   quit;
 
@@ -235,7 +274,7 @@
       quit;
     %end;
     %else %put ERR%str(OR): [&sysmacroname] Attribute "itemGroupOID" is missing.;
-      
+
     %if not %sysfunc(exist(&metadatalib..metadata_study)) %then %create_template(type=STUDY, out=&metadatalib..metadata_study);;
     %if not %sysfunc(exist(&metadatalib..metadata_tables)) %then %create_template(type=TABLES, out=&metadatalib..metadata_tables);;
     %if not %sysfunc(exist(&metadatalib..metadata_columns)) %then %create_template(type=COLUMNS, out=&metadatalib..metadata_columns);;
@@ -261,9 +300,9 @@
         set out_&_Random..root;
       run;
     %end;
-      
+
     data &metadatalib..metadata_study(keep=&metadata_study_columns);
-      set &metadatalib..metadata_study 
+      set &metadatalib..metadata_study
           work._metadata_study(
             rename=(
               datasetJSONCreationDateTime = creationDateTime
@@ -275,9 +314,9 @@
     proc delete data=work._metadata_study;
     run;
 
-    %if %cstutilcheckvarsexist(_cstDataSetName=out_&_Random..&_itemgroupdata_, _cstVarList=isReferenceData) 
+    %if %cstutilcheckvarsexist(_cstDataSetName=out_&_Random..&_itemgroupdata_, _cstVarList=isReferenceData)
     %then %do;
-      %if %cstutilgetattribute(_cstDataSetName=out_&_Random..&_itemgroupdata_, _cstVarName=isReferenceData, _cstAttribute=VARTYPE) eq N 
+      %if %cstutilgetattribute(_cstDataSetName=out_&_Random..&_itemgroupdata_, _cstVarName=isReferenceData, _cstAttribute=VARTYPE) eq N
       %then %do;
         data out_&_Random..&_itemgroupdata_;
           length isReferenceData $3;
@@ -285,7 +324,7 @@
             if _isReferenceData = 1 then isReferenceData = "Yes";
             if _isReferenceData = 0 then isReferenceData = "No";
             drop _isReferenceData;
-        run;  
+        run;
       %end;
     %end;
 
@@ -316,8 +355,8 @@
       if init then do;
         dataset_name = "&_ItemGroupName";
         %if %substr(%upcase(&DropSeqVar),1,1) eq Y %then %do;
-          order = order - 1;   
-        %end;  
+          order = order - 1;
+        %end;
         json_length = length;
         length = .;
       end;
@@ -327,7 +366,7 @@
     run;
 
   %end; /* savemetadata eq "Y" */
-  
+
 
   /* get formats from Dataset-JSON metadata, but only when the displayformat variable exists */
   %let format=;
@@ -338,7 +377,7 @@
           where (not(missing(displayformat)) and (displayformat ne ".")) /* and (type in ('integer' 'float' 'double' 'decimal')) */;
     quit;
   %end;
-  
+
   %put &=format;
 
   %if not %sysfunc(exist(out_&_Random..&_itemdata_)) %then %do;
@@ -357,7 +396,7 @@
       rename &rename;
       label &label;
   quit;
-  
+
 
   %******************************************************************************;
   %let _decimal_variables=;
@@ -367,7 +406,7 @@
         /* from &metadatalib..metadata_columns */
         from out_&_Random..&_items_
         where (datatype='decimal' and targetdatatype='decimal') and
-              (upcase(dataset_name) = upcase("&dsname"));  
+              (upcase(dataset_name) = upcase("&dsname"));
     quit;
   %end;
 
@@ -380,7 +419,7 @@
         label &label;
     quit;
 
-  %end;  
+  %end;
 
   %let _iso8601_variables=;
   %if %cstutilcheckvarsexist(_cstDataSetName=out_&_Random..&_items_, _cstVarList=targetdatatype) %then %do;
@@ -389,7 +428,7 @@
         /* from &metadatalib..metadata_columns */
         from out_&_Random..&_items_
         where (datatype in ('datetime' 'date' 'time')) and (targetdatatype = 'integer') and
-              (upcase(dataset_name) = upcase("&dsname"));  
+              (upcase(dataset_name) = upcase("&dsname"));
     quit;
   %end;
 
@@ -403,10 +442,10 @@
         label &label;
     quit;
 
-  %end;  
+  %end;
 
 %******************************************************************************;
-  
+
   /* Update lengths */
   %let length=;
   %if %cstutilcheckvarsexist(_cstDataSetName=out_&_Random..&_items_, _cstVarList=length) %then %do;
@@ -421,9 +460,9 @@
      ;
     quit ;
   %end;
-  
+
   %put &=length;
-  
+
   data &datalib..&dsname(
       %if %sysevalf(%superq(dslabel)=, boolean)=0 %then %str(label = %sysfunc(quote(%nrbquote(&dslabel))));
       %if %substr(%upcase(&DropSeqVar),1,1) eq Y %then drop=ITEMGROUPDATASEQ;
@@ -462,12 +501,12 @@
 
   data _null_;
     set column_metadata;
-    if DataType="char" and not (type in ('string' 'datetime' 'date' 'time')) 
+    if DataType="char" and not (type in ('string' 'datetime' 'date' 'time'))
       then putlog "WAR" "NING: [&sysmacroname] TYPE ISSUE: dataset=datalib..&dsname " OID= name= DataType= type=;
-    if DataType="num" and not (type in ('integer' 'double' 'float' 'decimal' 'datetime' 'date' 'time')) 
+    if DataType="num" and not (type in ('integer' 'double' 'float' 'decimal' 'datetime' 'date' 'time'))
       then putlog "WAR" "NING: [&sysmacroname] TYPE ISSUE: dataset=datalib..&dsname " OID= name= DataType= type=;
     %if %sysevalf(%superq(length)=, boolean)=0 %then %do;
-      if DataType="char" and not(missing(length)) and (length lt sas_length) 
+      if DataType="char" and not(missing(length)) and (length lt sas_length)
         then putlog "WAR" "NING: [&sysmacroname] LENGTH ISSUE: dataset=datalib..&dsname " OID= name= length= sas_length=;
     %end;
   run;
@@ -476,7 +515,7 @@
   run;
 
   %exit_macro_no_rows:
-  
+
   filename json&_Random clear;
   libname json&_Random clear;
   filename map&_Random clear;

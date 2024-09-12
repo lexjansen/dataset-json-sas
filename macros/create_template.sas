@@ -1,4 +1,20 @@
-%macro create_template(type=, out=);
+/**  
+  @file create_template.sas
+  @brief Create a SAS dataset template.
+
+  @author Lex Jansen
+
+  @param[in] type= The template type:
+    @li STUDY
+    @li TABLES
+    @li COLUMNS
+    @li COMPARE_RESULTS
+    @li VALIDATION_RESULTS
+  @param[out] out= Output dataset
+
+**/
+
+%macro create_template(type=, out=) / des = 'Create a SAS dataset template';
 
   %if %upcase(&type) eq STUDY %then %do;
     proc sql;

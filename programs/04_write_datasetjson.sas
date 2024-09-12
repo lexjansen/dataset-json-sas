@@ -8,11 +8,12 @@
 %let _studyOID=%str(TDF_ADaM.ADaMIG.1.1);
 %let _metaDataVersionOID=%str(MDV.TDF_ADaM.ADaMIG.1.1);
 
-/* Get the paths of the XPT files */
+/* Get the paths of the SAS datasets */
 %util_gettree(
   dir=%sysfunc(pathname(dataadam)),
   outds=work.dirtree_adam,
-  where=%str(ext="sas7bdat" and dir=0)
+  where=%str(ext="sas7bdat" and dir=0),
+  keep=filename fullpath
 );
 
 %if %cstutilnobs(_cstDataSetName=work.dirtree_adam)=0 %then %do;
@@ -51,11 +52,12 @@ run;
 %let _studyOID=%str(cdisc.com/CDISCPILOT01);
 %let _metaDataVersionOID=%str(MDV.MSGv2.0.SDTMIG.3.3.SDTM.1.7);
 
-/* Get the paths of the XPT files */
+/* Get the paths of the SAS datasets */
 %util_gettree(
   dir=%sysfunc(pathname(datasdtm)),
   outds=work.dirtree_sdtm,
-  where=%str(ext="sas7bdat" and dir=0)
+  where=%str(ext="sas7bdat" and dir=0),
+  keep=filename fullpath
 );
 
 %if %cstutilnobs(_cstDataSetName=work.dirtree_sdtm)=0 %then %do;
@@ -93,11 +95,12 @@ run;
 %let _studyOID=%str(8326556);
 %let _metaDataVersionOID=%str(CDISC-SEND.3.1);
 
-/* Get the paths of the XPT files */
+/* Get the paths of the SAS datasets */
 %util_gettree(
   dir=%sysfunc(pathname(datasend)),
   outds=work.dirtree_send,
-  where=%str(ext="sas7bdat" and dir=0)
+  where=%str(ext="sas7bdat" and dir=0),
+  keep=filename fullpath
 );
 
 %if %cstutilnobs(_cstDataSetName=work.dirtree_send)=0 %then %do;

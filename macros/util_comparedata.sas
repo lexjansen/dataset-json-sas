@@ -1,17 +1,33 @@
+/**
+  @file util_comparedata.sas
+  @brief Compare 2 libraries with SAS datasets.
+
+  @details
+
+  @author Lex Jansen
+
+  @param[in] baselib= The reference library of SAS data sets
+  @param[in] complib= The library of SAS data sets that is compared against the reference library
+  @param[in] dsname= One level dataset name
+  @param[in] compareoptions= (%str(listall criterion=0.00000001 method=absolute)) Extra options to be added to PROC COMPARE
+  @param[out] resultds= Results dataset
+  @param[in] detaillevel= (2) The minimum PROC COMPARE return code for which detailed compare info will be presented.
+
+**/
 %macro util_comparedata(
-  baselib=, 
-  complib=, 
-  dsname=, 
+  baselib=,
+  complib=,
+  dsname=,
   compareoptions=%str(listall criterion=0.00000001 method=absolute),
   resultds=,
   detaillevel=2
-  );
+  ) / des = 'Compare 2 libraries with SAS datasets';
 
   %local compinfo _Random today_iso8601;
 
   %let _Random=%sysfunc(putn(%sysevalf(%sysfunc(ranuni(0))*10000,floor),z4.));
   %let today_iso8601=%sysfunc(datetime(), is8601dt.);
-    
+
   proc compare base=&baselib..&dsname compare=&complib..&dsname %NRBQUOTE(&compareoptions) noprint;
   run;
 
@@ -29,16 +45,16 @@
     do i=1 to 16;
       if result_code >= 0 then do;
         if band(result_code, 2**(i-1)) then do;
-          result_character=trim(result_character)||'/'||scan(restmp,i,'/'); 
+          result_character=trim(result_character)||'/'||scan(restmp,i,'/');
           r(i) = 1;
         end;
-      end;  
+      end;
     end;
     if result_code=0 then result_character="NO DIFFERENCES";
     result_character=left(result_character);
     if index(result_character,'/')=1 then result_character=substr(result_character,2);
     call symputx ('result_character', result_character);
-    
+
     dataset_name=upcase("&dsname");
     baselib="&baselib";
     baselib_path="%sysfunc(pathname(&baselib))";
@@ -63,10 +79,10 @@
   %if %sysevalf(%superq(resultds)=, boolean)=0 %then %do;
     data &resultds;
       set &resultds work.compare_results_&_Random;
-    run;  
-  %end;  
+    run;
+  %end;
 
   proc delete data=work.compare_results_&_Random;
   run;
-  
+
 %mend util_comparedata;
