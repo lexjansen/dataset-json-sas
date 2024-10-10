@@ -28,7 +28,7 @@
 
 %macro create_metadata_from_definexml(
   definexml=,
-  metadatalib=) des = 'Extract metadata from a Define-XML file';
+  metadatalib=) / des = 'Extract metadata from a Define-XML file';
 
   proc lua infile='read_definexml';
   run;

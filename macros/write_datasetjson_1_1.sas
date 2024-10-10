@@ -54,9 +54,9 @@
     file jsonproc;
     set &tableMetadata;
     if (isReferenceData EQ "Yes")
-      then put "write value ""isReferenceData"" true;";
+      then put "WRITE VALUES ""isReferenceData"" true;";
     if (isReferenceData EQ "No")
-      then put "write value ""isReferenceData"" false;";
+      then put "WRITE VALUES ""isReferenceData"" false;";
   run;
 
   PROC JSON OUT=&outRef &prettyNoPretty NOSASTAGS SCAN TRIMBLANKS
@@ -75,7 +75,7 @@
       WRITE VALUES "originator" "&originator";
     ;
     %if %sysevalf(%superq(sourceSystem)=, boolean)=0 or %sysevalf(%superq(sourceSystemVersion)=, boolean)=0 %then %do;
-      WRITE VALUE "sourceSystem";
+      WRITE VALUES "sourceSystem";
       WRITE OPEN OBJECT;
       
       %if %sysevalf(%superq(sourceSystem)=, boolean)=0 %then
@@ -106,7 +106,7 @@
     %if %sysevalf(%superq(datasetLabel)=, boolean)=0 %then
       WRITE VALUES "label" "%nrbquote(&datasetLabel)";
     ;
-    WRITE VALUE "columns";
+    WRITE VALUES "columns";
     %* Use macro to avoid creating null values for missing attributes;
     %* Instead do not create the attribute;
     %write_json_metadata_array(&columnMetadata);
@@ -116,7 +116,7 @@
     WRITE CLOSE
     */
 
-    WRITE VALUE "rows";
+    WRITE VALUES "rows";
     WRITE OPEN ARRAY;
     EXPORT &rowData / NOKEYS FMTDATETIME;
     WRITE CLOSE;
