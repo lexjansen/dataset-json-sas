@@ -17,7 +17,7 @@
 );
 
 %if %cstutilnobs(_cstDataSetName=work.dirtree_adam)=0 %then %do;
-  %put WAR%str(NING): No SAS dadatsets to read in directory %sysfunc(pathname(dataadam).;
+  %put WAR%str(NING): No SAS dadatsets to read in directory %sysfunc(pathname(dataadam)).;
 %end;
 
 
@@ -61,7 +61,7 @@ run;
 );
 
 %if %cstutilnobs(_cstDataSetName=work.dirtree_sdtm)=0 %then %do;
-  %put WAR%str(NING): No SAS dadatsets to read in directory %sysfunc(pathname(datasdtm).;
+  %put WAR%str(NING): No SAS dadatsets to read in directory %sysfunc(pathname(datasdtm)).;
 %end;
 
 data _null_;
@@ -104,7 +104,7 @@ run;
 );
 
 %if %cstutilnobs(_cstDataSetName=work.dirtree_send)=0 %then %do;
-  %put WAR%str(NING): No SAS dadatsets to read in directory %sysfunc(pathname(datasdtm).;
+  %put WAR%str(NING): No SAS dadatsets to read in directory %sysfunc(pathname(datasend)).;
 %end;
 
 data _null_;
