@@ -32,84 +32,84 @@ More information:
 %global python_installed;
 %check_python();
 
-  /* Get the paths of the ADaM JSON files */
-  %util_gettree(
-    dir=&json_folder/adam,
-    outds=work.dirtree_adam,
-    where=%str(ext="json" and dir=0),
-    keep=fullpath
-  );
+/* Get the paths of the ADaM JSON files */
+%util_gettree(
+  dir=&json_folder/adam,
+  outds=work.dirtree_adam,
+  where=%str(ext="json" and dir=0),
+  keep=fullpath
+);
 
-  data work.dirtree_adam;
-    set work.dirtree_adam(rename=fullpath=json_file);
-    length result_code 8 result_character result_path $255 json_file json_schema $512;
-    retain json_schema "&json_schema";
-    call missing(result_code, result_character, result_path);
-    result_character = "Validation can not be executed";
-    %if &python_installed %then %do;
-      call validate_datasetjson(json_file, json_schema, result_code, result_character, result_path);
-      if result_code = 1 then putlog 'ERR' 'OR:' json_file= result_character= result_path=;
-    %end;
+data work.dirtree_adam;
+  set work.dirtree_adam(rename=fullpath=json_file);
+  length result_code 8 result_character result_path $255 json_file json_schema $512;
+  retain json_schema "&json_schema";
+  call missing(result_code, result_character, result_path);
+  result_character = "Validation can not be executed";
+  %if &python_installed %then %do;
+    call validate_datasetjson(json_file, json_schema, result_code, result_character, result_path);
+    if result_code = 1 then putlog 'ERR' 'OR:' json_file= result_character= result_path=;
+  %end;
+run;
+
+/* Get the path of the SDTM JSON files */
+%util_gettree(
+  dir=&json_folder/sdtm,
+  outds=work.dirtree_sdtm,
+  where=%str(ext="json" and dir=0),
+  keep=fullpath
+);
+
+data work.dirtree_sdtm;
+  set work.dirtree_sdtm(rename=fullpath=json_file);
+  length result_code 8 result_character result_path $255 json_file json_schema $512;
+  retain json_schema "&json_schema";
+  call missing(result_code, result_character, result_path);
+  result_character = "Validation can not be executed";
+  %if &python_installed %then %do;
+    call validate_datasetjson(json_file, json_schema, result_code, result_character, result_path);
+    if result_code = 1 then putlog 'ERR' 'OR:' json_file= result_character;
+  %end;  
+run;
+
+/* Get the path of the SEND JSON files */
+%util_gettree(
+  dir=&json_folder/send,
+  outds=work.dirtree_send,
+  where=%str(ext="json" and dir=0),
+  keep=fullpath
+);
+
+data work.dirtree_send;
+  set work.dirtree_send(rename=fullpath=json_file);
+  length result_code 8 result_character result_path $255 json_file json_schema $512;
+  retain json_schema "&json_schema";
+  call missing(result_code, result_character, result_path);
+  result_character = "Validation can not be executed";
+  %if &python_installed %then %do;
+    call validate_datasetjson(json_file, json_schema, result_code, result_character, result_path);
+    if result_code = 1 then putlog 'ERR' 'OR:' json_file= result_character;
+  %end;
+run;
+
+
+/* Report the results */
+%create_template(type=VALIDATION_RESULTS, out=results.schema_validation_results);
+data results.schema_validation_results;
+  set results.schema_validation_results work.dirtree_adam work.dirtree_sdtm work.dirtree_send;
+  json_file = translate(json_file, '/', '\');
+run;
+
+ods listing close;
+ods html5 path="&project_folder/programs" file="08_validate_datasetjson_results_&today_iso8601..html";
+
+  proc print data=results.schema_validation_results label;
+    title01 "Validation Results - &now_iso8601";
   run;
 
-  /* Get the path of the SDTM JSON files */
-  %util_gettree(
-    dir=&json_folder/sdtm,
-    outds=work.dirtree_sdtm,
-    where=%str(ext="json" and dir=0),
-    keep=fullpath
-  );
+ods html5 close;
+ods listing;
+title01;
 
-  data work.dirtree_sdtm;
-    set work.dirtree_sdtm(rename=fullpath=json_file);
-    length result_code 8 result_character result_path $255 json_file json_schema $512;
-    retain json_schema "&json_schema";
-    call missing(result_code, result_character, result_path);
-    result_character = "Validation can not be executed";
-    %if &python_installed %then %do;
-      call validate_datasetjson(json_file, json_schema, result_code, result_character, result_path);
-      if result_code = 1 then putlog 'ERR' 'OR:' json_file= result_character;
-    %end;  
-  run;
-
-  /* Get the path of the SEND JSON files */
-  %util_gettree(
-    dir=&json_folder/send,
-    outds=work.dirtree_send,
-    where=%str(ext="json" and dir=0),
-    keep=fullpath
-  );
-
-  data work.dirtree_send;
-    set work.dirtree_send(rename=fullpath=json_file);
-    length result_code 8 result_character result_path $255 json_file json_schema $512;
-    retain json_schema "&json_schema";
-    call missing(result_code, result_character, result_path);
-    result_character = "Validation can not be executed";
-    %if &python_installed %then %do;
-      call validate_datasetjson(json_file, json_schema, result_code, result_character, result_path);
-      if result_code = 1 then putlog 'ERR' 'OR:' json_file= result_character;
-    %end;
-  run;
-
-
-  /* Report the results */
-  %create_template(type=VALIDATION_RESULTS, out=results.schema_validation_results);
-  data results.schema_validation_results;
-    set results.schema_validation_results work.dirtree_adam work.dirtree_sdtm work.dirtree_send;
-    json_file = translate(json_file, '/', '\');
-  run;
-
-  ods listing close;
-  ods html5 path="&project_folder/programs" file="08_validate_datasetjson_results_&today_iso8601..html";
-
-    proc print data=results.schema_validation_results label;
-      title01 "Validation Results - &now_iso8601";
-    run;
-
-  ods html5 close;
-  ods listing;
-  title01;
-
-  proc delete data=work.dirtree_adam work.dirtree_sdtm work.dirtree_send;
-  run;
+proc delete data=work.dirtree_adam work.dirtree_sdtm work.dirtree_send;
+run;
