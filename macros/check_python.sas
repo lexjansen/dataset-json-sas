@@ -40,6 +40,13 @@
     _MAS_M2PATH
     ;
 
+  %if %symexist(python_installed) %then %do;
+  %end;
+  %else %do;
+    %global python_installed;
+  %end;   
+  %let python_installed = 0;
+
   %let _MAS_PYPATH = %sysget(MAS_PYPATH);
   %let _MAS_M2PATH = %sysget(MAS_M2PATH);
 
@@ -69,6 +76,10 @@
   %put MAS_PYPATH = &_MAS_PYPATH;
   %put MAS_M2PATH = &_MAS_M2PATH;
 
+  %let python_installed = 1;
+
   %exit_macro:
+  
+  %put &=python_installed;
 
 %mend check_python;
