@@ -208,10 +208,12 @@
 
   /* Get modifiedDateTime, releaseCreated, hostCreated, number of records */
   ods listing close;
+  ods select none;
   ods output Attributes=Attributes EngineHost=EngineHost Variables=Variables;
     proc contents data=&dataset;
     run;
   ods output close;
+  ods select all;
   ods listing;
 
   data _null_;
