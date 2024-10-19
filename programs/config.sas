@@ -24,15 +24,4 @@ libname metasvse "&project_folder/metadata_save/send";
 libname results "&project_folder/results";
 libname macros "&project_folder/macros";
 
-
-%* This is needed to be able to run Python;
-%* Update to your own locations           ;
-options set=MAS_PYPATH="&project_folder/venv/Scripts/python.exe";
-options set=MAS_M2PATH="%sysget(SASROOT)/tkmas/sasmisc/mas2py.py";
-
-%let fcmplib=work;
-%include "&project_folder/macros/validate_datasetjson.sas";
-
-options cmplib=&fcmplib..datasetjson_funcs;
-
 options mprint nomlogic nosymbolgen;
