@@ -20,7 +20,6 @@
     metaDataVersionOID
     metaDataRef
     itemGroupOID
-    isReferenceData
     records
     datasetName
     datasetLabel
@@ -43,20 +42,9 @@
   data _null_;
     set &tableMetadata;
     call symputx('itemGroupOID', oid);
-    call symputx('isReferenceData', isReferenceData);
     call symputx('records', records);
     call symputx('datasetName', name);
     call symputx('datasetLabel', label);
-  run;
-
-  filename jsonproc catalog "work.jsonproc.refdata.source";
-  data _null_;
-    file jsonproc;
-    set &tableMetadata;
-    if (isReferenceData EQ "Yes")
-      then put "WRITE VALUES ""isReferenceData"" true;";
-    if (isReferenceData EQ "No")
-      then put "WRITE VALUES ""isReferenceData"" false;";
   run;
 
   PROC JSON OUT=&outRef &prettyNoPretty NOSASTAGS SCAN TRIMBLANKS
@@ -98,9 +86,6 @@
     %if %sysevalf(%superq(itemGroupOID)=, boolean)=0 %then
       WRITE VALUES "itemGroupOID" "&itemGroupOID";
     ;  
-    %if %sysevalf(%superq(isReferenceData)=, boolean)=0 %then %do;
-      %include jsonproc;
-    %end;  
     WRITE VALUES "records" &records;
     WRITE VALUES "name" "&datasetName";
     %if %sysevalf(%superq(datasetLabel)=, boolean)=0 %then
@@ -123,6 +108,4 @@
     WRITE CLOSE;
   RUN;
 
-  filename jsonproc clear;
-  
 %mend write_datasetjson_1_1;
