@@ -16,7 +16,7 @@ local tableutils={}
       elseif (type(v) == "string") then
         toprint = toprint .. "\"" .. v .. "\",\r\n"
       elseif (type(v) == "table") then
-        toprint = toprint .. utils.tprint(v, indent + 2) .. ",\r\n"
+        toprint = toprint .. tableutils.tprint(v, indent + 2) .. ",\r\n"
       else
         toprint = toprint .. "\"" .. tostring(v) .. "\",\r\n"
       end

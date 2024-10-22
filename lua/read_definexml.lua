@@ -21,6 +21,29 @@
             float = "float"
           }
 
+    function writecolumn(dsid_c,itgd,it,itemtbl)
+      sas.append(dsid_c)
+      sas.put_value(dsid_c, "dataset_name", itgd['@Name'])
+      sas.put_value(dsid_c, "OID", it['@ItemOID'])
+      sas.put_value(dsid_c, "name", itemtbl[it['@ItemOID']].Name)
+      sas.put_value(dsid_c, "label", itemtbl[it['@ItemOID']].Description)
+      sas.put_value(dsid_c, "xml_datatype", itemtbl[it['@ItemOID']].DataType)
+      sas.put_value(dsid_c, "order", tonumber(it['@OrderNumber']))
+      if tonumber(itemtbl[it['@ItemOID']].Length) ~= nil then sas.put_value(dsid_c, "length", itemtbl[it['@ItemOID']].Length) end
+      if itemtbl[it['@ItemOID']].DisplayFormat ~= nil then sas.put_value(dsid_c, "DisplayFormat", itemtbl[it['@ItemOID']].DisplayFormat) end
+      if it['@KeySequence'] ~= nil then -- Define-XML 2.x
+        sas.put_value(dsid_c, "keySequence", tonumber(it['@KeySequence']))
+      end
+      if itgd['@DomainKeys'] and it['@KeySequence'] == nil then -- Define-XML 1.0
+        i = 0
+        for key in itgd['@DomainKeys']:gmatch('[^,%s]+') do
+          i = i + 1
+          if key == itemtbl[it['@ItemOID']].Name then sas.put_value(dsid_c, "keySequence", i) end
+        end
+      end
+      sas.update(dsid_c)
+    end
+
     sas.filename('define', sas.symget("definexml"))
 
     local metadatalib = sas.symget("metadatalib")
@@ -92,28 +115,13 @@
       end
       sas.update(dsid_t)
 
-      itemref = itgd.ItemRef
-      for j, it in ipairs(itemref) do
-        sas.append(dsid_c)
-        sas.put_value(dsid_c, "dataset_name", itgd['@Name'])
-        sas.put_value(dsid_c, "OID", it['@ItemOID'])
-        sas.put_value(dsid_c, "name", itemtbl[it['@ItemOID']].Name)
-        sas.put_value(dsid_c, "label", itemtbl[it['@ItemOID']].Description)
-        sas.put_value(dsid_c, "xml_datatype", itemtbl[it['@ItemOID']].DataType)
-        sas.put_value(dsid_c, "order", tonumber(it['@OrderNumber']))
-        if tonumber(itemtbl[it['@ItemOID']].Length) ~= nil then sas.put_value(dsid_c, "length", itemtbl[it['@ItemOID']].Length) end
-        if itemtbl[it['@ItemOID']].DisplayFormat ~= nil then sas.put_value(dsid_c, "DisplayFormat", itemtbl[it['@ItemOID']].DisplayFormat) end
-        if it['@KeySequence'] ~= nil then -- Define-XML 2.x
-          sas.put_value(dsid_c, "keySequence", tonumber(it['@KeySequence']))
+      if type(itgd.ItemRef) == "table" then
+        itemref = itgd.ItemRef
+        for j, it in ipairs(itemref) do
+          writecolumn(dsid_c,itgd,it,itemtbl)
         end
-        if itgd['@DomainKeys'] and it['@KeySequence'] == nil then -- Define-XML 1.0
-          i = 0
-          for key in itgd['@DomainKeys']:gmatch('[^,%s]+') do
-            i = i + 1
-            if key == itemtbl[it['@ItemOID']].Name then sas.put_value(dsid_c, "keySequence", i) end
-          end
-        end
-        sas.update(dsid_c)
+      elseif itgd['name'] == "ItemRef" then
+        writecolumn(dsid_c,define.Study.MetaDataVersion.ItemGroupDef,itgd,itemtbl)
       end
 
     end
