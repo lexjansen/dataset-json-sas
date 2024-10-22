@@ -80,8 +80,7 @@
     _Missing
     _create_temp_dataset_sas
     dataset_new dataset_name dataset_label _records
-    _studyOID _metaDataVersionOID
-    _itemGroupOID _isReferenceData
+    _studyOID _metaDataVersionOID _itemGroupOID
     creationDateTime modifiedDateTime
     releaseCreated hostCreated
     _decimal_variables _iso8601_variables _format
@@ -261,9 +260,6 @@
         select label, oid into :dataset_label trimmed, :_temGroupOID trimmed
           from &metadatalib..metadata_tables
             where upcase(name)="%upcase(&dataset_name)";
-        select isReferenceData into :_isReferenceData trimmed
-          from &metadatalib..metadata_tables
-            where upcase(name)="%upcase(&dataset_name)";
       %end;
     quit;
   %end;
@@ -286,7 +282,7 @@
     %put %str(WAR)NING: [&sysmacroname] Dataset &dataset has no dataset label.;
   %end;
 
-  %put NOTE: DATASET=&dataset_name &=_records &=_isReferenceData &=_itemGroupOID dslabel=%bquote(&dataset_label);
+  %put NOTE: DATASET=&dataset_name &=_records &=_itemGroupOID dslabel=%bquote(&dataset_label);
 
 
 
@@ -535,19 +531,10 @@
 
   %create_template(type=TABLES, out=work.table_metadata);
 
-  /* Derive _isReferenceData */
-  %if %cstutilcheckvarsexist(_cstDataSetName=&dataset, _cstVarList=usubjid)=0 %then
-    %do;
-      %let _isReferenceData=Yes;
-    %end;
-    %else %do;
-      %let _isReferenceData=No;
-    %end;
-
   proc sql;
   insert into work.table_metadata
     set oid = "&_itemGroupOID"
-        , isReferenceData = "&_isReferenceData"
+        , isReferenceData = ""
         , records = &_records
         , name = "%upcase(&dataset_name)"
         %if %sysevalf(%superq(dataset_label)=, boolean)=0 %then , label = "%nrbquote(&dataset_label)";

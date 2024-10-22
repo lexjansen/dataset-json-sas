@@ -29,6 +29,19 @@ More information:
   https://go.documentation.sas.com/doc/en/bicdc/9.4/biasag/n1mquxnfmfu83en1if8icqmx8cdf.htm
 */
 
+%* This is needed to be able to run Python;
+%* Update to your own locations           ;
+options set=MAS_PYPATH="&project_folder/venv/Scripts/python.exe";
+options set=MAS_M2PATH="%sysget(SASROOT)/tkmas/sasmisc/mas2py.py";
+
+%let fcmplib=work;
+%include "&project_folder/macros/validate_datasetjson.sas";
+
+options cmplib=&fcmplib..datasetjson_funcs;
+
+
+
+
 %global python_installed;
 %check_python();
 

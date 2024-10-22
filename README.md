@@ -23,7 +23,7 @@ Other updates in the test programs may be needed to make them work in a specific
 This was tested on Windows 10 and SAS OnDemand (Linux).
 
 The **07_validate_datasetjson.sas** program assumes that your SAS environment is able to run Python objects.
-Check the programs/config.sas file for the Python cofiguration.
+Check the program for the Python configuration.
 Python objects require environment variables to be set before you can use Python objects in your SAS environment.
 If the environment variables have not been set, or if they have been set incorrectly,
 SAS returns an error when you publish your Python code.
@@ -35,7 +35,7 @@ ERROR: The executable C:\file-path\python.exe cannot be located
        or is not a valid executable.
 ```
 
-In the **06_validate_datasetjson.sas** program you will need to update the evironment variables that configure the Python environment:
+In the **07_validate_datasetjson.sas** program you will need to update the evironment variables that configure the Python environment:
 
 ```TEXT
 options set=MAS_PYPATH="<your Python executable>";
