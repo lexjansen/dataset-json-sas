@@ -21,6 +21,39 @@
             float = "float"
           }
 
+
+    function countItemGroupDefs(mdv)
+      local ItemGroupDefs
+      ItemGroupDefs = 0
+      for i, item in ipairs(mdv) do
+        if item['name'] == 'ItemGroupDef' then ItemGroupDefs = ItemGroupDefs + 1 end
+      end
+      return ItemGroupDefs
+    end  
+
+    function writetable(dsid_t,itgd)
+      sas.append(dsid_t)
+      sas.put_value(dsid_t, "OID", itgd['@OID'])
+      sas.put_value(dsid_t, "name", itgd['@Name'])
+      if itgd.Description
+        then sas.put_value(dsid_t, "label", itgd.Description.TranslatedText[1])
+      elseif itgd['@Label']
+        then sas.put_value(dsid_t, "label", itgd['@Label'])
+      end
+      sas.put_value(dsid_t, "domain", itgd['@Domain'])
+      sas.put_value(dsid_t, "repeating", itgd['@Repeating'])
+      sas.put_value(dsid_t, "isreferencedata", itgd['@IsReferenceData'])
+      sas.put_value(dsid_t, "structure", itgd['@Structure'])
+      if itgd['@DomainKeys'] then
+        sas.put_value(dsid_t, "domainkeys", itgd['@DomainKeys'])
+      end
+      if itgd['@IsReferenceData'] == "Yes"
+        then sas.put_value(dsid_t, "datasettype", "ReferenceData")
+      end
+      sas.update(dsid_t)
+    end
+      
+      
     function writecolumn(dsid_c,itgd,it,itemtbl)
       sas.append(dsid_c)
       sas.put_value(dsid_c, "dataset_name", itgd['@Name'])
@@ -93,38 +126,34 @@
        %create_template(type=COLUMNS, out=@metadatalib@.metadata_columns);
     ]]
     dsid_c = sas.open(metadatalib..'.metadata_columns', "u")
-    local tbl = {}
-    for i, itgd in ipairs(define.Study.MetaDataVersion.ItemGroupDef) do
-      sas.append(dsid_t)
-      sas.put_value(dsid_t, "OID", itgd['@OID'])
-      sas.put_value(dsid_t, "name", itgd['@Name'])
-      if itgd.Description
-        then sas.put_value(dsid_t, "label", itgd.Description.TranslatedText[1])
-      elseif itgd['@Label']
-        then sas.put_value(dsid_t, "label", itgd['@Label'])
-      end
-      sas.put_value(dsid_t, "domain", itgd['@Domain'])
-      sas.put_value(dsid_t, "repeating", itgd['@Repeating'])
-      sas.put_value(dsid_t, "isreferencedata", itgd['@IsReferenceData'])
-      sas.put_value(dsid_t, "structure", itgd['@Structure'])
-      if itgd['@DomainKeys'] then
-        sas.put_value(dsid_t, "domainkeys", itgd['@DomainKeys'])
-      end
-      if itgd['@IsReferenceData'] == "Yes"
-        then sas.put_value(dsid_t, "datasettype", "ReferenceData")
-      end
-      sas.update(dsid_t)
+    
+    local nItemGroupDefs
+    nItemGroupDefs = countItemGroupDefs(define.Study.MetaDataVersion)
 
-      if type(itgd.ItemRef) == "table" then
+    
+    if nItemGroupDefs > 1 then 
+      for i, itgd in ipairs(define.Study.MetaDataVersion.ItemGroupDef) do
+        
+        writetable(dsid_t,itgd)
+
         itemref = itgd.ItemRef
         for j, it in ipairs(itemref) do
           writecolumn(dsid_c,itgd,it,itemtbl)
         end
-      elseif itgd['name'] == "ItemRef" then
-        writecolumn(dsid_c,define.Study.MetaDataVersion.ItemGroupDef,itgd,itemtbl)
-      end
 
+      end
+    elseif nItemGroupDefs == 1 then
+        
+        itgd = define.Study.MetaDataVersion.ItemGroupDef
+        writetable(dsid_t,itgd)
+
+        itemref = itgd.ItemRef
+        for j, it in ipairs(itemref) do
+          writecolumn(dsid_c,itgd,it,itemtbl)
+        end
+        
     end
+    
     sas.close(dsid_c)
     sas.close(dsid_t)
 
