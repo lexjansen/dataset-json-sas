@@ -257,7 +257,7 @@
       %end;
     /* Get dataset label and _itemGroupOID from the metadata */
       %if %sysfunc(exist(&metadatalib..metadata_tables)) %then %do;
-        select label, oid into :dataset_label trimmed, :_temGroupOID trimmed
+        select label, oid into :dataset_label trimmed, :_itemGroupOID trimmed
           from &metadatalib..metadata_tables
             where upcase(name)="%upcase(&dataset_name)";
       %end;
