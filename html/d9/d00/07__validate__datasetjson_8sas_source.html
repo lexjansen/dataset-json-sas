@@ -130,89 +130,104 @@ $(function(){initNavTree('d9/d00/07__validate__datasetjson_8sas_source.html','..
 <div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span><span class="comment">  Configuring SAS to Run the Python Language:</span></div>
 <div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span><span class="comment">  https://go.documentation.sas.com/doc/en/bicdc/9.4/biasag/n1mquxnfmfu83en1if8icqmx8cdf.htm</span></div>
 <div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span><span class="comment">*/</span></div>
-<div class="line"><a id="l00031" name="l00031"></a><span class="lineno">   31</span>%check_python();</div>
-<div class="line"><a id="l00032" name="l00032"></a><span class="lineno">   32</span> </div>
-<div class="line"><a id="l00033" name="l00033"></a><span class="lineno">   33</span> </div>
-<div class="line"><a id="l00034" name="l00034"></a><span class="lineno">   34</span><span class="comment">/* Get the paths of the ADaM JSON files */</span></div>
-<div class="line"><a id="l00035" name="l00035"></a><span class="lineno">   35</span>%util_gettree(</div>
-<div class="line"><a id="l00036" name="l00036"></a><span class="lineno">   36</span>  dir=&amp;json_folder/adam,</div>
-<div class="line"><a id="l00037" name="l00037"></a><span class="lineno">   37</span>  outds=work.dirtree_adam,</div>
-<div class="line"><a id="l00038" name="l00038"></a><span class="lineno">   38</span>  where=%str(ext=<span class="stringliteral">&quot;json&quot;</span> and dir=0),</div>
-<div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span>  keep=fullpath</div>
-<div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span>);</div>
+<div class="line"><a id="l00031" name="l00031"></a><span class="lineno">   31</span> </div>
+<div class="line"><a id="l00032" name="l00032"></a><span class="lineno">   32</span>%* This is needed to be able to run Python;</div>
+<div class="line"><a id="l00033" name="l00033"></a><span class="lineno">   33</span>%* Update to your own locations           ;</div>
+<div class="line"><a id="l00034" name="l00034"></a><span class="lineno">   34</span>options <span class="keyword">set</span>=MAS_PYPATH=<span class="stringliteral">&quot;&amp;project_folder/venv/Scripts/python.exe&quot;</span>;</div>
+<div class="line"><a id="l00035" name="l00035"></a><span class="lineno">   35</span>options <span class="keyword">set</span>=MAS_M2PATH=<span class="stringliteral">&quot;%sysget(SASROOT)/tkmas/sasmisc/mas2py.py&quot;</span>;</div>
+<div class="line"><a id="l00036" name="l00036"></a><span class="lineno">   36</span> </div>
+<div class="line"><a id="l00037" name="l00037"></a><span class="lineno">   37</span>%let fcmplib=work;</div>
+<div class="line"><a id="l00038" name="l00038"></a><span class="lineno">   38</span>%include <span class="stringliteral">&quot;&amp;project_folder/macros/validate_datasetjson.sas&quot;</span>;</div>
+<div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span> </div>
+<div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span>options cmplib=&amp;fcmplib..datasetjson_funcs;</div>
 <div class="line"><a id="l00041" name="l00041"></a><span class="lineno">   41</span> </div>
-<div class="line"><a id="l00042" name="l00042"></a><span class="lineno">   42</span>data work.dirtree_adam;</div>
-<div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span>  <span class="keyword">set</span> work.dirtree_adam(rename=fullpath=json_file);</div>
-<div class="line"><a id="l00044" name="l00044"></a><span class="lineno">   44</span>  length result_code 8 result_character result_path $255 json_file json_schema $512;</div>
-<div class="line"><a id="l00045" name="l00045"></a><span class="lineno">   45</span>  retain json_schema <span class="stringliteral">&quot;&amp;json_schema&quot;</span>;</div>
-<div class="line"><a id="l00046" name="l00046"></a><span class="lineno">   46</span>  call missing(result_code, result_character, result_path);</div>
+<div class="line"><a id="l00042" name="l00042"></a><span class="lineno">   42</span> </div>
+<div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span> </div>
+<div class="line"><a id="l00044" name="l00044"></a><span class="lineno">   44</span> </div>
+<div class="line"><a id="l00045" name="l00045"></a><span class="lineno">   45</span>%global python_installed;</div>
+<div class="line"><a id="l00046" name="l00046"></a><span class="lineno">   46</span>%check_python();</div>
 <div class="line"><a id="l00047" name="l00047"></a><span class="lineno">   47</span> </div>
-<div class="line"><a id="l00048" name="l00048"></a><span class="lineno">   48</span>  call validate_datasetjson(json_file, json_schema, result_code, result_character, result_path);</div>
-<div class="line"><a id="l00049" name="l00049"></a><span class="lineno">   49</span>  <span class="keywordflow">if</span> result_code = 1 then putlog <span class="stringliteral">&#39;ERR&#39;</span> <span class="stringliteral">&#39;OR:&#39;</span> json_file= result_character= result_path=;</div>
-<div class="line"><a id="l00050" name="l00050"></a><span class="lineno">   50</span>run;</div>
-<div class="line"><a id="l00051" name="l00051"></a><span class="lineno">   51</span> </div>
-<div class="line"><a id="l00052" name="l00052"></a><span class="lineno">   52</span> </div>
-<div class="line"><a id="l00053" name="l00053"></a><span class="lineno">   53</span><span class="comment">/* Get the path of the SDTM JSON files */</span></div>
-<div class="line"><a id="l00054" name="l00054"></a><span class="lineno">   54</span>%util_gettree(</div>
-<div class="line"><a id="l00055" name="l00055"></a><span class="lineno">   55</span>  dir=&amp;json_folder/sdtm,</div>
-<div class="line"><a id="l00056" name="l00056"></a><span class="lineno">   56</span>  outds=work.dirtree_sdtm,</div>
-<div class="line"><a id="l00057" name="l00057"></a><span class="lineno">   57</span>  where=%str(ext=<span class="stringliteral">&quot;json&quot;</span> and dir=0),</div>
-<div class="line"><a id="l00058" name="l00058"></a><span class="lineno">   58</span>  keep=fullpath</div>
-<div class="line"><a id="l00059" name="l00059"></a><span class="lineno">   59</span>);</div>
-<div class="line"><a id="l00060" name="l00060"></a><span class="lineno">   60</span> </div>
-<div class="line"><a id="l00061" name="l00061"></a><span class="lineno">   61</span>data work.dirtree_sdtm;</div>
-<div class="line"><a id="l00062" name="l00062"></a><span class="lineno">   62</span>  <span class="keyword">set</span> work.dirtree_sdtm(rename=fullpath=json_file);</div>
-<div class="line"><a id="l00063" name="l00063"></a><span class="lineno">   63</span>  length result_code 8 result_character result_path $255 json_file json_schema $512;</div>
-<div class="line"><a id="l00064" name="l00064"></a><span class="lineno">   64</span>  retain json_schema <span class="stringliteral">&quot;&amp;json_schema&quot;</span>;</div>
-<div class="line"><a id="l00065" name="l00065"></a><span class="lineno">   65</span>  call missing(result_code, result_character, result_path);</div>
-<div class="line"><a id="l00066" name="l00066"></a><span class="lineno">   66</span> </div>
-<div class="line"><a id="l00067" name="l00067"></a><span class="lineno">   67</span>  call validate_datasetjson(json_file, json_schema, result_code, result_character, result_path);</div>
-<div class="line"><a id="l00068" name="l00068"></a><span class="lineno">   68</span>  <span class="keywordflow">if</span> result_code = 1 then putlog <span class="stringliteral">&#39;ERR&#39;</span> <span class="stringliteral">&#39;OR:&#39;</span> json_file= result_character;</div>
-<div class="line"><a id="l00069" name="l00069"></a><span class="lineno">   69</span>run;</div>
-<div class="line"><a id="l00070" name="l00070"></a><span class="lineno">   70</span> </div>
-<div class="line"><a id="l00071" name="l00071"></a><span class="lineno">   71</span> </div>
-<div class="line"><a id="l00072" name="l00072"></a><span class="lineno">   72</span><span class="comment">/* Get the path of the SEND JSON files */</span></div>
-<div class="line"><a id="l00073" name="l00073"></a><span class="lineno">   73</span>%util_gettree(</div>
-<div class="line"><a id="l00074" name="l00074"></a><span class="lineno">   74</span>  dir=&amp;json_folder/send,</div>
-<div class="line"><a id="l00075" name="l00075"></a><span class="lineno">   75</span>  outds=work.dirtree_send,</div>
-<div class="line"><a id="l00076" name="l00076"></a><span class="lineno">   76</span>  where=%str(ext=<span class="stringliteral">&quot;json&quot;</span> and dir=0),</div>
-<div class="line"><a id="l00077" name="l00077"></a><span class="lineno">   77</span>  keep=fullpath</div>
-<div class="line"><a id="l00078" name="l00078"></a><span class="lineno">   78</span>);</div>
-<div class="line"><a id="l00079" name="l00079"></a><span class="lineno">   79</span> </div>
-<div class="line"><a id="l00080" name="l00080"></a><span class="lineno">   80</span>data work.dirtree_send;</div>
-<div class="line"><a id="l00081" name="l00081"></a><span class="lineno">   81</span>  <span class="keyword">set</span> work.dirtree_send(rename=fullpath=json_file);</div>
-<div class="line"><a id="l00082" name="l00082"></a><span class="lineno">   82</span>  length result_code 8 result_character result_path $255 json_file json_schema $512;</div>
-<div class="line"><a id="l00083" name="l00083"></a><span class="lineno">   83</span>  retain json_schema <span class="stringliteral">&quot;&amp;json_schema&quot;</span>;</div>
-<div class="line"><a id="l00084" name="l00084"></a><span class="lineno">   84</span>  call missing(result_code, result_character, result_path);</div>
-<div class="line"><a id="l00085" name="l00085"></a><span class="lineno">   85</span> </div>
-<div class="line"><a id="l00086" name="l00086"></a><span class="lineno">   86</span>  call validate_datasetjson(json_file, json_schema, result_code, result_character, result_path);</div>
-<div class="line"><a id="l00087" name="l00087"></a><span class="lineno">   87</span>  <span class="keywordflow">if</span> result_code = 1 then putlog <span class="stringliteral">&#39;ERR&#39;</span> <span class="stringliteral">&#39;OR:&#39;</span> json_file= result_character;</div>
-<div class="line"><a id="l00088" name="l00088"></a><span class="lineno">   88</span>run;</div>
-<div class="line"><a id="l00089" name="l00089"></a><span class="lineno">   89</span> </div>
-<div class="line"><a id="l00090" name="l00090"></a><span class="lineno">   90</span> </div>
-<div class="line"><a id="l00091" name="l00091"></a><span class="lineno">   91</span> </div>
-<div class="line"><a id="l00092" name="l00092"></a><span class="lineno">   92</span><span class="comment">/* Report the results */</span></div>
-<div class="line"><a id="l00093" name="l00093"></a><span class="lineno">   93</span>%create_template(type=VALIDATION_RESULTS, out=results.schema_validation_results);</div>
-<div class="line"><a id="l00094" name="l00094"></a><span class="lineno">   94</span>data results.schema_validation_results;</div>
-<div class="line"><a id="l00095" name="l00095"></a><span class="lineno">   95</span>  <span class="keyword">set</span> results.schema_validation_results work.dirtree_adam work.dirtree_sdtm work.dirtree_send;</div>
-<div class="line"><a id="l00096" name="l00096"></a><span class="lineno">   96</span>  json_file = translate(json_file, <span class="charliteral">&#39;/&#39;</span>, <span class="charliteral">&#39;\&#39;</span>);</div>
-<div class="line"><a id="l00097" name="l00097"></a><span class="lineno">   97</span>run;</div>
-<div class="line"><a id="l00098" name="l00098"></a><span class="lineno">   98</span> </div>
-<div class="line"><a id="l00099" name="l00099"></a><span class="lineno">   99</span>ods listing close;</div>
-<div class="line"><a id="l00100" name="l00100"></a><span class="lineno">  100</span>ods html5 path=<span class="stringliteral">&quot;&amp;project_folder/programs&quot;</span> file=<span class="stringliteral">&quot;08_validate_datasetjson_results_&amp;today_iso8601..html&quot;</span>;</div>
-<div class="line"><a id="l00101" name="l00101"></a><span class="lineno">  101</span> </div>
-<div class="line"><a id="l00102" name="l00102"></a><span class="lineno">  102</span>  proc print data=results.schema_validation_results label;</div>
-<div class="line"><a id="l00103" name="l00103"></a><span class="lineno">  103</span>    title01 <span class="stringliteral">&quot;Validation Results - &amp;now_iso8601&quot;</span>;</div>
-<div class="line"><a id="l00104" name="l00104"></a><span class="lineno">  104</span>  run;</div>
-<div class="line"><a id="l00105" name="l00105"></a><span class="lineno">  105</span> </div>
-<div class="line"><a id="l00106" name="l00106"></a><span class="lineno">  106</span>ods html5 close;</div>
-<div class="line"><a id="l00107" name="l00107"></a><span class="lineno">  107</span>ods listing;</div>
-<div class="line"><a id="l00108" name="l00108"></a><span class="lineno">  108</span>title01;</div>
-<div class="line"><a id="l00109" name="l00109"></a><span class="lineno">  109</span> </div>
-<div class="line"><a id="l00110" name="l00110"></a><span class="lineno">  110</span>proc delete data=work.dirtree_adam work.dirtree_sdtm work.dirtree_send;</div>
-<div class="line"><a id="l00111" name="l00111"></a><span class="lineno">  111</span>run;</div>
-<div class="line"><a id="l00112" name="l00112"></a><span class="lineno">  112</span> </div>
-<div class="line"><a id="l00113" name="l00113"></a><span class="lineno">  113</span> </div>
+<div class="line"><a id="l00048" name="l00048"></a><span class="lineno">   48</span><span class="comment">/* Get the paths of the ADaM JSON files */</span></div>
+<div class="line"><a id="l00049" name="l00049"></a><span class="lineno">   49</span>%util_gettree(</div>
+<div class="line"><a id="l00050" name="l00050"></a><span class="lineno">   50</span>  dir=&amp;json_folder/adam,</div>
+<div class="line"><a id="l00051" name="l00051"></a><span class="lineno">   51</span>  outds=work.dirtree_adam,</div>
+<div class="line"><a id="l00052" name="l00052"></a><span class="lineno">   52</span>  where=%str(ext=<span class="stringliteral">&quot;json&quot;</span> and dir=0),</div>
+<div class="line"><a id="l00053" name="l00053"></a><span class="lineno">   53</span>  keep=fullpath</div>
+<div class="line"><a id="l00054" name="l00054"></a><span class="lineno">   54</span>);</div>
+<div class="line"><a id="l00055" name="l00055"></a><span class="lineno">   55</span> </div>
+<div class="line"><a id="l00056" name="l00056"></a><span class="lineno">   56</span>data work.dirtree_adam;</div>
+<div class="line"><a id="l00057" name="l00057"></a><span class="lineno">   57</span>  <span class="keyword">set</span> work.dirtree_adam(rename=fullpath=json_file);</div>
+<div class="line"><a id="l00058" name="l00058"></a><span class="lineno">   58</span>  length result_code 8 result_character result_path $255 json_file json_schema $512;</div>
+<div class="line"><a id="l00059" name="l00059"></a><span class="lineno">   59</span>  retain json_schema <span class="stringliteral">&quot;&amp;json_schema&quot;</span>;</div>
+<div class="line"><a id="l00060" name="l00060"></a><span class="lineno">   60</span>  call missing(result_code, result_character, result_path);</div>
+<div class="line"><a id="l00061" name="l00061"></a><span class="lineno">   61</span>  result_character = <span class="stringliteral">&quot;Validation can not be executed&quot;</span>;</div>
+<div class="line"><a id="l00062" name="l00062"></a><span class="lineno">   62</span>  %<span class="keywordflow">if</span> &amp;python_installed %then %<span class="keywordflow">do</span>;</div>
+<div class="line"><a id="l00063" name="l00063"></a><span class="lineno">   63</span>    call validate_datasetjson(json_file, json_schema, result_code, result_character, result_path);</div>
+<div class="line"><a id="l00064" name="l00064"></a><span class="lineno">   64</span>    <span class="keywordflow">if</span> result_code = 1 then putlog <span class="stringliteral">&#39;ERR&#39;</span> <span class="stringliteral">&#39;OR:&#39;</span> json_file= result_character= result_path=;</div>
+<div class="line"><a id="l00065" name="l00065"></a><span class="lineno">   65</span>  %end;</div>
+<div class="line"><a id="l00066" name="l00066"></a><span class="lineno">   66</span>run;</div>
+<div class="line"><a id="l00067" name="l00067"></a><span class="lineno">   67</span> </div>
+<div class="line"><a id="l00068" name="l00068"></a><span class="lineno">   68</span><span class="comment">/* Get the path of the SDTM JSON files */</span></div>
+<div class="line"><a id="l00069" name="l00069"></a><span class="lineno">   69</span>%util_gettree(</div>
+<div class="line"><a id="l00070" name="l00070"></a><span class="lineno">   70</span>  dir=&amp;json_folder/sdtm,</div>
+<div class="line"><a id="l00071" name="l00071"></a><span class="lineno">   71</span>  outds=work.dirtree_sdtm,</div>
+<div class="line"><a id="l00072" name="l00072"></a><span class="lineno">   72</span>  where=%str(ext=<span class="stringliteral">&quot;json&quot;</span> and dir=0),</div>
+<div class="line"><a id="l00073" name="l00073"></a><span class="lineno">   73</span>  keep=fullpath</div>
+<div class="line"><a id="l00074" name="l00074"></a><span class="lineno">   74</span>);</div>
+<div class="line"><a id="l00075" name="l00075"></a><span class="lineno">   75</span> </div>
+<div class="line"><a id="l00076" name="l00076"></a><span class="lineno">   76</span>data work.dirtree_sdtm;</div>
+<div class="line"><a id="l00077" name="l00077"></a><span class="lineno">   77</span>  <span class="keyword">set</span> work.dirtree_sdtm(rename=fullpath=json_file);</div>
+<div class="line"><a id="l00078" name="l00078"></a><span class="lineno">   78</span>  length result_code 8 result_character result_path $255 json_file json_schema $512;</div>
+<div class="line"><a id="l00079" name="l00079"></a><span class="lineno">   79</span>  retain json_schema <span class="stringliteral">&quot;&amp;json_schema&quot;</span>;</div>
+<div class="line"><a id="l00080" name="l00080"></a><span class="lineno">   80</span>  call missing(result_code, result_character, result_path);</div>
+<div class="line"><a id="l00081" name="l00081"></a><span class="lineno">   81</span>  result_character = <span class="stringliteral">&quot;Validation can not be executed&quot;</span>;</div>
+<div class="line"><a id="l00082" name="l00082"></a><span class="lineno">   82</span>  %<span class="keywordflow">if</span> &amp;python_installed %then %<span class="keywordflow">do</span>;</div>
+<div class="line"><a id="l00083" name="l00083"></a><span class="lineno">   83</span>    call validate_datasetjson(json_file, json_schema, result_code, result_character, result_path);</div>
+<div class="line"><a id="l00084" name="l00084"></a><span class="lineno">   84</span>    <span class="keywordflow">if</span> result_code = 1 then putlog <span class="stringliteral">&#39;ERR&#39;</span> <span class="stringliteral">&#39;OR:&#39;</span> json_file= result_character;</div>
+<div class="line"><a id="l00085" name="l00085"></a><span class="lineno">   85</span>  %end;  </div>
+<div class="line"><a id="l00086" name="l00086"></a><span class="lineno">   86</span>run;</div>
+<div class="line"><a id="l00087" name="l00087"></a><span class="lineno">   87</span> </div>
+<div class="line"><a id="l00088" name="l00088"></a><span class="lineno">   88</span><span class="comment">/* Get the path of the SEND JSON files */</span></div>
+<div class="line"><a id="l00089" name="l00089"></a><span class="lineno">   89</span>%util_gettree(</div>
+<div class="line"><a id="l00090" name="l00090"></a><span class="lineno">   90</span>  dir=&amp;json_folder/send,</div>
+<div class="line"><a id="l00091" name="l00091"></a><span class="lineno">   91</span>  outds=work.dirtree_send,</div>
+<div class="line"><a id="l00092" name="l00092"></a><span class="lineno">   92</span>  where=%str(ext=<span class="stringliteral">&quot;json&quot;</span> and dir=0),</div>
+<div class="line"><a id="l00093" name="l00093"></a><span class="lineno">   93</span>  keep=fullpath</div>
+<div class="line"><a id="l00094" name="l00094"></a><span class="lineno">   94</span>);</div>
+<div class="line"><a id="l00095" name="l00095"></a><span class="lineno">   95</span> </div>
+<div class="line"><a id="l00096" name="l00096"></a><span class="lineno">   96</span>data work.dirtree_send;</div>
+<div class="line"><a id="l00097" name="l00097"></a><span class="lineno">   97</span>  <span class="keyword">set</span> work.dirtree_send(rename=fullpath=json_file);</div>
+<div class="line"><a id="l00098" name="l00098"></a><span class="lineno">   98</span>  length result_code 8 result_character result_path $255 json_file json_schema $512;</div>
+<div class="line"><a id="l00099" name="l00099"></a><span class="lineno">   99</span>  retain json_schema <span class="stringliteral">&quot;&amp;json_schema&quot;</span>;</div>
+<div class="line"><a id="l00100" name="l00100"></a><span class="lineno">  100</span>  call missing(result_code, result_character, result_path);</div>
+<div class="line"><a id="l00101" name="l00101"></a><span class="lineno">  101</span>  result_character = <span class="stringliteral">&quot;Validation can not be executed&quot;</span>;</div>
+<div class="line"><a id="l00102" name="l00102"></a><span class="lineno">  102</span>  %<span class="keywordflow">if</span> &amp;python_installed %then %<span class="keywordflow">do</span>;</div>
+<div class="line"><a id="l00103" name="l00103"></a><span class="lineno">  103</span>    call validate_datasetjson(json_file, json_schema, result_code, result_character, result_path);</div>
+<div class="line"><a id="l00104" name="l00104"></a><span class="lineno">  104</span>    <span class="keywordflow">if</span> result_code = 1 then putlog <span class="stringliteral">&#39;ERR&#39;</span> <span class="stringliteral">&#39;OR:&#39;</span> json_file= result_character;</div>
+<div class="line"><a id="l00105" name="l00105"></a><span class="lineno">  105</span>  %end;</div>
+<div class="line"><a id="l00106" name="l00106"></a><span class="lineno">  106</span>run;</div>
+<div class="line"><a id="l00107" name="l00107"></a><span class="lineno">  107</span> </div>
+<div class="line"><a id="l00108" name="l00108"></a><span class="lineno">  108</span> </div>
+<div class="line"><a id="l00109" name="l00109"></a><span class="lineno">  109</span><span class="comment">/* Report the results */</span></div>
+<div class="line"><a id="l00110" name="l00110"></a><span class="lineno">  110</span>%create_template(type=VALIDATION_RESULTS, out=results.schema_validation_results);</div>
+<div class="line"><a id="l00111" name="l00111"></a><span class="lineno">  111</span>data results.schema_validation_results;</div>
+<div class="line"><a id="l00112" name="l00112"></a><span class="lineno">  112</span>  <span class="keyword">set</span> results.schema_validation_results work.dirtree_adam work.dirtree_sdtm work.dirtree_send;</div>
+<div class="line"><a id="l00113" name="l00113"></a><span class="lineno">  113</span>  json_file = translate(json_file, <span class="charliteral">&#39;/&#39;</span>, <span class="charliteral">&#39;\&#39;</span>);</div>
+<div class="line"><a id="l00114" name="l00114"></a><span class="lineno">  114</span>run;</div>
+<div class="line"><a id="l00115" name="l00115"></a><span class="lineno">  115</span> </div>
+<div class="line"><a id="l00116" name="l00116"></a><span class="lineno">  116</span>ods listing close;</div>
+<div class="line"><a id="l00117" name="l00117"></a><span class="lineno">  117</span>ods html5 path=<span class="stringliteral">&quot;&amp;project_folder/programs&quot;</span> file=<span class="stringliteral">&quot;08_validate_datasetjson_results_&amp;today_iso8601..html&quot;</span>;</div>
+<div class="line"><a id="l00118" name="l00118"></a><span class="lineno">  118</span> </div>
+<div class="line"><a id="l00119" name="l00119"></a><span class="lineno">  119</span>  proc print data=results.schema_validation_results label;</div>
+<div class="line"><a id="l00120" name="l00120"></a><span class="lineno">  120</span>    title01 <span class="stringliteral">&quot;Validation Results - &amp;now_iso8601&quot;</span>;</div>
+<div class="line"><a id="l00121" name="l00121"></a><span class="lineno">  121</span>  run;</div>
+<div class="line"><a id="l00122" name="l00122"></a><span class="lineno">  122</span> </div>
+<div class="line"><a id="l00123" name="l00123"></a><span class="lineno">  123</span>ods html5 close;</div>
+<div class="line"><a id="l00124" name="l00124"></a><span class="lineno">  124</span>ods listing;</div>
+<div class="line"><a id="l00125" name="l00125"></a><span class="lineno">  125</span>title01;</div>
+<div class="line"><a id="l00126" name="l00126"></a><span class="lineno">  126</span> </div>
+<div class="line"><a id="l00127" name="l00127"></a><span class="lineno">  127</span>proc delete data=work.dirtree_adam work.dirtree_sdtm work.dirtree_send;</div>
+<div class="line"><a id="l00128" name="l00128"></a><span class="lineno">  128</span>run;</div>
 </div><!-- fragment --></div><!-- contents -->
 </div><!-- doc-content -->
 <!-- start footer part -->
