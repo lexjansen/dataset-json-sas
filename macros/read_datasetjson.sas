@@ -33,7 +33,6 @@
     @li metadata_study
     @li metadata_tables
     @li metadata_columns
-  @param[in] dropseqvar= (Y) Drop record sequence variable? (Y/N)
 
 **/
 
@@ -41,7 +40,6 @@
   jsonpath=,
   jsonfref=,
   datalib=,
-  dropseqvar=Y,
   savemetadata=Y,
   metadatalib=work
   ) / des = 'Read a Dataset-JSON file to a SAS dataset';
@@ -68,7 +66,6 @@
   %* Check for missing parameters ;
   %let _Missing=;
   %if %sysevalf(%superq(datalib)=, boolean) %then %let _Missing = &_Missing datalib;
-  %if %sysevalf(%superq(dropseqvar)=, boolean) %then %let _Missing = &_Missing dropseqvar;
   %if %sysevalf(%superq(savemetadata)=, boolean) %then %let _Missing = &_Missing savemetadata;
 
   %if %length(&_Missing) gt 0
@@ -126,13 +123,6 @@
         %put %sysfunc(sysmsg());
         %goto exit_macro;
     %end;
-  %end;
-
-  %* Rule: dropseqvar has to be Y or N  *;
-  %if "%substr(%upcase(&dropseqvar),1,1)" ne "Y" and "%substr(%upcase(&dropseqvar),1,1)" ne "N" %then
-  %do;
-    %put ERR%str(OR): [&sysmacroname] Required macro parameter &=dropseqvar must be Y or N.;
-    %goto exit_macro;
   %end;
 
   %* Rule: savemetadata has to be Y or N  *;
@@ -350,13 +340,10 @@
       order = _n_;
     run;
 
-    data &metadatalib..metadata_columns(%if %substr(%upcase(&DropSeqVar),1,1) eq Y %then where=(upcase(name) ne "ITEMGROUPDATASEQ"););
+    data &metadatalib..metadata_columns;
       set &metadatalib..metadata_columns work.&_items_(rename=(itemOID=OID) in=init);
       if init then do;
         dataset_name = "&_ItemGroupName";
-        %if %substr(%upcase(&DropSeqVar),1,1) eq Y %then %do;
-          order = order - 1;
-        %end;
         json_length = length;
         length = .;
       end;
@@ -465,7 +452,6 @@
 
   data &datalib..&dsname(
       %if %sysevalf(%superq(dslabel)=, boolean)=0 %then %str(label = %sysfunc(quote(%nrbquote(&dslabel))));
-      %if %substr(%upcase(&DropSeqVar),1,1) eq Y %then drop=ITEMGROUPDATASEQ;
     );
     retain &variables;
     %if %sysevalf(%superq(length)=, boolean)=0 %then length &length;;
@@ -479,10 +465,7 @@
   proc sql ;
    create table column_metadata
    as select
-    case upcase(d.name)
-      when "ITEMGROUPDATASEQ" then d.name
-      else cats("IT.", "%upcase(&dsname).", d.name)
-    end as OID,
+    cats("IT.", "%upcase(&dsname).", d.name) as OID,
     d.name,
     d.type as datatype,
     i.datatype as type,

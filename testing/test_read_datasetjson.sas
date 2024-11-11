@@ -2,6 +2,20 @@
 %let project_folder=/_github/lexjansen/dataset-json-sas;
 %include "&project_folder/programs/config.sas";
 
+%* This is needed to be able to run Python;
+%* Update to your own locations           ;
+options set=MAS_PYPATH="&project_folder/venv/Scripts/python.exe";
+options set=MAS_M2PATH="%sysget(SASROOT)/tkmas/sasmisc/mas2py.py";
+
+%let fcmplib=work;
+%include "&project_folder/macros/validate_datasetjson.sas";
+
+options cmplib=&fcmplib..datasetjson_funcs;
+
+%global python_installed;
+%check_python();
+
+
 %let _SaveOptions = %sysfunc(getoption(dlcreatedir));
 options dlcreatedir;
 
@@ -24,7 +38,6 @@ libname data "&project_folder/testing";
   %read_datasetjson(
     jsonpath=&json_file,
     datalib=data,
-    dropseqvar=Y,
     savemetadata=Y,
     metadatalib=metadata
   );

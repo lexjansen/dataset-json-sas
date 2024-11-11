@@ -86,8 +86,7 @@ run;
 
 %read_datasetjson(
   jsonpath=%sysfunc(pathname(data))/adaedt.json, 
-  datalib=data, 
-  dropseqvar=Y
+  datalib=data
   );
 
 proc contents data=data.adaedt varnum;

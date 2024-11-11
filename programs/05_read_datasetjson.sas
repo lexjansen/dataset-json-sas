@@ -26,7 +26,6 @@ data _null_;
     code=cats('%nrstr(%read_datasetjson(',
                         'jsonpath=', fullpath, ', ',
                         'datalib=outadam, ',
-                        'dropseqvar=Y, ',
                         'savemetadata=Y, ',
                         'metadatalib=metasvad',
                     ');)');
@@ -60,7 +59,6 @@ data _null_;
     code=cats('%nrstr(%read_datasetjson(',
                         'jsonpath=', fullpath, ', ',
                         'datalib=outsdtm, ',
-                        'dropseqvar=Y, ',
                         'savemetadata=Y, ',
                         'metadatalib=metasvsd',
                     ');)');
@@ -94,7 +92,6 @@ data _null_;
     code=cats('%nrstr(%read_datasetjson(',
                         'jsonpath=', fullpath, ', ',
                         'datalib=outsend, ',
-                        'dropseqvar=Y, ',
                         'savemetadata=Y, ',
                         'metadatalib=metasvse',
                     ');)');
