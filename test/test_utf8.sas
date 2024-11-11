@@ -11,11 +11,10 @@ run;
 %read_datasetjson(
   jsonpath=&project_folder/test/ae_utf8.json, 
   datalib=data, 
-  dropseqvar=Y,
   savemetadata=Y,
   metadatalib=data
   );
-
+  
 %write_datasetjson(
   dataset=data.ae, 
   jsonpath=&project_folder/test/ae_out.json, 
@@ -29,7 +28,6 @@ run;
 %read_datasetjson(
   jsonpath=&project_folder/test/ae_out.json, 
   datalib=work, 
-  dropseqvar=Y,
   savemetadata=Y,
   metadatalib=work
   );

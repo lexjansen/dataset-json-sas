@@ -121,8 +121,7 @@ libname sasout "%sysfunc(pathname(work))/sas&_random_";
 
 %read_datasetjson(
   jsonpath=%sysfunc(pathname(xptout))/&_dataset_..json,
-  datalib=sasout,
-  dropseqvar=Y
+  datalib=sasout
   );
 
 

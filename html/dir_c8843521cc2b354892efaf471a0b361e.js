@@ -18,7 +18,6 @@ var dir_c8843521cc2b354892efaf471a0b361e =
     [ "util_gettree.sas", "db/d00/util__gettree_8sas.html", null ],
     [ "validate_datasetjson.sas", "d8/d00/validate__datasetjson_8sas_source.html", null ],
     [ "write_datasetjson.sas", "df/d00/write__datasetjson_8sas.html", null ],
-    [ "write_datasetjson_1_0.sas", "d8/d00/write__datasetjson__1__0_8sas_source.html", null ],
     [ "write_datasetjson_1_1.sas", "da/d00/write__datasetjson__1__1_8sas_source.html", null ],
     [ "write_json_map.sas", "d0/d00/write__json__map_8sas_source.html", null ],
     [ "write_json_metadata_array.sas", "dc/d00/write__json__metadata__array_8sas_source.html", null ]

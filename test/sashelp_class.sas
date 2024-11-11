@@ -3,10 +3,8 @@
 %include "&project_folder/programs/config.sas";
 
 data work.class(label="%cstutilgetattribute(_cstDataSetName=sashelp.class, _cstAttribute=LABEL)");
-  * attrib ITEMGROUPDATASEQ length=8 label="Record Identifier";
   label Name = "Name" Sex = "Sex" Age="Age" Height="Height";
   set sashelp.class;
-  * ITEMGROUPDATASEQ = strip(put(_n_, best.));
   bmi = weight * 703 / (height * height);
 run;
 
@@ -52,7 +50,6 @@ quit;
 %read_datasetjson(
   jsonpath=&project_folder\test\class.json,
   datalib=work,
-  dropseqvar=Y,
   savemetadata=N
 );
 
@@ -66,7 +63,6 @@ run;
 %read_datasetjson(
   jsonpath=&project_folder\test\class_bmi_num.json,
   datalib=work,
-  dropseqvar=Y,
   savemetadata=N
 );
 

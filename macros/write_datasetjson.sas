@@ -84,7 +84,7 @@
     creationDateTime modifiedDateTime
     releaseCreated hostCreated
     _decimal_variables _iso8601_variables _format
-    _dataset_to_write;
+    ;
 
 
   %let _Random=%sysfunc(putn(%sysevalf(%sysfunc(ranuni(0))*10000,floor),z4.));
@@ -407,44 +407,6 @@
 
   %end;
 
-  %if %cstutilcheckvarsexist(_cstDataSetName=&dataset_new, _cstVarList=ITEMGROUPDATASEQ) %then %do;
-  /* There already is a ITEMGROUPDATASEQ variable */
-    %put %str(WAR)NING: [&sysmacroname] Dataset &dataset_new already contains a variable ITEMGROUPDATASEQ.;
-    %if %cstutilgetattribute(_cstDataSetName=&dataset_new, _cstVarName=ITEMGROUPDATASEQ, _cstAttribute=VARTYPE) eq C %then %do;
-      /* The datatype of the ITEMGROUPDATASEQ variable is character*/
-      %put %str(ERR)OR: [&sysmacroname] The ITEMGROUPDATASEQ in the dataset &dataset_new is a character variable.;
-      %put %str(ERR)OR: [&sysmacroname] It is required to drop this variable.;
-    %end;
-    %let _dataset_to_write = &dataset_new;
-  %end;
-  %else %do;
-    /* Create the numeric ITEMGROUPDATASEQ variable */
-    /* Create a 1-obs dataset with the same structure as the column_metadata dataset */
-    proc sql noprint;
-      create table itemgroupdataseq_metadata
-        like work.column_metadata;
-      insert into itemgroupdataseq_metadata
-        set OID="ITEMGROUPDATASEQ", name="ITEMGROUPDATASEQ", label="Record Identifier",
-          dataType="integer";
-    quit;
-
-    data work.column_metadata;
-      set itemgroupdataseq_metadata
-          work.column_metadata(where=(upcase(name) ne "ITEMGROUPDATASEQ"));
-    run;
-
-    data work.column_data;
-      length ITEMGROUPDATASEQ 8.;
-      set &dataset_new;
-      ITEMGROUPDATASEQ = _n_;
-    run;
-    %let _dataset_to_write = work.column_data;
-
-    proc delete data=work.itemgroupdataseq_metadata;
-    run;
-
-  %end;
-
   %************************************************************;
   /* Convert numeric variables to decimal strings if needed */
   %************************************************************;
@@ -472,7 +434,7 @@
   %end;
   %if %sysevalf(%superq(_decimal_variables)=, boolean)=0 %then %do;
     %put NOTE: [&sysmacroname] &dataset: numeric variables converted to strings: &_decimal_variables;
-    %convert_num_to_char(ds=&_dataset_to_write, outds=&_dataset_to_write, varlist=&_decimal_variables);
+    %convert_num_to_char(ds=&dataset_new, outds=&dataset_new, varlist=&_decimal_variables);
   %end;
 
   %************************************************************;
@@ -494,7 +456,7 @@
   data work.column_metadata_formats;
     length dataset_name $32;
      set work.column_metadata(where=((datatype in ('datetime', 'date', 'time')) and (targetdatatype = 'integer')));
-     dataset_name = "column_data";
+     dataset_name = "&dataset_name";
      if dataType = "date" and find(displayFormat, "E8601DA", 'it')=0 then displayFormat = "E8601DA.";
      if dataType = "datetime" and find(displayFormat, "E8601DT", 'it')=0 then displayFormat = "E8601DT.";
      if dataType = "time" and find(displayFormat, "E8601TM", 'it')=0 then displayFormat = "E8601TM.";
@@ -502,7 +464,7 @@
 
   %add_formats_to_datasets(
     metadata=work.column_metadata_formats,
-    datalib=work,
+    datalib=sas&_Random,
     condition = %str(not missing(displayFormat)),
     format=displayFormat
     );
@@ -556,7 +518,7 @@
     technicalMetadata=work.study_metadata,
     tableMetadata=work.table_metadata,
     columnMetadata=work.column_metadata,
-    rowdata=&_dataset_to_write,
+    rowdata=&dataset_new,
     prettyNoPretty=&pretty
   );
 
@@ -574,10 +536,6 @@
 
   %if %sysfunc(exist(work.column_metadata)) %then %do;
     proc delete data=work.column_metadata;
-    run;
-  %end;
-  %if %sysfunc(exist(work.column_data)) %then %do;
-    proc delete data=work.column_data;
     run;
   %end;
 
