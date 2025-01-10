@@ -34,7 +34,7 @@
        %end;
        %else %do;
          %let _value=%sysfunc(getvarn(&dset_id, &_varnum));
-         %if &_value ne %str(%sysfunc(getoption(missing))) %then %let code=&code "&_varname" &_value;
+         %if &_value ne %str(.) %then %let code=&code "&_varname" &_value;
        %end;
    
    %end;
