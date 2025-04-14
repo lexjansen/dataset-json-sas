@@ -24,7 +24,7 @@
 */
 var NAVTREE =
 [
-  [ "Dataset-JSON v1.1 Hands-On Implementation Training", "index.html", [
+  [ "Dataset-JSON v1.1 - SAS implementation", "index.html", [
     [ "Files", "files.html", [
       [ "File List", "files.html", "files_dup" ]
     ] ]
