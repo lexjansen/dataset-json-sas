@@ -52,6 +52,11 @@ More information:
 - [Using PROC FCMP Python Objects](https://documentation.sas.com/doc/en/pgmsascdc/9.4_3.5/lecompobjref/p18qp136f91aaqn1h54v3b6pkant.htm)
 - [Configuring SAS to Run the Python Language](https://go.documentation.sas.com/doc/en/bicdc/9.4/biasag/n1mquxnfmfu83en1if8icqmx8cdf.htm)
 
+## Supported python versions
+
+[![Python 3.9](https://img.shields.io/badge/python-3.9-blue.svg)](https://www.python.org/downloads/release/python-390/)
+[![Python 3.10](https://img.shields.io/badge/python-3.10-blue.svg)](https://www.python.org/downloads/release/python-3100/)
+
 ## Documentation
 
 Documentation is in the **doc** folder (not updated yet for Dataset-JSON v1.1):
