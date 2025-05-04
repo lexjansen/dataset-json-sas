@@ -76,6 +76,7 @@
     proc sql;
     create table &out
       (
+       datetime char(32) label="Time stamp",
        dataset_name char(32) label="SAS Dataset Name",
        baselib char(8) label="Base Library",
        baselib_path char(1024) label="Base Library Path",
@@ -91,6 +92,7 @@
     proc sql;
     create table &out
       (
+       datetime char(32) label="Time stamp",
        json_file char(1024) label="Dataset-JSON File",
        json_schema char(1024) label="Dataset-JSON Schema",
        result_code num label="Validation Result (Numeric)",
