@@ -305,6 +305,27 @@
         if dataType in ("date", "datetime", "time") and targetDataType = "integer" and missing(displayFormat)
           then putlog "WAR" "NING: [&sysmacroname] Missing displayFormat for variable: &dataset.." name +(-1) ", " oid= +(-1) ", " dataType= +(-1) ", " targetDataType=;
 
+        if dataType in ("date", "datetime", "time", "integer") and missing(targetDataType) and 
+            (
+              (find(displayFormat, "E8601DA", 'it') or find(displayFormat, "DATE", 'it')) or
+              (find(displayFormat, "E8601TM", 'it') or find(displayFormat, "TIME", 'it')) or
+              (find(displayFormat, "E8601DT", 'it') or find(displayFormat, "DATETIME", 'it'))
+            ) then do;
+            putlog "WAR" "NING: [&sysmacroname] Missing targetDataType for variable: &dataset.." name +(-1) ", " oid= +(-1) ", " dataType= +(-1) ", " displayFormat=;
+            targetDataType = "integer";
+            if dataType = "integer" then do;
+                if (find(displayFormat, "E8601DA", 'it') or find(displayFormat, "DATE", 'it')) then do;
+                  dataType = "date";
+                end;
+                if (find(displayFormat, "E8601TM", 'it') or find(displayFormat, "TIME", 'it')) then do;
+                  dataType = "time";
+                end;
+                if (find(displayFormat, "E8601DT", 'it') or find(displayFormat, "DATETIME", 'it')) then do;
+                  dataType = "datetime";
+                end;
+            end;
+            putlog "WAR" "NING: [&sysmacroname] dataType set to """ dataType +(-1) """, targetDataType set to ""integer""";
+        end;
     run;
 
 
