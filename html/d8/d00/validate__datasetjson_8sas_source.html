@@ -102,44 +102,48 @@ $(function(){initNavTree('d8/d00/validate__datasetjson_8sas_source.html','../../
 <div class="contents">
 <div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span>proc fcmp outlib=&amp;fcmplib..datasetjson_funcs.python;</div>
 <div class="line"><a id="l00002" name="l00002"></a><span class="lineno">    2</span> </div>
-<div class="line"><a id="l00003" name="l00003"></a><span class="lineno">    3</span>  subroutine validate_datasetjson(jsonfile $, jsonschema $, result_code, result_character $, result_path $);</div>
+<div class="line"><a id="l00003" name="l00003"></a><span class="lineno">    3</span>  subroutine validate_datasetjson(jsonfile $, jsonschema $, datetime $, result_code, result_character $, result_path $);</div>
 <div class="line"><a id="l00004" name="l00004"></a><span class="lineno">    4</span>  </div>
 <div class="line"><a id="l00005" name="l00005"></a><span class="lineno">    5</span>    length jsonfile jsonschema $ 1024 </div>
-<div class="line"><a id="l00006" name="l00006"></a><span class="lineno">    6</span>           result_character resultMessage result_path resultPath $ 255 </div>
-<div class="line"><a id="l00007" name="l00007"></a><span class="lineno">    7</span>           result_code 8;</div>
-<div class="line"><a id="l00008" name="l00008"></a><span class="lineno">    8</span>    outargs result_code, result_character, result_path;</div>
-<div class="line"><a id="l00009" name="l00009"></a><span class="lineno">    9</span>    declare <span class="keywordtype">object</span> py4(python);</div>
-<div class="line"><a id="l00010" name="l00010"></a><span class="lineno">   10</span>    submit into py4;</div>
-<div class="line"><a id="l00011" name="l00011"></a><span class="lineno">   11</span>    def validatejson(jsonfile, jsonschema):</div>
-<div class="line"><a id="l00012" name="l00012"></a><span class="lineno">   12</span>      <span class="stringliteral">&quot;&quot;</span><span class="stringliteral">&quot;Output: resultCode, resultMessage, resultPath&quot;</span><span class="stringliteral">&quot;&quot;</span></div>
-<div class="line"><a id="l00013" name="l00013"></a><span class="lineno">   13</span>      </div>
-<div class="line"><a id="l00014" name="l00014"></a><span class="lineno">   14</span>      import json</div>
-<div class="line"><a id="l00015" name="l00015"></a><span class="lineno">   15</span>      import jsonschema as JSD</div>
-<div class="line"><a id="l00016" name="l00016"></a><span class="lineno">   16</span>      </div>
-<div class="line"><a id="l00017" name="l00017"></a><span class="lineno">   17</span>      try:</div>
-<div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span>        jsonf = json.load(open(jsonfile, encoding=<span class="stringliteral">&quot;utf8&quot;</span>))</div>
-<div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span>        with open(jsonschema) as s:</div>
-<div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span>           schema = json.load(s)</div>
-<div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span>        JSD.validate(jsonf, schema=schema)</div>
-<div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span>        resultCode = 0</div>
-<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span>        resultMessage = <span class="stringliteral">&quot;The document validated successfully&quot;</span></div>
-<div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span>        resultPath = <span class="stringliteral">&quot;&quot;</span></div>
-<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span>      except Exception as e:</div>
-<div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span>        resultCode = 1</div>
-<div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span>        resultMessage = str(e.message) + <span class="stringliteral">&quot; (&quot;</span> + (e.schema[<span class="stringliteral">&#39;description&#39;</span>]) +<span class="stringliteral">&quot;)&quot;</span></div>
-<div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span>        resultPath = str(e.json_path)</div>
-<div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span>      return resultCode, resultMessage, resultPath</div>
-<div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span>        </div>
-<div class="line"><a id="l00031" name="l00031"></a><span class="lineno">   31</span>    endsubmit;</div>
-<div class="line"><a id="l00032" name="l00032"></a><span class="lineno">   32</span>    </div>
-<div class="line"><a id="l00033" name="l00033"></a><span class="lineno">   33</span>    rc = py4.publish();</div>
-<div class="line"><a id="l00034" name="l00034"></a><span class="lineno">   34</span>    rc = py4.call(<span class="stringliteral">&#39;validatejson&#39;</span>, jsonfile, jsonschema);</div>
-<div class="line"><a id="l00035" name="l00035"></a><span class="lineno">   35</span>    result_code = py4.results[<span class="stringliteral">&#39;resultCode&#39;</span>];</div>
-<div class="line"><a id="l00036" name="l00036"></a><span class="lineno">   36</span>    result_character = py4.results[<span class="stringliteral">&#39;resultMessage&#39;</span>];</div>
-<div class="line"><a id="l00037" name="l00037"></a><span class="lineno">   37</span>    result_path = py4.results[<span class="stringliteral">&#39;resultPath&#39;</span>];</div>
-<div class="line"><a id="l00038" name="l00038"></a><span class="lineno">   38</span>  endsub;</div>
-<div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span> </div>
-<div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span>run;</div>
+<div class="line"><a id="l00006" name="l00006"></a><span class="lineno">    6</span>           datetime $32</div>
+<div class="line"><a id="l00007" name="l00007"></a><span class="lineno">    7</span>           result_character resultMessage result_path resultPath $ 255 </div>
+<div class="line"><a id="l00008" name="l00008"></a><span class="lineno">    8</span>           result_code 8;</div>
+<div class="line"><a id="l00009" name="l00009"></a><span class="lineno">    9</span>    outargs datetime, result_code, result_character, result_path;</div>
+<div class="line"><a id="l00010" name="l00010"></a><span class="lineno">   10</span>    declare <span class="keywordtype">object</span> py4(python);</div>
+<div class="line"><a id="l00011" name="l00011"></a><span class="lineno">   11</span>    submit into py4;</div>
+<div class="line"><a id="l00012" name="l00012"></a><span class="lineno">   12</span>    def validatejson(jsonfile, jsonschema):</div>
+<div class="line"><a id="l00013" name="l00013"></a><span class="lineno">   13</span>      <span class="stringliteral">&quot;&quot;</span><span class="stringliteral">&quot;Output: dateTime, resultCode, resultMessage, resultPath&quot;</span><span class="stringliteral">&quot;&quot;</span></div>
+<div class="line"><a id="l00014" name="l00014"></a><span class="lineno">   14</span>      </div>
+<div class="line"><a id="l00015" name="l00015"></a><span class="lineno">   15</span>      import datetime</div>
+<div class="line"><a id="l00016" name="l00016"></a><span class="lineno">   16</span>      import json</div>
+<div class="line"><a id="l00017" name="l00017"></a><span class="lineno">   17</span>      import jsonschema as JSD</div>
+<div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span>      </div>
+<div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span>      dateTime = datetime.datetime.now().replace(microsecond=0).isoformat()</div>
+<div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span>      try:</div>
+<div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span>        jsonf = json.load(open(jsonfile, encoding=<span class="stringliteral">&quot;utf8&quot;</span>))</div>
+<div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span>        with open(jsonschema) as s:</div>
+<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span>           schema = json.load(s)</div>
+<div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span>        JSD.validate(jsonf, schema=schema)</div>
+<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span>        resultCode = 0</div>
+<div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span>        resultMessage = <span class="stringliteral">&quot;The document validated successfully&quot;</span></div>
+<div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span>        resultPath = <span class="stringliteral">&quot;&quot;</span></div>
+<div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span>      except Exception as e:</div>
+<div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span>        resultCode = 1</div>
+<div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span>        resultMessage = str(e.message) + <span class="stringliteral">&quot; (&quot;</span> + (e.schema[<span class="stringliteral">&#39;description&#39;</span>]) +<span class="stringliteral">&quot;)&quot;</span></div>
+<div class="line"><a id="l00031" name="l00031"></a><span class="lineno">   31</span>        resultPath = str(e.json_path)</div>
+<div class="line"><a id="l00032" name="l00032"></a><span class="lineno">   32</span>      return dateTime, resultCode, resultMessage, resultPath</div>
+<div class="line"><a id="l00033" name="l00033"></a><span class="lineno">   33</span>        </div>
+<div class="line"><a id="l00034" name="l00034"></a><span class="lineno">   34</span>    endsubmit;</div>
+<div class="line"><a id="l00035" name="l00035"></a><span class="lineno">   35</span>    </div>
+<div class="line"><a id="l00036" name="l00036"></a><span class="lineno">   36</span>    rc = py4.publish();</div>
+<div class="line"><a id="l00037" name="l00037"></a><span class="lineno">   37</span>    rc = py4.call(<span class="stringliteral">&#39;validatejson&#39;</span>, jsonfile, jsonschema);</div>
+<div class="line"><a id="l00038" name="l00038"></a><span class="lineno">   38</span>    datetime = py4.results[<span class="stringliteral">&#39;dateTime&#39;</span>];</div>
+<div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span>    result_code = py4.results[<span class="stringliteral">&#39;resultCode&#39;</span>];</div>
+<div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span>    result_character = py4.results[<span class="stringliteral">&#39;resultMessage&#39;</span>];</div>
+<div class="line"><a id="l00041" name="l00041"></a><span class="lineno">   41</span>    result_path = py4.results[<span class="stringliteral">&#39;resultPath&#39;</span>];</div>
+<div class="line"><a id="l00042" name="l00042"></a><span class="lineno">   42</span>  endsub;</div>
+<div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span> </div>
+<div class="line"><a id="l00044" name="l00044"></a><span class="lineno">   44</span>run;</div>
 </div><!-- fragment --></div><!-- contents -->
 </div><!-- doc-content -->
 <!-- start footer part -->
