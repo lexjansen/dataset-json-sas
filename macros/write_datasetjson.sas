@@ -77,6 +77,7 @@
     _Random
     _SaveOptions1
     _SaveOptions2
+    _SaveOptions3
     _Missing
     _create_temp_dataset_sas
     dataset_new dataset_name dataset_label _records
@@ -94,6 +95,9 @@
   %let _SaveOptions2 = %sysfunc(getoption(compress, keyword)) %sysfunc(getoption(reuse, keyword));
   options dlcreatedir;
   options compress=Yes reuse=Yes;
+  %* Since JSON keys are case-sensitive, it is required that metadata datasets have case-sensitive columns;
+  %let _SaveOptions3 = %sysfunc(getoption(validvarname, keyword));
+  options validvarname = V7;
 
   %if %sysevalf(%superq(datasetJSONVersion)=, boolean) %then %let datasetJSONVersion = %str(1.1.0);
 
@@ -565,5 +569,6 @@
   %* Restore options;
   options &_SaveOptions1;
   options &_SaveOptions2;
+  options &_SaveOptions3;
 
 %mend write_datasetjson;

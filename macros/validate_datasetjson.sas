@@ -1,5 +1,10 @@
 proc fcmp outlib=&fcmplib..datasetjson_funcs.python;
 
+
+  %* Since JSON keys are case-sensitive, it is required that metadata datasets have case-sensitive columns;
+  %let _SaveOptions = %sysfunc(getoption(validvarname, keyword));
+  options validvarname = V7;
+  
   subroutine validate_datasetjson(jsonfile $, jsonschema $, datetime $, result_code, result_character $, result_path $);
   
     length jsonfile jsonschema $ 1024 
@@ -40,5 +45,8 @@ proc fcmp outlib=&fcmplib..datasetjson_funcs.python;
     result_character = py4.results['resultMessage'];
     result_path = py4.results['resultPath'];
   endsub;
+  
+  %* Reset VALIDVARNAME option to original value;
+  options &_SaveOptions;  
 
 run;

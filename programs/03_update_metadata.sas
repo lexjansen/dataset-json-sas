@@ -1,6 +1,11 @@
 %let project_folder=/_github/lexjansen/dataset-json-sas;
 %include "&project_folder/programs/config.sas";
 
+%* Since JSON keys are case-sensitive, it is required that metadata datasets have case-sensitive columns;
+%let _SaveOptions = %sysfunc(getoption(validvarname));
+options validvarname = V7;
+
+
 proc format;
   /* this is a very rough mapping, it does not take decimal into account */
   value $datatyp
@@ -75,6 +80,9 @@ data metasend.metadata_columns;
   if dataType = "string" then json_length = length;
 
 run;
+
+%* Reset VALIDVARNAME option to original value;
+options validvarname = &_SaveOptions;
 
 
 /*

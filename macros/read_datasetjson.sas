@@ -47,6 +47,7 @@
   %local _Missing
          _SaveOptions1
          _SaveOptions2
+         _SaveOptions3
          _Random
          metadata_study_columns metadata_tables_columns metadata_columns_columns
          _items_ _itemdata_ _itemgroupdata_ ItemGroupOID _ItemGroupName
@@ -58,6 +59,10 @@
   %* Save options;
   %let _SaveOptions1 = %sysfunc(getoption(dlcreatedir));
   options dlcreatedir;
+
+  %* Since JSON keys are case-sensitive, it is required that metadata datasets have case-sensitive columns;
+  %let _SaveOptions2 = %sysfunc(getoption(validvarname, keyword));
+  options validvarname = V7;
 
   %******************************************************************************;
   %* Parameter checks                                                           *;
@@ -138,7 +143,7 @@
 
 
   %* Save options;
-  %let _SaveOptions2 = %sysfunc(getoption(compress, keyword)) %sysfunc(getoption(reuse, keyword));
+  %let _SaveOptions3 = %sysfunc(getoption(compress, keyword)) %sysfunc(getoption(reuse, keyword));
   options compress=Yes reuse=Yes;
 
   %if %sysevalf(%superq(jsonpath)=, boolean)=0 %then
@@ -155,7 +160,7 @@
   run;
 
   %* Restore options;
-  options &_SaveOptions2;
+  options &_SaveOptions3;
 
   %let datasetJSONVersion=;
   proc sql noprint;
@@ -516,5 +521,6 @@
 
   %* Restore options;
   options &_SaveOptions1;
+  options &_SaveOptions2;
 
 %mend read_datasetjson;

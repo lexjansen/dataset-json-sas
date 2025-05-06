@@ -30,6 +30,13 @@
   drop=ext
   ) / des = 'Create a dataset with directory information';
 
+
+  %* Since JSON keys are case-sensitive, it is required that metadata datasets have case-sensitive columns;
+  %local _SaveOptions;
+  %let _SaveOptions = %sysfunc(getoption(validvarname, keyword));
+  options validvarname = V7;
+
+
   /*
   credit:
    Tom:
@@ -72,5 +79,8 @@
     set &outds %if %sysevalf(%superq(where)=, boolean)=0 %then (where=(&where));;
   run;  
 
-  
+
+  %* Reset VALIDVARNAME option to original value;
+  options &_SaveOptions;
+
 %mend util_gettree ;

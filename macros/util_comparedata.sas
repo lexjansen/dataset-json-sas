@@ -23,10 +23,20 @@
   detaillevel=2
   ) / des = 'Compare 2 libraries with SAS datasets';
 
-  %local compinfo _Random now_iso8601;
+  %local 
+    compinfo 
+    _Random 
+    now_iso8601 
+    _SaveOptions
+    ;
 
   %let _Random=%sysfunc(putn(%sysevalf(%sysfunc(ranuni(0))*10000,floor),z4.));
   %let now_iso8601=%sysfunc(datetime(), is8601dt.);
+
+  %* Since JSON keys are case-sensitive, it is required that metadata datasets have case-sensitive columns;
+  %local _SaveOptions;
+  %let _SaveOptions = %sysfunc(getoption(validvarname, keyword));
+  options validvarname = V7;
 
   proc compare base=&baselib..&dsname compare=&complib..&dsname %NRBQUOTE(&compareoptions) noprint;
   run;
@@ -85,5 +95,8 @@
 
   proc delete data=work.compare_results_&_Random;
   run;
+  
+  %* Reset VALIDVARNAME option to original value;
+  options &_SaveOptions;  
 
 %mend util_comparedata;

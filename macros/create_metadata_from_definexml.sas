@@ -30,6 +30,16 @@
   definexml=,
   metadatalib=) / des = 'Extract metadata from a Define-XML file';
 
+
+  %* Since JSON keys are case-sensitive, it is required that metadata datasets have case-sensitive columns;
+  %local _SaveOptions;
+  %let _SaveOptions = %sysfunc(getoption(validvarname, keyword));
+  options validvarname = V7;
+  
   proc lua infile='read_definexml';
   run;
+  
+  %* Reset VALIDVARNAME option to original value;
+  options &_SaveOptions;
+   
 %mend create_metadata_from_definexml;
