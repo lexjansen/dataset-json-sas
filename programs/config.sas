@@ -26,4 +26,3 @@ libname results "&project_folder/results";
 libname macros "&project_folder/macros";
 
 options mprint nomlogic nosymbolgen;
-options validvarname=UPCASE;

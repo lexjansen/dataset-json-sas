@@ -18,14 +18,27 @@ proc fcmp outlib=&fcmplib..datasetjson_funcs.python;
       """Output: dateTime, resultCode, resultMessage, resultPath"""
       
       import datetime
+      import os
       import json
       import jsonschema as JSD
       
       dateTime = datetime.datetime.now().replace(microsecond=0).isoformat()
       try:
         jsonf = json.load(open(jsonfile, encoding="utf8"))
+      except Exception as e:
+        resultCode = 1
+        resultMessage = "Error loading JSON file"
+        resultPath = ""
+        return dateTime, resultCode, resultMessage, resultPath
+      try:
         with open(jsonschema) as s:
            schema = json.load(s)
+      except Exception as e:
+        resultCode = 1
+        resultMessage = "Error loading JSON schema"
+        resultPath = ""
+        return dateTime, resultCode, resultMessage, resultPath
+      try:
         JSD.validate(jsonf, schema=schema)
         resultCode = 0
         resultMessage = "The document validated successfully"
