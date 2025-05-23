@@ -366,7 +366,7 @@
     proc sql noprint;
       select catx(' ', name, strip(displayformat)) into :format separated by ' '
           from out_&_Random..&_items_
-          where (not(missing(displayformat)) and (displayformat ne ".")) /* and (type in ('integer' 'float' 'double' 'decimal')) */;
+          where (not(missing(displayformat)) and (displayformat ne ".")) and (datatype ne 'string');
     quit;
   %end;
 

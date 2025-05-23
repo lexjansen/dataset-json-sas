@@ -330,6 +330,7 @@
             end;
             putlog "WAR" "NING: [&sysmacroname] dataType set to """ dataType +(-1) """, targetDataType set to ""integer""";
         end;
+        if dataType = "string" then displayFormat = "";
     run;
 
 
@@ -403,6 +404,7 @@
       end;
       else do;
         dataType="string";
+        displayFormat="";
       end;
       /* Numeric datetime, date, and time variables will be transfered as ISO 8601 strings */
       if not (missing(displayFormat)) then do;
@@ -420,8 +422,10 @@
         end;
       end;
 
-      if formatl gt 0 then displayFormat=cats(displayFormat, put(formatl, best.), ".");
-      if formatd gt 0 then displayFormat=cats(displayFormat, put(formatd, best.));
+      if (sas_type = 1) then do;
+        if formatl gt 0 then displayFormat=cats(displayFormat, put(formatl, best.), ".");
+        if formatd gt 0 then displayFormat=cats(displayFormat, put(formatd, best.));
+      end;
       %* put a dot on the end of format if we are still missing it;
       if (not missing(displayFormat)) and index(displayFormat,'.')=0 then displayFormat=strip(displayFormat)||'.';
       if missing(label) then do;
