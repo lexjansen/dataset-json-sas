@@ -63,7 +63,7 @@ run;
   
 data work.metadata_columns(drop=sas_type varnum);
   retain OID name label json_datatype xml_datatype length keysequence;
-  length OID $128 json_datatype $32 keysequence 8;
+  length OID $128 json_datatype $32 targetDataType $32 keysequence 8;
   set work.metadata_columns;
   keysequence=.;
   OID = cats("IT", ".", "ADAEDT", ".", upcase(name));

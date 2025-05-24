@@ -27,11 +27,11 @@ libname data "&project_folder/testing";
   %put #### TEST &test;
   
   data _null_;
-    length result_code 8 result_character result_path $255 json_file json_schema $512;
+    length datetime $32 result_code 8 result_character result_path $255 json_file json_schema $512;
     json_schema = "&json_schema";
     json_file = "&json_file";
-    call missing(result_code, result_character, result_path);
-    call validate_datasetjson(json_file, json_schema, result_code, result_character, result_path);
+    call missing(datetime, result_code, result_character, result_path);
+    call validate_datasetjson(json_file, json_schema, datetime, result_code, result_character, result_path);
     if result_code = 1 then putlog 'ERR' 'OR:' result_code= json_file= result_character= result_path=;
   run;
 
