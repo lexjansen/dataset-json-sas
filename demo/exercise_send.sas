@@ -65,7 +65,7 @@ run;
 
 %write_datasetjson(
     dataset=datasend.&dataset,
-    jsonpath=&project_folder/json_out/send/&dataset..json,
+    jsonfref=jsonfile,
     usemetadata=Y,
     metadatalib=metasend,
     fileOID=&_fileOID,
@@ -82,7 +82,7 @@ run;
 
 /* Create SAS dataset from Dataset-JSON */
 %read_datasetjson(
-    jsonpath=&project_folder/json_out/send/&dataset..json,
+    jsonfref=jsonfile,
     datalib=outsend,
     savemetadata=Y,
     metadatalib=metasvad

@@ -14,7 +14,7 @@ filename jsonfile "&project_folder/json_out/sdtm/&dataset..json";
   _cstOptions=datecopy
   );
 
-proc contents data=dataadam.&dataset varnum;
+proc contents data=datasdtm.&dataset varnum;
 run;  
 
 /* Create metadata from SDTM Define-XML */
@@ -65,7 +65,7 @@ run;
 
 %write_datasetjson(
     dataset=datasdtm.&dataset,
-    jsonpath=&project_folder/json_out/sdtm/&dataset..json,
+    jsonfref=jsonfile,
     usemetadata=Y,
     metadatalib=metasdtm,
     fileOID=&_fileOID,
@@ -82,7 +82,7 @@ run;
 
 /* Create SAS dataset from Dataset-JSON */
 %read_datasetjson(
-    jsonpath=&project_folder/json_out/sdtm/&dataset..json,
+    jsonfref=jsonfile,
     datalib=outsdtm,
     savemetadata=Y,
     metadatalib=metasvad
