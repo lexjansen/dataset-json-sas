@@ -2,6 +2,8 @@
 %let project_folder=/_github/lexjansen/dataset-json-sas;
 %include "&project_folder/programs/config.sas";
 
+filename jsonfile "&project_folder/demo/class.json";
+
 data work.class(label="%cstutilgetattribute(_cstDataSetName=sashelp.class,_cstAttribute=LABEL)");
   label Name="Name" Sex="Sex" Age="Age" Height="Height" Weight="Weight";
   set sashelp.class;
@@ -9,7 +11,7 @@ run;
 
 %write_datasetjson(
     dataset=work.class,
-    jsonpath=&project_folder/demo/class.json,
+    jsonfref=jsonfile,
     fileOID=,
     originator=,
     sourceSystem=,
@@ -20,9 +22,8 @@ run;
     );
 
 %read_datasetjson(
-    jsonpath=&project_folder/demo/class.json,
-    datalib=work,
-    dropseqvar=Y
+    jsonfref=jsonfile,
+    datalib=work
 );
 
 proc compare base=sashelp.class compare=work.class listall;
