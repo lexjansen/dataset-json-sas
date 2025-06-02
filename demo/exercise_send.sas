@@ -15,7 +15,7 @@ filename jsonfile "&project_folder/json_out/send/&dataset..json";
   );
 
 proc contents data=dataadam.&dataset varnum;
-run;  
+run;
 
 /* Create metadata from SEND Define-XML */
 %create_metadata_from_definexml(
@@ -76,7 +76,7 @@ run;
     metaDataVersionOID=&_metaDataVersionOID,
     metaDataRef=define.xml,
     %* In a submission, you would typicaly use pretty=NOPRETTY ;
-    pretty=PRETTY
+    pretty=NOPRETTY
     );
 
 
