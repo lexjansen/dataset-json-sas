@@ -39,12 +39,14 @@
   @param[in] decimalVariables= List of numeric variables to write as decimal strings.
     Not used when usemetadata=Y. Separated by blanks.
   @param[in] datasetJSONVersion= (1.1.0) Dataset-JSON version. Allowed values: 1.1.*
+  @param[in] fileOID= A unique identifier for this dataset.
   @param[in] originator= The organization that generated the Dataset-JSON dataset.
   @param[in] sourceSystem= The name of the information system from which the content of this dataset was sourced
   @param[in] sourceSystemVersion= The version of the information system from which the content of this dataset was sourced
   @param[in] studyOID= Unique identifier for the study that may also function as a foreign key to a Study/\@OID in an associated Define-XML file
   @param[in] metaDataVersionOID= Unique identifier for the metadata version that may also function as a foreign key to a MetaDataVersion/\@OID in an associated Define-XML file
   @param[in] metaDataRef= URI for a metadata file describing the dataset (e.g., a Define-XML file)
+  @param[in] itemGroupOID= Unique identifier for the dataset that may also function as a foreign key to an ItemGroupDef/@OID in an associated Define-XML file.
   @param[in] datasetlabel= Dataset label
   @param[in] pretty= (NOPRETTY) Format Dataset-JSON file (PRETTY/NOPRETTY).
 
@@ -69,6 +71,7 @@
   studyOID=,
   metaDataVersionOID=,
   metaDataRef=,
+  itemGroupOID=,
   datasetlabel=,
   pretty=NOPRETTY
   ) / des = 'Write a SAS dataset to a Dataset-JSON file';
@@ -80,7 +83,7 @@
     _SaveOptions3
     _Missing
     _create_temp_dataset_sas
-    dataset_new dataset_name dataset_label _records
+    dataset_new dataset_name _datasetlabel _records
     _studyOID _metaDataVersionOID _itemGroupOID
     creationDateTime modifiedDateTime
     releaseCreated hostCreated
@@ -101,7 +104,7 @@
 
   %if %sysevalf(%superq(datasetJSONVersion)=, boolean) %then %let datasetJSONVersion = %str(1.1.0);
 
-  %let dataset_label=;
+  %let _datasetlabel=;
   %let _itemGroupOID=;
   %let _studyOID=;
   %let _metaDataVersionOID=;
@@ -204,6 +207,13 @@
     %put ERR%str(OR): [&sysmacroname] Macro parameter &=datasetJSONVersion. Allowed values: 1.1.x.;
     %goto exit_macro;
   %end;
+  
+  
+  %if (%sysevalf(%superq(sourceSystem)=, boolean) and %sysevalf(%superq(sourceSystemVersion)=, boolean)=0) or
+      (%sysevalf(%superq(sourceSystem)=, boolean)=0 and %sysevalf(%superq(sourceSystemVersion)=, boolean)) %then
+  %do;
+    %put ERR%str(OR): [&sysmacroname] Macro parameters &=sourceSystem / &=sourceSystemVersion should both be missing or both be non-missing;
+  %end;
 
   %******************************************************************************;
   %* End of parameter checks                                                    *;
@@ -235,11 +245,12 @@
   proc delete data=work.Attributes work.EngineHost;
   run;
 
-  %if %sysevalf(%superq(sourceSystem)=, boolean) and
-    %sysevalf(%superq(hostCreated)=, boolean)=0 %then %let sourceSystem = %str(SAS on &hostCreated);
-  %if %sysevalf(%superq(sourceSystemVersion)=, boolean) and
-    %sysevalf(%superq(releaseCreated)=, boolean)=0 %then %let sourceSystemVersion = %str(&releaseCreated);
-
+  %if %sysevalf(%superq(sourceSystem)=, boolean) and %sysevalf(%superq(sourceSystemVersion)=, boolean) %then %do;
+    %if %sysevalf(%superq(hostCreated)=, boolean)=0 and %sysevalf(%superq(releaseCreated)=, boolean)=0 %then %do;
+      %let sourceSystem = %str(SAS on &hostCreated);
+      %let sourceSystemVersion = %str(&releaseCreated);
+    %end;
+  %end;
 
   /* Create temp SAS dataset */
   %let dataset_name=%scan(&dataset, -1, %str(.));
@@ -261,7 +272,7 @@
       %end;
     /* Get dataset label and _itemGroupOID from the metadata */
       %if %sysfunc(exist(&metadatalib..metadata_tables)) %then %do;
-        select label, oid into :dataset_label trimmed, :_itemGroupOID trimmed
+        select label, oid into :_datasetlabel trimmed, :_itemGroupOID trimmed
           from &metadatalib..metadata_tables
             where upcase(name)="%upcase(&dataset_name)";
       %end;
@@ -275,18 +286,24 @@
   %if %sysevalf(%superq(_metaDataVersionOID)=, boolean) and %sysevalf(%superq(metaDataVersionOID)=, boolean)=0 %then
     %let _metaDataVersionOID=&metaDataVersionOID;
 
-  %if %sysevalf(%superq(_itemGroupOID)=, boolean) %then %let _itemGroupOID=IG.%upcase(&dataset_name);
+  %if %sysevalf(%superq(_itemGroupOID)=, boolean) %then 
+    %let _itemGroupOID=%str(&itemGroupOID);
+  /* When stkll missing, generate the itemGroupOID, since it is required */  
+  %if %sysevalf(%superq(_itemGroupOID)=, boolean) %then 
+    %let _itemGroupOID=IG.%upcase(&dataset_name);
 
-  %if %sysevalf(%superq(dataset_label)=, boolean) %then
-    %let dataset_label=%cstutilgetattribute(_cstDataSetName=&dataset_new,_cstAttribute=LABEL);
-  %if %sysevalf(%superq(dataset_label)=, boolean) %then
-    %let dataset_label=&datasetlabel;
+  /* Get dataset label from the dataset */
+  %if %sysevalf(%superq(_datasetlabel)=, boolean) %then
+    %let _datasetlabel=%cstutilgetattribute(_cstDataSetName=&dataset_new,_cstAttribute=LABEL);
+  /* Get dataset label from macro parameter */
+  %if %sysevalf(%superq(_datasetlabel)=, boolean) %then
+    %let _datasetlabel=&datasetlabel;
 
-  %if %sysevalf(%superq(dataset_label)=, boolean) %then %do;
-    %put %str(WAR)NING: [&sysmacroname] Dataset &dataset has no dataset label.;
+  %if %sysevalf(%superq(_datasetlabel)=, boolean) %then %do;
+    %put %str(ER)ROR: [&sysmacroname] Dataset &dataset has no dataset label.;
   %end;
 
-  %put NOTE: DATASET=&dataset_name &=_records &=_itemGroupOID dslabel=%bquote(&dataset_label);
+  %put NOTE: DATASET=&dataset_name &=_records &=_itemGroupOID dslabel=%bquote(&_datasetlabel);
 
 
 
@@ -299,12 +316,22 @@
           drop=length
           rename=(json_length=length)
         );
-        if missing(oid) then putlog "WAR" "NING: [&sysmacroname] Missing oid for variable: &dataset." name ;
-        if missing(name) then putlog "WAR" "NING: [&sysmacroname] Missing name for variable in dataset &dataset: " oid ;
+
+        if missing(name) then do;
+          putlog "WAR" "NING: [&sysmacroname] Missing name in metadata for &dataset variable. " oid=;
+        end;  
         if missing(label) then do;
-          putlog "WAR" "NING: [&sysmacroname] Missing label for variable: &dataset.." name +(-1) ", " oid= +(-1) ".";
-        end;
-        if missing(datatype) then putlog "WAR" "NING: [&sysmacroname] Missing dataType for variable: &dataset.." name +(-1) ", " oid=;
+          putlog "WAR" "NING: [&sysmacroname] Missing label in metadata for &dataset variable " 
+            name  +(-1) ". Dataset variable label will be used.";
+        end;  
+        if missing(oid) then do;
+          putlog "WAR" "NING: [&sysmacroname] Missing oid in metadata for &dataset variable " 
+            name +(-1) ". ItemOID will be generated.";
+        end;  
+        if missing(datatype) then do;
+          putlog "WAR" "NING: [&sysmacroname] Missing dataType in metadata for &dataset variable." 
+            name +(-1) ".";
+        end;  
 
         if dataType in ("date", "datetime", "time") and targetDataType = "integer" and missing(displayFormat)
           then putlog "WAR" "NING: [&sysmacroname] Missing displayFormat for variable: &dataset.." name +(-1) ", " oid= +(-1) ", " dataType= +(-1) ", " targetDataType=;
@@ -336,13 +363,14 @@
 
     /* Check lengths */
     proc contents noprint varnum data=&dataset_new
-      out=work.column_metadata_sas(keep=name type length varnum);
+      out=work.column_metadata_sas(keep=name label type length varnum);
     run;
 
     proc sql noprint;
       create table work.column_metadata as
       select
         t2.name as sas_name,
+        t2.label as sas_label,
         t2.length as sas_length,
         t2.type as sas_type,
         t2.varnum,
@@ -354,21 +382,37 @@
         ;
     quit ;
 
-    data work.column_metadata(drop=sas_type sas_length sas_name order varnum);
+    data work.column_metadata(drop=sas_type sas_length sas_name sas_label order varnum);
       set work.column_metadata;
       if (sas_type=2) and (not missing(length)) and (length lt sas_length)
         then putlog 'WAR' 'NING:' " [&sysmacroname] &dataset.." name +(-1) ": metadata length is smaller than SAS length - "
                     length= +(-1) ", SAS length=" sas_length;
       if missing(name) then do;
-        putlog 'WAR' 'NING:' "[&sysmacroname] &dataset.." sas_name
-                +(-1) ": variable is missing from metadata. SAS metadata will be used.";
+        putlog 'WAR' 'NING:' "[&sysmacroname] Dataset &dataset variable " sas_name
+                +(-1) " is missing from metadata. SAS metadata will be used.";
         OID = cats("IT", ".", upcase("&dataset_name"), ".", upcase(sas_name));
         name = sas_name;
         length = sas_length;
+        label = sas_label;
         if sas_type=1 then dataType="float";
                       else dataType="string";
-        label = propcase(name);
       end;
+      
+      if missing(length) and sas_type=2 then do;
+        length = sas_length;
+      end;  
+      if missing(label) then do;
+        label = sas_label;
+      end;  
+      if missing(oid) then do;
+        OID = cats("IT", ".", upcase("&dataset_name"), ".", upcase(sas_name));;
+      end;  
+      if missing(datatype) then do;
+        if sas_type=1 then dataType="float";
+                      else dataType="string";
+        putlog "WAR" "NING: [&sysmacroname] Derived dataType for variable: &dataset.." name +(-1) ", " dataType=;
+      end;  
+      
     run;
 
     proc delete data=work._column_metadata;
@@ -428,14 +472,20 @@
       end;
       %* put a dot on the end of format if we are still missing it;
       if (not missing(displayFormat)) and index(displayFormat,'.')=0 then displayFormat=strip(displayFormat)||'.';
-      if missing(label) then do;
-        putlog "WAR" "NING: [&sysmacroname] Missing label for variable &dataset.." name +(-1) ", " oid= +(-1) ".";
-      end;
-      if missing(dataType) then putlog "WAR" "NING: [&sysmacroname] Missing type for variable &dataset.." name +(-1) ", "  oid=;
     run;
 
   %end;
 
+  data _null_;
+    set work.column_metadata;
+      if missing(label) then do;
+        putlog "ER" "ROR: [&sysmacroname] Missing label for variable &dataset.." name +(-1) ", " oid= +(-1) ".";
+      end;
+      if missing(dataType) then do;
+        putlog "ER" "ROR: [&sysmacroname] Missing type for variable &dataset.." name +(-1) ", "  oid=+(-1) ".";
+      end;  
+  run;    
+    
   %************************************************************;
   /* Convert numeric variables to decimal strings if needed */
   %************************************************************;
@@ -528,7 +578,7 @@
         , isReferenceData = ""
         , records = &_records
         , name = "%upcase(&dataset_name)"
-        %if %sysevalf(%superq(dataset_label)=, boolean)=0 %then , label = "%nrbquote(&dataset_label)";
+        %if %sysevalf(%superq(_datasetlabel)=, boolean)=0 %then , label = "%nrbquote(&_datasetlabel)";
     ;
   quit;
 

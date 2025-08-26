@@ -112,24 +112,24 @@ $(function() {
 <div class="line"><a id="l00004" name="l00004"></a><span class="lineno">    4</span>  %* Since JSON keys are <span class="keywordflow">case</span>-sensitive, it is required that metadata datasets have <span class="keywordflow">case</span>-sensitive columns;</div>
 <div class="line"><a id="l00005" name="l00005"></a><span class="lineno">    5</span>  %let _SaveOptions = %sysfunc(getoption(validvarname, keyword));</div>
 <div class="line"><a id="l00006" name="l00006"></a><span class="lineno">    6</span>  options validvarname = V7;</div>
-<div class="line"><a id="l00007" name="l00007"></a><span class="lineno">    7</span>  </div>
+<div class="line"><a id="l00007" name="l00007"></a><span class="lineno">    7</span> </div>
 <div class="line"><a id="l00008" name="l00008"></a><span class="lineno">    8</span>  subroutine validate_datasetjson(jsonfile $, jsonschema $, datetime $, result_code, result_character $, result_path $);</div>
-<div class="line"><a id="l00009" name="l00009"></a><span class="lineno">    9</span>  </div>
-<div class="line"><a id="l00010" name="l00010"></a><span class="lineno">   10</span>    length jsonfile jsonschema $ 1024 </div>
+<div class="line"><a id="l00009" name="l00009"></a><span class="lineno">    9</span> </div>
+<div class="line"><a id="l00010" name="l00010"></a><span class="lineno">   10</span>    length jsonfile jsonschema $ 1024</div>
 <div class="line"><a id="l00011" name="l00011"></a><span class="lineno">   11</span>           datetime $32</div>
-<div class="line"><a id="l00012" name="l00012"></a><span class="lineno">   12</span>           result_character resultMessage result_path resultPath $ 255 </div>
+<div class="line"><a id="l00012" name="l00012"></a><span class="lineno">   12</span>           result_character resultMessage result_path resultPath $ 255</div>
 <div class="line"><a id="l00013" name="l00013"></a><span class="lineno">   13</span>           result_code 8;</div>
 <div class="line"><a id="l00014" name="l00014"></a><span class="lineno">   14</span>    outargs datetime, result_code, result_character, result_path;</div>
 <div class="line"><a id="l00015" name="l00015"></a><span class="lineno">   15</span>    declare <span class="keywordtype">object</span> py4(python);</div>
 <div class="line"><a id="l00016" name="l00016"></a><span class="lineno">   16</span>    submit into py4;</div>
 <div class="line"><a id="l00017" name="l00017"></a><span class="lineno">   17</span>    def validatejson(jsonfile, jsonschema):</div>
 <div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span>      <span class="stringliteral">&quot;&quot;</span><span class="stringliteral">&quot;Output: dateTime, resultCode, resultMessage, resultPath&quot;</span><span class="stringliteral">&quot;&quot;</span></div>
-<div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span>      </div>
+<div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span> </div>
 <div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span>      import datetime</div>
 <div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span>      import os</div>
 <div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span>      import json</div>
 <div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span>      import jsonschema as JSD</div>
-<div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span>      </div>
+<div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span> </div>
 <div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span>      dateTime = datetime.datetime.now().replace(microsecond=0).isoformat()</div>
 <div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span>      try:</div>
 <div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span>        jsonf = json.load(open(jsonfile, encoding=<span class="stringliteral">&quot;utf8&quot;</span>))</div>
@@ -156,9 +156,9 @@ $(function() {
 <div class="line"><a id="l00048" name="l00048"></a><span class="lineno">   48</span>        resultMessage = str(e.message) + <span class="stringliteral">&quot; (&quot;</span> + (e.schema[<span class="stringliteral">&#39;description&#39;</span>]) +<span class="stringliteral">&quot;)&quot;</span></div>
 <div class="line"><a id="l00049" name="l00049"></a><span class="lineno">   49</span>        resultPath = str(e.json_path)</div>
 <div class="line"><a id="l00050" name="l00050"></a><span class="lineno">   50</span>      return dateTime, resultCode, resultMessage, resultPath</div>
-<div class="line"><a id="l00051" name="l00051"></a><span class="lineno">   51</span>        </div>
+<div class="line"><a id="l00051" name="l00051"></a><span class="lineno">   51</span> </div>
 <div class="line"><a id="l00052" name="l00052"></a><span class="lineno">   52</span>    endsubmit;</div>
-<div class="line"><a id="l00053" name="l00053"></a><span class="lineno">   53</span>    </div>
+<div class="line"><a id="l00053" name="l00053"></a><span class="lineno">   53</span> </div>
 <div class="line"><a id="l00054" name="l00054"></a><span class="lineno">   54</span>    rc = py4.publish();</div>
 <div class="line"><a id="l00055" name="l00055"></a><span class="lineno">   55</span>    rc = py4.call(<span class="stringliteral">&#39;validatejson&#39;</span>, jsonfile, jsonschema);</div>
 <div class="line"><a id="l00056" name="l00056"></a><span class="lineno">   56</span>    datetime = py4.results[<span class="stringliteral">&#39;dateTime&#39;</span>];</div>
@@ -166,11 +166,11 @@ $(function() {
 <div class="line"><a id="l00058" name="l00058"></a><span class="lineno">   58</span>    result_character = py4.results[<span class="stringliteral">&#39;resultMessage&#39;</span>];</div>
 <div class="line"><a id="l00059" name="l00059"></a><span class="lineno">   59</span>    result_path = py4.results[<span class="stringliteral">&#39;resultPath&#39;</span>];</div>
 <div class="line"><a id="l00060" name="l00060"></a><span class="lineno">   60</span>  endsub;</div>
-<div class="line"><a id="l00061" name="l00061"></a><span class="lineno">   61</span>  </div>
+<div class="line"><a id="l00061" name="l00061"></a><span class="lineno">   61</span> </div>
 <div class="line"><a id="l00062" name="l00062"></a><span class="lineno">   62</span>  %* Reset VALIDVARNAME option to original value;</div>
-<div class="line"><a id="l00063" name="l00063"></a><span class="lineno">   63</span>  options &amp;_SaveOptions;  </div>
+<div class="line"><a id="l00063" name="l00063"></a><span class="lineno">   63</span>  options &amp;_SaveOptions;</div>
 <div class="line"><a id="l00064" name="l00064"></a><span class="lineno">   64</span> </div>
-<div class="line"><a id="l00065" name="l00065"></a><span class="lineno">   65</span>run;</div>
+<div class="line"><a id="l00065" name="l00065"></a><span class="lineno">   65</span>quit;</div>
 </div><!-- fragment --></div><!-- contents -->
 </div><!-- doc-content -->
 </div><!-- container -->
