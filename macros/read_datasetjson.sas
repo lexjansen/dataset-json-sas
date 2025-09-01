@@ -50,8 +50,8 @@
          _SaveOptions3
          _Random
          metadata_study_columns metadata_tables_columns metadata_columns_columns
-         _items_ _itemdata_ _itemgroupdata_ ItemGroupOID _ItemGroupName
-         dslabel dsname variables rename label length format
+         _items_ _itemdata_ _records _ItemGroupOID _ItemGroupName _ItemGroupLabel
+         variables rename label length format
          _var_exist _decimal_variables _iso8601_variables;
 
   %let _Random=%sysfunc(putn(%sysevalf(%sysfunc(ranuni(0))*10000,floor),z4.));
@@ -121,6 +121,20 @@
     %end;
   %end;
 
+  %* Rule: savemetadata has to be Y or N  *;
+  %if "%substr(%upcase(&savemetadata),1,1)" ne "Y" and "%substr(%upcase(&savemetadata),1,1)" ne "N" %then
+  %do;
+    %put ERR%str(OR): [&sysmacroname] Required macro parameter &=savemetadata must be Y or N.;
+    %goto exit_macro;
+  %end;
+
+  %* Rule: when savemetadata eq Y then metadatalib can not be empty *;
+  %if "%substr(%upcase(&savemetadata),1,1)" eq "Y" and %sysevalf(%superq(metadatalib)=, boolean) %then
+  %do;
+    %put ERR%str(OR): [&sysmacroname] When savemetadata=Y, then parameter metadatalib can not be empty.;
+    %goto exit_macro;
+  %end;
+
   %* Check if metadatalib has been assigned ;
   %if %sysevalf(%superq(metadatalib)=, boolean)=0 %then %do;
     %if (%sysfunc(libref(&metadatalib)) ne 0 ) %then %do;
@@ -130,17 +144,9 @@
     %end;
   %end;
 
-  %* Rule: savemetadata has to be Y or N  *;
-  %if "%substr(%upcase(&savemetadata),1,1)" ne "Y" and "%substr(%upcase(&savemetadata),1,1)" ne "N" %then
-  %do;
-    %put ERR%str(OR): [&sysmacroname] Required macro parameter &=savemetadata must be Y or N.;
-    %goto exit_macro;
-  %end;
-
-%******************************************************************************;
+  %******************************************************************************;
   %* End of parameter checks                                                    *;
   %******************************************************************************;
-
 
   %* Save options;
   %let _SaveOptions3 = %sysfunc(getoption(compress, keyword)) %sysfunc(getoption(reuse, keyword));
@@ -151,7 +157,11 @@
   %if %sysevalf(%superq(jsonfref)=, boolean)=0 %then
     filename json&_random "%sysfunc(pathname(&jsonfref))";;
 
-  filename mapmeta "../maps/map_meta.map";
+  /* Define the names of the dataset to be created */
+  %let _items_=columns;
+  %let _itemdata_=rows;
+
+  %* Read Dataset-JSON file;
   filename map&_Random "%sysfunc(pathname(work))/map_%scan(%sysfunc(pathname(json&_random)), -2, %str(.\/)).map";
   libname out_&_Random "%sysfunc(pathname(work))/%scan(%sysfunc(pathname(json&_random)), -2, %str(.\/))";
 
@@ -159,44 +169,90 @@
   proc copy in=json&_Random out=out_&_Random;
   run;
 
-  %* Restore options;
+  filename json&_Random clear;
+  libname json&_Random clear;
+  filename map&_Random clear;
+
+  %* Restore compress/reuse options;
   options &_SaveOptions3;
 
+  
+  %* Get Dataset-JSON version;
   %let datasetJSONVersion=;
-  proc sql noprint;
-    select datasetJSONVersion into :datasetJSONVersion separated by ' '
-      from out_&_Random..root;
-  quit;
-
-  %put &=datasetJSONVersion;
-
-  %* Rule: allowed versions *;
+  %if %cstutilcheckvarsexist(_cstDataSetName=out_&_Random..root, _cstVarList=datasetJSONVersion) %then %do;
+    proc sql noprint;
+      select datasetJSONVersion into :datasetJSONVersion separated by ' '
+        from out_&_Random..root;
+    quit;
+  %end;
+  %* Rule: only version 1.1.x is supported *;
   %if %substr(&datasetJSONVersion,1,3) ne %str(1.1) %then
   %do;
-    %put ERR%str(OR): [&sysmacroname] Attribute datasetJSONVersion=&datasetJSONVersion is invalid. Allowed values: 1.1.x.;
+    %put ERR%str(OR): [&sysmacroname] Attribute datasetJSONVersion=&datasetJSONVersion is not supported. Supported versions: 1.1.x.;
     %goto exit_macro;
   %end;
+  %else %do;
+    %put NOTE: [&sysmacroname] &=datasetJSONVersion;
+    %put;
+  %end;
 
-  /* Find the names of the dataset that were created */
-  %let _itemgroupdata_=root;
-  %let _items_=columns;
-  %let _itemdata_=rows;
-
+  %* Check if we have column metadata;
   %if not %sysfunc(exist(out_&_Random..&_items_)) %then %do;
-    %put ERR%str(OR): [&sysmacroname] Attribute "columns" is missing.;
+    %put ERR%str(OR): [&sysmacroname] Attribute "&_items_" is missing.;
     %goto exit_macro;
   %end;
 
+  %* Get the number of records of the dataset to be created;
+  %let _records=;
+  %if %cstutilcheckvarsexist(_cstDataSetName=out_&_Random..root, _cstVarList=records) %then %do;
+    proc sql noprint;
+      select records into :_records trimmed
+        from out_&_Random..root;
+    quit;
+    %put NOTE: [&sysmacroname] &=_records;
+  %end;
+  %else %put WAR%str(NING): [&sysmacroname] Attribute "records" is missing.;
+
+  %* Get the OID of the dataset to be created;
+  %let _ItemGroupOID=;
+  %if %cstutilcheckvarsexist(_cstDataSetName=out_&_Random..root, _cstVarList=ItemGroupOID) %then %do;
+    proc sql noprint;
+      select ItemGroupOID into :_ItemGroupOID trimmed
+        from out_&_Random..root;
+    quit;
+    %put NOTE: [&sysmacroname] &=_ItemGroupOID;
+  %end;
+  %else %put WAR%str(NING): [&sysmacroname] Attribute "itemGroupOID" is missing.;
+  
+  %* Get the name of the dataset to be created;
   %let _itemGroupName=;
+  %if %cstutilcheckvarsexist(_cstDataSetName=out_&_Random..root, _cstVarList=name) %then %do;
+    proc sql noprint;
+      select name into :_itemGroupName separated by ' '
+        from out_&_Random..root;
+    quit;
+  %end;  
+  %if %sysevalf(%superq(_itemGroupName)=, boolean) %then %do;
+    %put ERR%str(OR): [&sysmacroname] No dataset name attribute has been defined in the Dataset-JSON file. DATA&_Random will be created.;
+    %let _itemGroupName = DATA&_Random;
+  %end;
+  %else %do;
+    %put NOTE: [&sysmacroname] &=_itemGroupName;
+    %put;
+  %end;  
+
+  %* Get the label of the dataset to be created;
+  %let _ItemGroupLabel=;
   proc sql noprint;
-    select name into :_itemGroupName separated by ' '
-      from out_&_Random..root;
+    %if %cstutilcheckvarsexist(_cstDataSetName=out_&_Random..root, _cstVarList=label) %then %do;
+      select label into :_ItemGroupLabel trimmed
+        from out_&_Random..root
+    %end;
   quit;
 
-  %if %sysevalf(%superq(_itemGroupName)=, boolean) %then %do;
-      %put ERR%str(OR): [&sysmacroname] No dataset name attribute has been defined in the Dataset-JSON file.;
-      %goto exit_macro;
-  %end;
+  %put NOTE: [&sysmacroname] _ItemGroupLabel=%sysfunc(quote(%nrbquote(&_ItemGroupLabel)));
+
+
 
   %let _var_exist = %cstutilcheckvarsexist(_cstDataSetName=out_&_Random..&_items_, _cstVarList=targetDataType);
   data out_&_Random..&_items_;
@@ -240,35 +296,11 @@
       where not(missing(label));
   quit;
 
-  %put &=variables;
-  %put &=rename;
-  %put &=label;
-
-  %let dslabel=;
-  %let dsname=;
-  proc sql noprint;
-    %if %cstutilcheckvarsexist(_cstDataSetName=out_&_Random..&_itemgroupdata_, _cstVarList=label) %then %do;
-      select label, name into :dslabel trimmed, :dsname trimmed
-        from out_&_Random..&_itemgroupdata_
-    %end;
-    %else %do;
-      select name into :dsname trimmed
-        from out_&_Random..&_itemgroupdata_
-    %end;
-    ;
-  quit;
+  %put NOTE: [&sysmacroname] &=variables;
+  %put NOTE: [&sysmacroname] &=rename;
+  %put NOTE: [&sysmacroname] &=label;
 
   %if "%substr(%upcase(&savemetadata),1,1)" eq "Y" %then %do;
-
-
-    %let ItemGroupOID=;
-    %if %cstutilcheckvarsexist(_cstDataSetName=out_&_Random..&_itemgroupdata_, _cstVarList=ItemGroupOID) %then %do;
-      proc sql noprint;
-        select ItemGroupOID into :ItemGroupOID trimmed
-          from out_&_Random..&_itemgroupdata_;
-      quit;
-    %end;
-    %else %put ERR%str(OR): [&sysmacroname] Attribute "itemGroupOID" is missing.;
 
     %if not %sysfunc(exist(&metadatalib..metadata_study)) %then %create_template(type=STUDY, out=&metadatalib..metadata_study);;
     %if not %sysfunc(exist(&metadatalib..metadata_tables)) %then %create_template(type=TABLES, out=&metadatalib..metadata_tables);;
@@ -278,10 +310,11 @@
     proc sql noprint;
       select name into :metadata_study_columns separated by ' '
         from dictionary.columns
-      where upcase(libname)="%upcase(&metadatalib)" and
-           upcase(memname)="METADATA_STUDY"
+        where upcase(libname)="%upcase(&metadatalib)" and
+              upcase(memname)="METADATA_STUDY"
      ;
     quit ;
+    %put NOTE: [&sysmacroname] &=metadata_study_columns;
 
 
     %if %sysfunc(exist(out_&_Random..sourceSystem))
@@ -309,13 +342,13 @@
     proc delete data=work._metadata_study;
     run;
 
-    %if %cstutilcheckvarsexist(_cstDataSetName=out_&_Random..&_itemgroupdata_, _cstVarList=isReferenceData)
+    %if %cstutilcheckvarsexist(_cstDataSetName=out_&_Random..root, _cstVarList=isReferenceData)
     %then %do;
-      %if %cstutilgetattribute(_cstDataSetName=out_&_Random..&_itemgroupdata_, _cstVarName=isReferenceData, _cstAttribute=VARTYPE) eq N
+      %if %cstutilgetattribute(_cstDataSetName=out_&_Random..root, _cstVarName=isReferenceData, _cstAttribute=VARTYPE) eq N
       %then %do;
-        data out_&_Random..&_itemgroupdata_;
+        data out_&_Random..root;
           length isReferenceData $3;
-          set out_&_Random..&_itemgroupdata_(rename=(isReferenceData = _isReferenceData));
+          set out_&_Random..root(rename=(isReferenceData = _isReferenceData));
             if _isReferenceData = 1 then isReferenceData = "Yes";
             if _isReferenceData = 0 then isReferenceData = "No";
             drop _isReferenceData;
@@ -327,16 +360,17 @@
     proc sql noprint;
       select name into :metadata_tables_columns separated by ' '
         from dictionary.columns
-      where upcase(libname)="%upcase(&metadatalib)" and
-           upcase(memname)="METADATA_TABLES"
+        where upcase(libname)="%upcase(&metadatalib)" and
+              upcase(memname)="METADATA_TABLES"
      ;
     quit ;
+    %put NOTE: [&sysmacroname] &=metadata_tables_columns;
 
     data &metadatalib..metadata_tables(keep=&metadata_tables_columns);
-      set &metadatalib..metadata_tables out_&_Random..&_itemgroupdata_(in=inigd);
+      set &metadatalib..metadata_tables out_&_Random..root(in=inigd);
       if inigd then do;
-        oid = "&ItemGroupOID";
-        call symputx('_ItemGroupName', name);
+        oid = "&_ItemGroupOID";
+        name = "&_itemGroupName";
       end;
     run;
 
@@ -369,11 +403,31 @@
           where (not(missing(displayformat)) and (displayformat ne ".")) and (datatype ne 'string');
     quit;
   %end;
-
-  %put &=format;
+  %put NOTE: [&sysmacroname] &=format;
 
   %if not %sysfunc(exist(out_&_Random..&_itemdata_)) %then %do;
-    %put NOTE: [&sysmacroname] Attribute "rows" is missing.;
+    %put NOTE: [&sysmacroname] Attribute "rows" is missing. Zero obs dataset &datalib..&_ItemGroupName created.;
+    %if &_records ne 0 %then 
+      %put WAR%STR(NING): [&sysmacroname] No data, but value of attribute "records" = "&_records";
+    %create_zero_obs_dataset(
+       outlib = &datalib,
+       dsname = &_ItemGroupName,
+       metadata_dataset = out_&_Random..&_items_,
+       datasetlabel = %nrbquote(&_ItemGroupLabel)
+    )
+    %goto exit_macro_no_rows;
+  %end;
+
+  %if %cstutilnobs(_cstDataSetName = out_&_Random..&_itemdata_) eq 0 %then %do;
+    %put NOTE: [&sysmacroname] No data in "rows" attribute. Zero obs dataset &datalib..&_ItemGroupName created.;
+    %if &_records ne 0 %then 
+      %put WAR%STR(NING): [&sysmacroname] No data, but value of attribute "records" = "&_records";
+    %create_zero_obs_dataset(
+       outlib = &datalib,
+       dsname = &_ItemGroupName,
+       metadata_dataset = out_&_Random..&_items_,
+       datasetlabel = %nrbquote(&_ItemGroupLabel)
+    )
     %goto exit_macro_no_rows;
   %end;
 
@@ -382,9 +436,9 @@
   run;
 
   proc datasets library=&datalib noprint nolist nodetails;
-    %if %sysfunc(exist(&datalib..&dsname)) %then %do; delete &dsname; %end;
-    change &_itemdata_ = &dsname;
-    modify &dsname %if %sysevalf(%superq(dslabel)=, boolean)=0 %then %str((label = %sysfunc(quote(%nrbquote(&dslabel)))));;
+    %if %sysfunc(exist(&datalib..&_itemGroupName)) %then %do; delete &_itemGroupName; %end;
+    change &_itemdata_ = &_itemGroupName;
+    modify &_itemGroupName %if %sysevalf(%superq(_ItemGroupLabel)=, boolean)=0 %then %str((label = %sysfunc(quote(%nrbquote(&_ItemGroupLabel)))));;
       rename &rename;
       label &label;
   quit;
@@ -398,16 +452,16 @@
         /* from &metadatalib..metadata_columns */
         from out_&_Random..&_items_
         where (datatype='decimal' and targetdatatype='decimal') and
-              (upcase(dataset_name) = upcase("&dsname"));
+              (upcase(dataset_name) = upcase("&_itemGroupName"));
     quit;
   %end;
 
   %if %sysevalf(%superq(_decimal_variables)=, boolean)=0 %then %do;
-    %put NOTE: [&sysmacroname] &datalib..&dsname: character variables converted to numeric: &_decimal_variables;
-    %convert_char_to_num(ds=&datalib..&dsname, outds=&datalib..&dsname, varlist=&_decimal_variables);
+    %put NOTE: [&sysmacroname] &datalib..&_itemGroupName: character variables converted to numeric: &_decimal_variables;
+    %convert_char_to_num(ds=&datalib..&_itemGroupName, outds=&datalib..&_itemGroupName, varlist=&_decimal_variables);
 
     proc datasets library=&datalib noprint nolist nodetails;
-      modify &dsname %if %sysevalf(%superq(dslabel)=, boolean)=0 %then %str((label = %sysfunc(quote(%nrbquote(&dslabel)))));;
+      modify &_itemGroupName %if %sysevalf(%superq(_ItemGroupLabel)=, boolean)=0 %then %str((label = %sysfunc(quote(%nrbquote(&_ItemGroupLabel)))));;
         label &label;
     quit;
 
@@ -420,17 +474,17 @@
         /* from &metadatalib..metadata_columns */
         from out_&_Random..&_items_
         where (datatype in ('datetime' 'date' 'time')) and (targetdatatype = 'integer') and
-              (upcase(dataset_name) = upcase("&dsname"));
+              (upcase(dataset_name) = upcase("&_itemGroupName"));
     quit;
   %end;
 
   %if %sysevalf(%superq(_iso8601_variables)=, boolean)=0 %then %do;
 
-    %put NOTE: [&sysmacroname] &datalib..%upcase(&dsname), character ISO 8601 variables converted to numeric: &_iso8601_variables;
-    %convert_iso_to_num(ds=&datalib..&dsname, outds=&datalib..&dsname, varlist=&_iso8601_variables);
+    %put NOTE: [&sysmacroname] &datalib..%upcase(&_itemGroupName), character ISO 8601 variables converted to numeric: &_iso8601_variables;
+    %convert_iso_to_num(ds=&datalib..&_itemGroupName, outds=&datalib..&_itemGroupName, varlist=&_iso8601_variables);
 
     proc datasets library=&datalib noprint nolist nodetails;
-      modify &dsname %if %sysevalf(%superq(dslabel)=, boolean)=0 %then %str((label = %sysfunc(quote(%nrbquote(&dslabel)))));;
+      modify &_itemGroupName %if %sysevalf(%superq(_ItemGroupLabel)=, boolean)=0 %then %str((label = %sysfunc(quote(%nrbquote(&_ItemGroupLabel)))));;
         label &label;
     quit;
 
@@ -446,7 +500,7 @@
         from dictionary.columns d,
              out_&_Random..&_items_ i
       where upcase(libname)="%upcase(&datalib)" and
-           upcase(memname)="%upcase(&dsname)" and
+           upcase(memname)="%upcase(&_itemGroupName)" and
            d.name = i.name and
            d.type="char" and (not(missing(i.length))) and (i.length gt d.length)
      ;
@@ -455,13 +509,13 @@
 
   %put &=length;
 
-  data &datalib..&dsname(
-      %if %sysevalf(%superq(dslabel)=, boolean)=0 %then %str(label = %sysfunc(quote(%nrbquote(&dslabel))));
+  data &datalib..&_itemGroupName(
+      %if %sysevalf(%superq(_ItemGroupLabel)=, boolean)=0 %then %str(label = %sysfunc(quote(%nrbquote(&_ItemGroupLabel))));
     );
     retain &variables;
     %if %sysevalf(%superq(length)=, boolean)=0 %then length &length;;
     %if %sysevalf(%superq(format)=, boolean)=0 %then format &format;;
-    set &datalib..&dsname;
+    set &datalib..&_itemGroupName;
   run;
 
 
@@ -470,7 +524,7 @@
   proc sql ;
    create table column_metadata
    as select
-    cats("IT.", "%upcase(&dsname).", d.name) as OID,
+    cats("IT.", "%upcase(&_itemGroupName).", d.name) as OID,
     d.name,
     d.type as datatype,
     i.datatype as type,
@@ -482,7 +536,7 @@
    from dictionary.columns d,
         out_&_Random..&_items_ i
    where upcase(libname)="%upcase(&datalib)" and
-         upcase(memname)="%upcase(&dsname)" and
+         upcase(memname)="%upcase(&_itemGroupName)" and
          d.name = i.name
    ;
   quit ;
@@ -490,12 +544,12 @@
   data _null_;
     set column_metadata;
     if DataType="char" and not (type in ('string' 'datetime' 'date' 'time'))
-      then putlog "WAR" "NING: [&sysmacroname] TYPE ISSUE: dataset=datalib..&dsname " OID= name= DataType= type=;
+      then putlog "WAR" "NING: [&sysmacroname] TYPE ISSUE: dataset=datalib..&_itemGroupName " OID= name= DataType= type=;
     if DataType="num" and not (type in ('integer' 'double' 'float' 'decimal' 'datetime' 'date' 'time'))
-      then putlog "WAR" "NING: [&sysmacroname] TYPE ISSUE: dataset=datalib..&dsname " OID= name= DataType= type=;
+      then putlog "WAR" "NING: [&sysmacroname] TYPE ISSUE: dataset=datalib..&_itemGroupName " OID= name= DataType= type=;
     %if %sysevalf(%superq(length)=, boolean)=0 %then %do;
       if DataType="char" and not(missing(length)) and (length lt sas_length)
-        then putlog "WAR" "NING: [&sysmacroname] LENGTH ISSUE: dataset=datalib..&dsname " OID= name= length= sas_length=;
+        then putlog "WAR" "NING: [&sysmacroname] LENGTH ISSUE: dataset=datalib..&_itemGroupName " OID= name= length= sas_length=;
     %end;
   run;
 
@@ -503,11 +557,6 @@
   run;
 
   %exit_macro_no_rows:
-
-  filename json&_Random clear;
-  libname json&_Random clear;
-  filename map&_Random clear;
-  filename mapmeta clear;
 
   proc datasets nolist lib=out_&_Random kill;
   quit;
@@ -519,7 +568,7 @@
 
   %exit_macro:
 
-  %* Restore options;
+  %* Restore dlcreatedir and valivarname options;
   options &_SaveOptions1;
   options &_SaveOptions2;
 
