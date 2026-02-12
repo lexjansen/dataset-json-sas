@@ -1,8 +1,9 @@
 import argparse
-from os import listdir, getenv
+from os import listdir
 from os.path import isfile, join
 import json
 import jsonschema as JSD
+
 
 def validate_json(json_data, schema_file):
     """
@@ -20,7 +21,7 @@ def validate_json(json_data, schema_file):
         return True
 
     except JSD.exceptions.ValidationError as e:
-        print(f"Error encountered while validating against JSON schema:")
+        print("Error encountered while validating against JSON schema:")
         # print(f"{e}")
         print(f"{e.message}")
         print(f"{e.schema['description']}")
@@ -28,11 +29,13 @@ def validate_json(json_data, schema_file):
         print(f"{e.json_path}")
         return False
 
+
 def parse_args():
     parser = argparse.ArgumentParser()
-    parser.add_argument( "-d", "--directory", help="Directory location for .json files", dest="directory", required=True)
-    parser.add_argument( "-s", "--schemafile", help="Location for .json schema", dest="schemafile", required=True)
+    parser.add_argument("-d", "--directory", help="Directory location for .json files", dest="directory", required=True)
+    parser.add_argument("-s", "--schemafile", help="Location for .json schema", dest="schemafile", required=True)
     return parser.parse_args()
+
 
 if __name__ == "__main__":
 
@@ -40,17 +43,14 @@ if __name__ == "__main__":
 
     schemafile = args.schemafile
 
-    files = [join(args.directory,f) for f in listdir(args.directory) if isfile(join(args.directory, f))]
+    files = [join(args.directory, f) for f in listdir(args.directory) if isfile(join(args.directory, f))]
     print(f"Validating against schemafile {schemafile}")
     for f in files:
-          isJson = f.find(".json")
-          if isJson > 0:
+        isJson = f.find(".json")
+        if isJson > 0:
             print(f"Validating {f}")
             try:
-              validate_json(json.load(open(f, encoding="utf8")), schemafile)
+                validate_json(json.load(open(f, encoding="utf8")), schemafile)
             except json.JSONDecodeError as e:
-                print(f"Error encountered while JSON file:")
+                print("Error encountered with JSON file:")
                 print(f"{e.msg} at position {e.pos}, row {e.lineno}, column {e.colno}")
-
-
-
